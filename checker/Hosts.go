@@ -1,7 +1,9 @@
-package helper
+package checker
 
 import (
 	"fmt"
+	"log"
+	"net"
 	"net/http"
 	"sort"
 	"time"
@@ -13,6 +15,8 @@ type HostTime struct {
 }
 
 type HostTimes []HostTime
+
+var UserIP string
 
 func (ht HostTimes) Len() int {
 	return len(ht)
@@ -43,7 +47,6 @@ func CheckDomains() {
 	// Sort the hosts based on response time
 	sort.Sort(hosts)
 
-	// Print the sorted list
 	for _, host := range hosts {
 		fmt.Printf("%s: %s\n", host.Host, host.ResponseTime)
 		//TODO charm implementation
@@ -59,4 +62,17 @@ func checkTime(host string) time.Duration {
 	}
 
 	return time.Since(starttime)
+}
+
+// GetLocalIP gets the outgoing ip address when a packet is sent
+func GetLocalIP() string {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	UserIP = conn.LocalAddr().(*net.UDPAddr).IP.String()
+
+	return UserIP
 }
