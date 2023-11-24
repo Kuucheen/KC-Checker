@@ -7,6 +7,7 @@ import (
 )
 
 type Config struct {
+	Threads int      `json:"threads"`
 	Retries int      `json:"retries"`
 	Timeout int      `json:"timeout"`
 	Hosts   []string `json:"hosts"`
@@ -30,6 +31,6 @@ func ReadSettings() {
 
 }
 
-func getConfig() Config {
+func GetConfig() Config {
 	return config
 }

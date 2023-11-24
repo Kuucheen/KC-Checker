@@ -1,4 +1,5 @@
 {
+  "threads": 100,
   "retries": 2,
   "timeout": 10,
   "hosts": ["http://pascal.hoez.free.fr/azenv.php",
