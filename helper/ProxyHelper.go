@@ -8,20 +8,17 @@ import (
 )
 
 type proxy struct {
-	ip   string
-	port int
-	full string
+	ip     string
+	port   int
+	full   string
+	checks int
 }
 
 var proxyType int
 var checked = false
 
-var elite []proxy
-var anonymous []proxy
-var transparent []proxy
-
-func ToProxies(arr []string) []proxy {
-	newArr := []proxy{}
+func ToProxies(arr []string) []*proxy {
+	var newArr []*proxy
 	for _, value := range arr {
 		temp := strings.Split(value, ":")
 
@@ -35,7 +32,7 @@ func ToProxies(arr []string) []proxy {
 			fmt.Print("Not a valid port: ", err)
 		}
 
-		newArr = append(newArr, proxy{
+		newArr = append(newArr, &proxy{
 			ip:   temp[0],
 			port: dat,
 			full: temp[0] + ":" + temp[1],
@@ -69,6 +66,7 @@ func GetType() int {
 	return proxyType
 }
 
-func SetType(value int) {
-	proxyType = value
+func GetTypeName() string {
+	names := []string{"http", "socks4", "socks5"}
+	return names[proxyType]
 }
