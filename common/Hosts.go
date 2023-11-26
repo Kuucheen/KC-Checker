@@ -1,9 +1,7 @@
-package checker
+package common
 
 import (
-	"fmt"
-	"log"
-	"net"
+	"io"
 	"net/http"
 	"sort"
 	"time"
@@ -32,8 +30,8 @@ func (ht HostTimes) Swap(i, j int) {
 
 var hosts HostTimes
 
-func CheckDomains() {
-	configHosts := getConfig().Hosts
+func CheckDomains() HostTimes {
+	configHosts := GetConfig().Hosts
 
 	for _, value := range configHosts {
 		responseTime := checkTime(value)
@@ -44,35 +42,49 @@ func CheckDomains() {
 		hosts = append(hosts, hostTime)
 	}
 
-	// Sort the hosts based on response time
+	// Create a copy of the unsorted hosts
+	unsortedHosts := make(HostTimes, len(hosts))
+	copy(unsortedHosts, hosts)
+
+	// Sort the original hosts based on response time
 	sort.Sort(hosts)
 
-	for _, host := range hosts {
-		fmt.Printf("%s: %s\n", host.Host, host.ResponseTime)
-		//TODO charm implementation
-	}
+	// Return the unsorted hosts
+	return unsortedHosts
+}
+
+func GetHosts() HostTimes {
+	return hosts
 }
 
 func checkTime(host string) time.Duration {
-	starttime := time.Now()
+	startTime := time.Now()
 
 	_, err := http.Get(host)
 	if err != nil {
-		return time.Duration(0)
+		return time.Nanosecond * 999999999
 	}
 
-	return time.Since(starttime)
+	return time.Since(startTime)
 }
 
 // GetLocalIP gets the outgoing ip address when a packet is sent
 func GetLocalIP() string {
-	conn, err := net.Dial("udp", "8.8.8.8:80")
+	resp, err := http.Get(GetConfig().IpLookup)
 	if err != nil {
-		log.Fatal(err)
+		panic("Couldnt get the users ip!")
 	}
-	defer conn.Close()
 
-	UserIP = conn.LocalAddr().(*net.UDPAddr).IP.String()
+	respBody, err := io.ReadAll(resp.Body)
+	err = resp.Body.Close()
+	if err != nil {
+		return ""
+	}
+	if err != nil {
+		panic(err)
+	}
+
+	UserIP = string(respBody)
 
 	return UserIP
 }
