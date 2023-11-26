@@ -1,7 +1,7 @@
 package helper
 
 import (
-	"KC-Checker/checker"
+	"KC-Checker/common"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -19,7 +19,7 @@ var (
 )
 
 func Dispatcher(proxies []*proxy) {
-	threads := checker.GetConfig().Threads
+	threads := common.GetConfig().Threads
 	allProxies = proxies
 
 	fmt.Println("starting dispatcher")
@@ -38,7 +38,7 @@ func Dispatcher(proxies []*proxy) {
 func check(proxy *proxy) {
 	atomic.AddInt32(&threadsActive, 1)
 
-	for proxy.checks <= checker.GetConfig().Retries {
+	for proxy.checks <= common.GetConfig().Retries {
 		body, status := Request(proxy)
 
 		if status >= 400 || status == -1 {
@@ -83,6 +83,6 @@ func GetFinishedProxies() map[string][]*proxy {
 	}
 }
 
-func GetInvaild() int {
+func GetInvalid() int {
 	return int(atomic.LoadInt32(&invalid))
 }
