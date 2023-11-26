@@ -1,26 +1,36 @@
 package main
 
 import (
+	"KC-Checker/common"
 	"KC-Checker/helper"
 	"fmt"
 )
 
-type test struct {
-	val int
-}
-
 func main() {
-	d := []byte("192.532.213.33")
-
-	helper.Write("output/socks4/elite.txt", d)
+	common.ReadSettings()
 
 	stringProxyArr := helper.GetInput()
 
 	if len(stringProxyArr) == 0 {
-		//TODO charm textinput
+		fmt.Print("Looks like you forgot to add some proxies to proxies.txt!")
 	}
 
 	proxyArr := helper.ToProxies(stringProxyArr)
-	fmt.Print(proxyArr)
 
+	helper.GetType()
+
+	fmt.Println("got type: ", helper.GetTypeName())
+
+	common.CheckDomains()
+
+	common.GetLocalIP()
+
+	helper.Dispatcher(proxyArr)
+
+	fmt.Println("FINISHED!")
+
+	fmt.Println("Elite: ", len(helper.GetFinishedProxies()["elite"]))
+	fmt.Println("Anonymous: ", len(helper.GetFinishedProxies()["anonymous"]))
+	fmt.Println("Transparent: ", len(helper.GetFinishedProxies()["transparent"]))
+	fmt.Println("Invalid: ", helper.GetInvalid())
 }
