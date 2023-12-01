@@ -2,7 +2,6 @@ package helper
 
 import (
 	"KC-Checker/common"
-	"fmt"
 	"golang.org/x/net/context"
 	proxy2 "golang.org/x/net/proxy"
 	"io"
@@ -33,7 +32,6 @@ func GetProxyLevel(innerhtml string) int {
 func Request(proxy *proxy) (string, int) {
 	proxyURL, err := url.Parse(GetTypeName() + "://" + proxy.full)
 	if err != nil {
-		fmt.Println("Error parsing proxy URL:", err)
 		return "Error parsing proxy URL", -1
 	}
 
@@ -45,7 +43,6 @@ func Request(proxy *proxy) (string, int) {
 	case "socks4", "socks5":
 		dialer, err := proxy2.SOCKS5("tcp", proxy.full, nil, proxy2.Direct)
 		if err != nil {
-			fmt.Println("Error creating SOCKS5 dialer:", err)
 			return "Error creating SOCKS5 dialer", -1
 		}
 		transport = &http.Transport{
@@ -62,23 +59,25 @@ func Request(proxy *proxy) (string, int) {
 
 	req, err := http.NewRequest("GET", common.GetHosts()[0].Host, nil)
 	if err != nil {
-		fmt.Println("Error creating HTTP request:", err)
 		return "Error creating HTTP request", -1
 	}
 
+	req.Header.Set("Connection", "close")
+
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error making HTTP request:", err)
+		if strings.Contains(err.Error(), "Maximum number of open connections reached.") {
+			return "Maximum number of open connections reached", -1
+		}
+
 		return "Error making HTTP request", -1
 	}
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Recovered from panic:", r)
 		}
 
 		err := resp.Body.Close()
 		if err != nil {
-			fmt.Println("Error closing response body:", err)
 		}
 	}()
 
@@ -86,7 +85,6 @@ func Request(proxy *proxy) (string, int) {
 
 	resBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
 		return "Error reading response body", -1
 	}
 
