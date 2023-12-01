@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"KC-Checker/charm"
 	"fmt"
 	"strconv"
 	"strings"
@@ -15,7 +14,6 @@ type proxy struct {
 }
 
 var proxyType int
-var checked = false
 
 func ToProxies(arr []string) []*proxy {
 	var newArr []*proxy
@@ -57,16 +55,14 @@ func checkIp(ip string) bool {
 }
 
 func GetType() int {
-	if !checked {
-		typeof := charm.RunType()
-		proxyType = typeof
-		checked = true
-	}
-
 	return proxyType
 }
 
 func GetTypeName() string {
 	names := []string{"http", "socks4", "socks5"}
 	return names[proxyType]
+}
+
+func SetType(typ int) {
+	proxyType = typ
 }
