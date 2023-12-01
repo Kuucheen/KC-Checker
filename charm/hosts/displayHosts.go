@@ -1,4 +1,4 @@
-package charm
+package hosts
 
 import (
 	"KC-Checker/common"
@@ -20,9 +20,15 @@ func DisplayHosts(hosts []common.HostTime) {
 	var data [][]string
 
 	for _, val := range hosts {
+		response := val.ResponseTime.String()
+
+		if response == "999h0m0s" {
+			response = "error"
+		}
+
 		data = append(data, []string{
 			val.Host,
-			val.ResponseTime.String(), // Format to display two decimal places
+			response,
 		})
 	}
 
@@ -48,7 +54,7 @@ func DisplayHosts(hosts []common.HostTime) {
 				return selectedStyle
 			}
 
-			if data[row-1][1] == "999.999999ms" {
+			if data[row-1][1] == "error" {
 				return errorStyle
 			}
 
@@ -61,6 +67,13 @@ func DisplayHosts(hosts []common.HostTime) {
 
 	fastestStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#01BE85")).
-		SetString(ReplaceAll(common.GetHosts()[0].Host, []string{"http://", "https://"}))
+		SetString(replaceAll(common.GetHosts()[0].Host, []string{"http://", "https://"}))
 	fmt.Println("Fastest host:", fastestStyle)
+}
+
+func replaceAll(str string, list []string) string {
+	for _, val := range list {
+		str = strings.ReplaceAll(str, val, "")
+	}
+	return str
 }
