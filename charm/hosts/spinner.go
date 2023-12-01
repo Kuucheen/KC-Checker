@@ -1,6 +1,6 @@
-package spinner
+package hosts
 
-// A simple program demonstrating the spinner component from the Bubbles
+// A simple program demonstrating the hosts component from the Bubbles
 // component library.
 
 import (
@@ -75,6 +75,7 @@ func Run() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
 }
 
 func SetFinished() {
