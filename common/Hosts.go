@@ -62,7 +62,7 @@ func checkTime(host string) time.Duration {
 
 	_, err := http.Get(host)
 	if err != nil {
-		return time.Nanosecond * 999999999
+		return time.Hour * 999
 	}
 
 	return time.Since(startTime)
