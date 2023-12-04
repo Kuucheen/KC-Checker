@@ -1,47 +1,76 @@
 package charm
 
 import (
-	"fmt"
 	"github.com/charmbracelet/lipgloss"
-	"os"
-	"os/exec"
-	"runtime"
+	"log"
+	"strings"
+	"time"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
-var clear map[string]func() //create a map for storing clear funcs
-
-func init() {
-	clear = make(map[string]func()) //Initialize it
-	clear["linux"] = func() {
-		cmd := exec.Command("clear") //Linux example, its tested
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	}
-	clear["windows"] = func() {
-		cmd := exec.Command("cmd", "/c", "cls") //Windows example, its tested
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	}
-}
-
-func CallClear() {
-	value, ok := clear[runtime.GOOS] //runtime.GOOS -> linux, windows, darwin etc.
-	if ok {                          //if we defined a clear func for that platform:
-		value() //we execute it
-	} else { //unsupported platform
-		panic("Your platform is unsupported! I can't clear terminal screen :(")
-	}
-}
-
 func DrawLogo() {
-	CallClear()
+	// Initialize our program
+	p := tea.NewProgram(logoModel(0))
+	if _, err := p.Run(); err != nil {
+		log.Fatal(err)
+	}
+}
+
+// A logoModel can be more or less any type of data. It holds all the data for a
+// program, so often it's a struct. For this simple example, however, all
+// we'll need is a simple integer.
+type logoModel int
+
+// Init optionally returns an initial command we should run. In this case we
+// want to start the timer.
+func (m logoModel) Init() tea.Cmd {
+	return tea.Batch(tick, tea.ClearScreen)
+}
+
+// Update is called when messages are received. The idea is that you inspect the
+// message and send back an updated logoModel accordingly. You can also return
+// a command, which is a function that performs I/O and returns a message.
+func (m logoModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		if msg.String() == "ctrl+c" || msg.String() == "q" {
+			return m, tea.Quit
+		}
+	case tickMsg:
+		if m >= 120 {
+			return m, tea.Quit
+		}
+		m += 2
+		return m, tick
+	}
+	return m, nil
+}
+
+// View returns a string based on data in the logoModel. That string which will be
+// rendered to the terminal.
+func (m logoModel) View() string {
+	logo := "_  _ ____    ____ _  _ ____ ____ _  _ ____ ____ \n|_/  |    __ |    |__| |___ |    |_/  |___ |__/ \n| \\_ |___    |___ |  | |___ |___ | \\_ |___ |  \\ \n"
 
 	var style = lipgloss.NewStyle().
-		Align(lipgloss.Center).
+		PaddingLeft(38).
 		Foreground(lipgloss.Color("#758ECD")).
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("#7189FF")).
-		SetString("_  _ ____    ____ _  _ ____ ____ _  _ ____ ____ \n|_/  |    __ |    |__| |___ |    |_/  |___ |__/ \n| \\_ |___    |___ |  | |___ |___ | \\_ |___ |  \\ \n                                                ")
+		SetString(logo)
 
-	fmt.Print(style, "\n")
+	var linestyle = style.Copy().
+		PaddingLeft(60 - int(m)/2).
+		SetString(strings.Repeat("─", int(m)))
+
+	str := style.Render() + "\n\n" + linestyle.Render() + "\n\n"
+
+	return str
+}
+
+// Messages are events that we respond to in our Update function. This
+// particular one indicates that the timer has ticked.
+type tickMsg time.Time
+
+func tick() tea.Msg {
+	time.Sleep(time.Millisecond * 10)
+	return tickMsg{}
 }
