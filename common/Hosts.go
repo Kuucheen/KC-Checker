@@ -28,7 +28,7 @@ func (ht HostTimes) Swap(i, j int) {
 	ht[i], ht[j] = ht[j], ht[i]
 }
 
-var hosts HostTimes
+var CurrentCheckedHosts HostTimes
 
 func CheckDomains() HostTimes {
 	configHosts := GetConfig().Hosts
@@ -39,22 +39,22 @@ func CheckDomains() HostTimes {
 			Host:         value,
 			ResponseTime: responseTime,
 		}
-		hosts = append(hosts, hostTime)
+		CurrentCheckedHosts = append(CurrentCheckedHosts, hostTime)
 	}
 
-	// Create a copy of the unsorted hosts
-	unsortedHosts := make(HostTimes, len(hosts))
-	copy(unsortedHosts, hosts)
+	// Create a copy of the unsorted CurrentCheckedHosts
+	unsortedHosts := make(HostTimes, len(CurrentCheckedHosts))
+	copy(unsortedHosts, CurrentCheckedHosts)
 
-	// Sort the original hosts based on response time
-	sort.Sort(hosts)
+	// Sort the original CurrentCheckedHosts based on response time
+	sort.Sort(CurrentCheckedHosts)
 
-	// Return the unsorted hosts
+	// Return the unsorted CurrentCheckedHosts
 	return unsortedHosts
 }
 
 func GetHosts() HostTimes {
-	return hosts
+	return CurrentCheckedHosts
 }
 
 func checkTime(host string) time.Duration {
@@ -70,21 +70,25 @@ func checkTime(host string) time.Duration {
 
 // GetLocalIP gets the outgoing ip address when a packet is sent
 func GetLocalIP() string {
-	resp, err := http.Get(GetConfig().IpLookup)
-	if err != nil {
-		panic("Couldnt get the users ip!")
+	for i := 0; i < 2; i++ {
+		resp, err := http.Get(GetConfig().IpLookup)
+		if err != nil {
+			continue
+		}
+
+		respBody, err := io.ReadAll(resp.Body)
+		err = resp.Body.Close()
+		if err != nil {
+			return ""
+		}
+		if err != nil {
+			panic(err)
+		}
+
+		UserIP = string(respBody)
+
+		return UserIP
 	}
 
-	respBody, err := io.ReadAll(resp.Body)
-	err = resp.Body.Close()
-	if err != nil {
-		return ""
-	}
-	if err != nil {
-		panic(err)
-	}
-
-	UserIP = string(respBody)
-
-	return UserIP
+	panic("Couldnt get the Users IP please provide an other ip sources!")
 }
