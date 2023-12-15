@@ -6,36 +6,36 @@ import (
 	"sync/atomic"
 )
 
-var (
-	elite            []*proxy
-	EliteCount       int32
-	anonymous        []*proxy
-	AnonymousCount   int32
-	transparent      []*proxy
-	TransparentCount int32
-	allProxies       []*proxy
-	Invalid          int32
-	threadsActive    int32
-	mutex            sync.Mutex
-	wg               sync.WaitGroup
+const (
+	Transparent = 1
+	Anonymous   = 2
+	Elite       = 3
 )
 
-func Dispatcher(proxies []*proxy) {
-	threads := common.GetConfig().Threads
-	allProxies = proxies
+var (
+	proxyQueue    = ProxyQueue{}
+	ProxyMap      = make(map[int][]*Proxy)
+	Invalid       int32
+	threadsActive int32
+	mutex         sync.Mutex
+	wg            sync.WaitGroup
+)
 
-	for len(allProxies) > 0 {
+func Dispatcher(proxies []*Proxy) {
+	threads := common.GetConfig().Threads
+
+	for len(proxies) > 0 {
 		if int(atomic.LoadInt32(&threadsActive)) <= threads {
 			wg.Add(1)
-			go check(allProxies[0])
-			allProxies = allProxies[1:]
+			go check(proxies[0])
+			proxies = proxies[1:]
 		}
 	}
 
 	wg.Wait()
 }
 
-func check(proxy *proxy) {
+func check(proxy *Proxy) {
 	atomic.AddInt32(&threadsActive, 1)
 
 	for proxy.checks <= common.GetConfig().Retries {
@@ -50,39 +50,44 @@ func check(proxy *proxy) {
 
 		mutex.Lock()
 		switch level {
-		case 1:
-			transparent = append(transparent, proxy)
-			atomic.AddInt32(&TransparentCount, 1)
-		case 2:
-			anonymous = append(anonymous, proxy)
-			atomic.AddInt32(&AnonymousCount, 1)
-		case 3:
-			elite = append(elite, proxy)
-			atomic.AddInt32(&EliteCount, 1)
+		case Transparent:
+			proxy.Level = Transparent
+			ProxyMap[Transparent] = append(ProxyMap[Transparent], proxy)
+			proxyQueue.Enqueue(proxy)
+		case Anonymous:
+			proxy.Level = Anonymous
+			ProxyMap[Anonymous] = append(ProxyMap[Anonymous], proxy)
+			proxyQueue.Enqueue(proxy)
+		case Elite:
+			proxy.Level = Elite
+			ProxyMap[Elite] = append(ProxyMap[Elite], proxy)
+			proxyQueue.Enqueue(proxy)
 		default:
 			atomic.AddInt32(&Invalid, 1)
 		}
-		defer mutex.Unlock()
+		mutex.Unlock()
 
-		defer atomic.AddInt32(&threadsActive, -1)
+		atomic.AddInt32(&threadsActive, -1)
+
 		wg.Done()
 		return
 	}
 
-	defer atomic.AddInt32(&threadsActive, -1)
+	defer func() {
+		atomic.AddInt32(&threadsActive, -1)
+		wg.Done()
+	}()
 	atomic.AddInt32(&Invalid, 1)
-	wg.Done()
-	return
-}
-
-func GetFinishedProxies() map[string][]*proxy {
-	return map[string][]*proxy{
-		"transparent": transparent,
-		"anonymous":   anonymous,
-		"elite":       elite,
-	}
 }
 
 func GetInvalid() int {
 	return int(atomic.LoadInt32(&Invalid))
+}
+
+func GetActive() int {
+	return int(atomic.LoadInt32(&threadsActive))
+}
+
+func GetQueue() ProxyQueue {
+	return proxyQueue
 }
