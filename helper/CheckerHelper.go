@@ -5,6 +5,7 @@ import (
 	"golang.org/x/net/context"
 	proxy2 "golang.org/x/net/proxy"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -29,8 +30,10 @@ func GetProxyLevel(innerhtml string) int {
 
 }
 
-func Request(proxy *proxy) (string, int) {
-	proxyURL, err := url.Parse(GetTypeName() + "://" + proxy.full)
+func Request(proxy *Proxy) (string, int) {
+	log.SetOutput(io.Discard)
+
+	proxyURL, err := url.Parse(GetTypeName() + "://" + proxy.Full)
 	if err != nil {
 		return "Error parsing proxy URL", -1
 	}
@@ -41,7 +44,7 @@ func Request(proxy *proxy) (string, int) {
 	case "http":
 		transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 	case "socks4", "socks5":
-		dialer, err := proxy2.SOCKS5("tcp", proxy.full, nil, proxy2.Direct)
+		dialer, err := proxy2.SOCKS5("tcp", proxy.Full, nil, proxy2.Direct)
 		if err != nil {
 			return "Error creating SOCKS5 dialer", -1
 		}
