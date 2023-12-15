@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/viewport"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -32,6 +31,10 @@ var (
 		b.Right = "├"
 		return lipgloss.NewStyle().BorderStyle(b).Padding(0, 1)
 	}()
+
+	eliteCount       = 0
+	anonymousCount   = 0
+	transparentCount = 0
 
 	helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
 )
@@ -61,7 +64,7 @@ type model struct {
 var finished = false
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(tickCmd(), tea.EnterAltScreen)
+	return tea.Batch(tickCmd())
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -74,26 +77,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 
 	case tea.WindowSizeMsg:
-		m.elite.Width = msg.Width - padding*2 - 4
-		if m.elite.Width > maxWidth {
-			m.elite.Width = maxWidth
-		}
-		m.anonymous.Width = msg.Width - padding*2 - 4
-		if m.anonymous.Width > maxWidth {
-			m.anonymous.Width = maxWidth
-		}
-		m.transparent.Width = msg.Width - padding*2 - 4
-		if m.transparent.Width > maxWidth {
-			m.transparent.Width = maxWidth
-		}
+		width := 55
+		m.elite.Width = width
+		m.anonymous.Width = width
+		m.transparent.Width = width
 		return m, nil
 
 	case tickMsg:
 		sum := float64(getSum())
 
-		eliteCmd := m.elite.SetPercent(float64(helper.EliteCount) / sum)
-		anonymousCmd := m.anonymous.SetPercent(float64(helper.AnonymousCount) / sum)
-		transparentCmd := m.transparent.SetPercent(float64(helper.TransparentCount) / sum)
+		eliteCount = len(helper.ProxyMap[3])
+		anonymousCount = len(helper.ProxyMap[2])
+		transparentCount = len(helper.ProxyMap[1])
+
+		eliteCmd := m.elite.SetPercent(float64(eliteCount) / sum)
+		anonymousCmd := m.anonymous.SetPercent(float64(anonymousCount) / sum)
+		transparentCmd := m.transparent.SetPercent(float64(transparentCount) / sum)
 
 		return m, tea.Batch(tickCmd(), eliteCmd, anonymousCmd, transparentCmd)
 	// FrameMsg is sent when the elite bar wants to animate itself
@@ -115,29 +114,24 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	var style = lipgloss.NewStyle().
-		Align(lipgloss.Center).
-		Foreground(lipgloss.Color("#758ECD")).
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("#7189FF")).
-		SetString("_  _ ____    ____ _  _ ____ ____ _  _ ____ ____ \n|_/  |    __ |    |__| |___ |    |_/  |___ |__/ \n| \\_ |___    |___ |  | |___ |___ | \\_ |___ |  \\ \n                                                ")
-
 	pad := strings.Repeat(" ", padding)
-	return style.String() + "\n" + m.renderLine("Elite") + "\n\n" +
-		pad + m.elite.View() + "\n\n" + m.renderLine("Anonymous") + "\n\n" +
-		pad + m.anonymous.View() + "\n\n" + m.renderLine("Transparent") + "\n\n" +
-		pad + m.transparent.View() + "\n\nElite: " +
-		strconv.Itoa(int(helper.EliteCount)) + "\n\nAnonymous: " +
-		strconv.Itoa(int(helper.AnonymousCount)) + "\n\nTransparent: " +
-		strconv.Itoa(int(helper.TransparentCount)) + "\n\nSum: " +
-		strconv.Itoa(getSum()) + "\n\nInvalid: " +
-		strconv.Itoa(int(helper.Invalid)) + "\n\n" +
-		pad + helpStyle("Press any key to quit")
+	bars := lipgloss.NewStyle().
+		BorderStyle(lipgloss.ThickBorder()).
+		BorderRight(true).
+		SetString(m.renderLine("Elite") + "\n\n" +
+			pad + m.elite.View() + "\n\n" + m.renderLine("Anonymous") + "\n\n" +
+			pad + m.anonymous.View() + "\n\n" + m.renderLine("Transparent") + "\n\n" +
+			pad + m.transparent.View())
+
+	return "\n" +
+		lipgloss.JoinHorizontal(lipgloss.Top, bars.String(),
+			lipgloss.JoinHorizontal(lipgloss.Top, getStyledQueue(),
+				getStyledInfo(eliteCount, anonymousCount, transparentCount)))
 }
 
 func (m model) renderLine(str string) string {
 	title := titleStyle.Render(str)
-	line := strings.Repeat("─", max(0, 50-lipgloss.Width(title)))
+	line := strings.Repeat("─", max(0, 57-lipgloss.Width(title)))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
 
@@ -148,7 +142,7 @@ func tickCmd() tea.Cmd {
 }
 
 func getSum() int {
-	sum := int(helper.EliteCount + helper.AnonymousCount + helper.TransparentCount)
+	sum := eliteCount + anonymousCount + transparentCount
 
 	if sum == 0 {
 		sum = 1
