@@ -2,15 +2,15 @@ package charm
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"os"
 )
 
 var docStyle = lipgloss.NewStyle().Margin(1, 2)
 var index = 0
+var finished = false
 
 type item struct {
 	title, desc string
@@ -25,19 +25,20 @@ type model struct {
 }
 
 func (m model) Init() tea.Cmd {
-	return nil
+	return tea.SetWindowTitle("KC-Checker - github.com/Kuucheen")
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		if msg.String() == "ctrl+c" || msg.String() == "enter" {
+			finished = true
 			index = m.list.Index()
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
-		m.list.SetSize(msg.Width-h, msg.Height-v)
+		m.list.SetSize(msg.Width-h, msg.Height-v-10)
 	}
 
 	var cmd tea.Cmd
@@ -46,20 +47,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+	if finished {
+		return ""
+	}
 	return docStyle.Render(m.list.View())
 }
 
-func RunType() int {
+func GetProxyType() int {
+
 	items := []list.Item{
-		item{title: "HTTP/s", desc: "for various web applications"},
+		item{"HTTP/s", "for various web applications"},
 		item{title: "SOCKS4", desc: "for various app applications"},
 		item{title: "SOCKS5", desc: "for various app applications"},
 	}
 
 	m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
 	m.list.Title = "What type of proxies do you want to check?"
+	m.list.SetStatusBarItemName("Type", "Types")
 
-	p := tea.NewProgram(m, tea.WithAltScreen())
+	p := tea.NewProgram(m)
 
 	if _, err := p.Run(); err != nil {
 		fmt.Println("Error running program:", err)
