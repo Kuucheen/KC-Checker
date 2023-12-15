@@ -6,17 +6,18 @@ import (
 	"strings"
 )
 
-type proxy struct {
+type Proxy struct {
 	ip     string
 	port   int
-	full   string
+	Full   string
+	Level  int
 	checks int
 }
 
 var proxyType int
 
-func ToProxies(arr []string) []*proxy {
-	var newArr []*proxy
+func ToProxies(arr []string) []*Proxy {
+	var newArr []*Proxy
 	for _, value := range arr {
 		temp := strings.Split(value, ":")
 
@@ -30,10 +31,10 @@ func ToProxies(arr []string) []*proxy {
 			fmt.Print("Not a valid port: ", err)
 		}
 
-		newArr = append(newArr, &proxy{
+		newArr = append(newArr, &Proxy{
 			ip:   temp[0],
 			port: dat,
-			full: temp[0] + ":" + temp[1],
+			Full: temp[0] + ":" + temp[1],
 		})
 	}
 
