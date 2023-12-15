@@ -13,8 +13,8 @@ func Write(file string, data []byte) {
 	}
 }
 
-func GetInput() []string {
-	dat, err := os.ReadFile("proxies.txt")
+func GetInput(file string) []string {
+	dat, err := os.ReadFile(file)
 	if err != nil {
 		fmt.Printf("Error while reading proxies: %s", err)
 	}
