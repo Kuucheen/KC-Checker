@@ -22,6 +22,8 @@ func DrawLogo() {
 // we'll need is a simple integer.
 type logoModel int
 
+var times int
+
 // Init optionally returns an initial command we should run. In this case we
 // want to start the timer.
 func (m logoModel) Init() tea.Cmd {
@@ -42,6 +44,7 @@ func (m logoModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 		m += 2
+		times += 2
 		return m, tick
 	}
 	return m, nil
@@ -71,6 +74,6 @@ func (m logoModel) View() string {
 type tickMsg time.Time
 
 func tick() tea.Msg {
-	time.Sleep(time.Millisecond * 10)
+	time.Sleep(time.Duration(100000 - times*900))
 	return tickMsg{}
 }
