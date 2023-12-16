@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+var ProxySum float64
+
 func Write(file string, data []byte) {
 	err := os.WriteFile(file, data, 0644)
 	if err != nil {
@@ -18,7 +20,9 @@ func GetInput(file string) []string {
 	if err != nil {
 		fmt.Printf("Error while reading proxies: %s", err)
 	}
+	split := strings.Split(strings.ReplaceAll(string(dat), "\r\n", "\n"), "\n")
 
-	//Split into lines
-	return strings.Split(strings.ReplaceAll(string(dat), "\r\n", "\n"), "\n")
+	ProxySum = float64(len(split))
+
+	return split
 }
