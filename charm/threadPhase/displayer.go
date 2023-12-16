@@ -44,7 +44,8 @@ var (
 	anonymousCount   = 0
 	transparentCount = 0
 
-	helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
+	helpStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
+	greenStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#01BE85")).Render
 )
 
 type tickMsg time.Time
@@ -61,6 +62,8 @@ type model struct {
 var (
 	finished    = false
 	threadPhase = true
+
+	outputPath = ""
 )
 
 func RunBars() {
@@ -105,11 +108,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if msg.String() == "q" {
 				threadPhase = false
 				helper.StopThreads()
+
 			}
 		} else {
-			if msg.String() == tea.KeyDown.String() || msg.String() == tea.KeyRight.String() {
+			switch msg.String() {
+			case tea.KeyEnter.String():
+				outputPath = "\n\n" + helper.Write(helper.ProxyMap, m.list.Index())
+			case tea.KeyRight.String():
 				m.list.CursorDown()
-			} else if msg.String() == tea.KeyUp.String() || msg.String() == tea.KeyLeft.String() {
+			case tea.KeyLeft.String():
 				m.list.CursorUp()
 			}
 		}
@@ -183,12 +190,12 @@ func (m model) View() string {
 		extraString = m.list.View() + "\n" + helpStyle("→ right • ← left")
 	}
 
-	return "\n" +
-		lipgloss.JoinHorizontal(lipgloss.Top, bars.String(),
+	return lipgloss.JoinHorizontal(lipgloss.Top, bars.String(),
+		lipgloss.JoinVertical(lipgloss.Center,
 			lipgloss.JoinVertical(lipgloss.Center, lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinHorizontal(lipgloss.Top, getStyledQueue(),
 				getStyledInfo(eliteCount, anonymousCount, transparentCount)),
-				percentageBar.String()), extraString),
-		)
+				percentageBar.String()), extraString), greenStyle(outputPath)),
+	)
 }
 
 func (m model) renderLine(str string) string {
