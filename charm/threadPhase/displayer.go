@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -23,6 +24,14 @@ import (
 const (
 	padding = 2
 )
+
+type item struct {
+	title, desc string
+}
+
+func (i item) Title() string       { return i.title }
+func (i item) Description() string { return i.desc }
+func (i item) FilterValue() string { return i.title }
 
 var (
 	titleStyle = func() lipgloss.Style {
@@ -38,12 +47,39 @@ var (
 	helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
 )
 
+type tickMsg time.Time
+
+type model struct {
+	elite       progress.Model
+	anonymous   progress.Model
+	transparent progress.Model
+	percentage  progress.Model
+	viewport    viewport.Model
+	list        list.Model
+}
+
+var (
+	finished    = false
+	threadPhase = true
+)
+
 func RunBars() {
+	items := []list.Item{
+		item{"ip:port", ""},
+		item{title: "type://ip:port", desc: ""},
+	}
+
 	m := model{
 		elite:       progress.New(progress.WithDefaultGradient()),
 		anonymous:   progress.New(progress.WithDefaultGradient()),
 		transparent: progress.New(progress.WithDefaultGradient()),
+		percentage:  progress.New(progress.WithDefaultGradient()),
+		list:        list.New(items, list.NewDefaultDelegate(), 75, 0),
 	}
+	m.list.Title = "How do you want to save the proxies?"
+	m.list.SetShowStatusBar(false)
+	m.list.SetFilteringEnabled(false)
+	m.list.SetShowHelp(false)
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Println("Oh no!", err)
@@ -51,19 +87,8 @@ func RunBars() {
 	}
 }
 
-type tickMsg time.Time
-
-type model struct {
-	elite       progress.Model
-	anonymous   progress.Model
-	transparent progress.Model
-	viewport    viewport.Model
-}
-
-var finished = false
-
 func (m model) Init() tea.Cmd {
-	return tea.Batch(tickCmd())
+	return tickCmd()
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -73,28 +98,46 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		return m, tea.Quit
+		if msg.String() == "ctrl+c" {
+			return m, tea.Quit
+		}
+		if threadPhase {
+			if msg.String() == "q" {
+				threadPhase = false
+				helper.StopThreads()
+			}
+		} else {
+			if msg.String() == tea.KeyDown.String() || msg.String() == tea.KeyRight.String() {
+				m.list.CursorDown()
+			} else if msg.String() == tea.KeyUp.String() || msg.String() == tea.KeyLeft.String() {
+				m.list.CursorUp()
+			}
+		}
+		return m, nil
 
 	case tea.WindowSizeMsg:
 		width := 55
 		m.elite.Width = width
 		m.anonymous.Width = width
 		m.transparent.Width = width
+		m.percentage.Width = width - 10
+		m.list.SetWidth(msg.Width)
 		return m, nil
 
 	case tickMsg:
 		sum := float64(getSum())
 
-		eliteCount = len(helper.ProxyMap[3])
-		anonymousCount = len(helper.ProxyMap[2])
-		transparentCount = len(helper.ProxyMap[1])
+		eliteCount = helper.ProxyCountMap[3]
+		anonymousCount = helper.ProxyCountMap[2]
+		transparentCount = helper.ProxyCountMap[1]
 
 		eliteCmd := m.elite.SetPercent(float64(eliteCount) / sum)
 		anonymousCmd := m.anonymous.SetPercent(float64(anonymousCount) / sum)
 		transparentCmd := m.transparent.SetPercent(float64(transparentCount) / sum)
+		percentageCmd := m.percentage.SetPercent(float64(getSumWithInvalid()) / helper.ProxySum)
 
-		return m, tea.Batch(tickCmd(), eliteCmd, anonymousCmd, transparentCmd)
-	// FrameMsg is sent when the elite bar wants to animate itself
+		return m, tea.Batch(tickCmd(), eliteCmd, anonymousCmd, transparentCmd, percentageCmd)
+
 	case progress.FrameMsg:
 		eliteModel, eliteCmd := m.elite.Update(msg)
 		m.elite = eliteModel.(progress.Model)
@@ -105,8 +148,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		transparentModel, transparentCmd := m.transparent.Update(msg)
 		m.transparent = transparentModel.(progress.Model)
 
-		return m, tea.Batch(eliteCmd, anonymousCmd, transparentCmd)
+		percentageModel, percentageCmd := m.percentage.Update(msg)
+		m.percentage = percentageModel.(progress.Model)
 
+		return m, tea.Batch(eliteCmd, anonymousCmd, transparentCmd, percentageCmd)
 	default:
 		return m, nil
 	}
@@ -122,10 +167,28 @@ func (m model) View() string {
 			pad + m.anonymous.View() + "\n\n" + m.renderLine("Transparent") + "\n\n" +
 			pad + m.transparent.View())
 
+	percentageBar := lipgloss.NewStyle().
+		BorderStyle(lipgloss.NormalBorder()).
+		PaddingLeft(3).
+		PaddingRight(3).
+		Width(64).
+		BorderBottom(true).
+		SetString("Progress  " + m.percentage.View())
+
+	extraString := ""
+
+	if threadPhase {
+		extraString = helpStyle("Press q to stop")
+	} else {
+		extraString = m.list.View() + "\n" + helpStyle("→ right • ← left")
+	}
+
 	return "\n" +
 		lipgloss.JoinHorizontal(lipgloss.Top, bars.String(),
-			lipgloss.JoinHorizontal(lipgloss.Top, getStyledQueue(),
-				getStyledInfo(eliteCount, anonymousCount, transparentCount)))
+			lipgloss.JoinVertical(lipgloss.Center, lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinHorizontal(lipgloss.Top, getStyledQueue(),
+				getStyledInfo(eliteCount, anonymousCount, transparentCount)),
+				percentageBar.String()), extraString),
+		)
 }
 
 func (m model) renderLine(str string) string {
@@ -148,6 +211,10 @@ func getSum() int {
 	}
 
 	return sum
+}
+
+func getSumWithInvalid() int {
+	return getSum() + helper.GetInvalid()
 }
 
 func SetFinished() {
