@@ -2,6 +2,7 @@ package hosts
 
 import (
 	"KC-Checker/common"
+	"KC-Checker/helper"
 	"fmt"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 )
 
 type errMsg error
@@ -44,6 +46,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if checked {
 		finished = true
+		go helper.Dispatcher(helper.ToProxies(helper.GetInput("proxies.txt")))
+		time.Sleep(time.Second * 2)
 		m.View()
 		return m, tea.Quit
 	}
