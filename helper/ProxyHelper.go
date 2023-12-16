@@ -55,13 +55,14 @@ func checkIp(ip string) bool {
 	return true
 }
 
-func GetType() int {
-	return proxyType
-}
-
 func GetTypeName() string {
 	names := []string{"http", "socks4", "socks5"}
 	return names[proxyType]
+}
+
+func GetLevelNameOf(typ int) string {
+	names := []string{"transparent", "anonymous", "elite"}
+	return names[typ]
 }
 
 func SetType(typ int) {
