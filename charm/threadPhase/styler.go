@@ -43,7 +43,9 @@ func getStyledQueue() string {
 	return lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).
 		BorderBottom(true).
 		BorderRight(true).
-		Width(26).
+		PaddingLeft(5).
+		PaddingRight(5).
+		Width(36).
 		Render(retString)
 }
 
@@ -56,5 +58,11 @@ func getStyledInfo(elite int, anon int, trans int) string {
 		"Transparent: %d\n"+
 		"Invalid: %d", activeThreads, elite, anon, trans, helper.GetInvalid())
 
-	return lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true).Render(retString)
+	return lipgloss.NewStyle().
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderBottom(true).
+		PaddingLeft(5).
+		PaddingRight(5).
+		Width(27).
+		Render(retString)
 }
