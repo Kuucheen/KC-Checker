@@ -9,7 +9,6 @@ package threadPhase
 
 import (
 	"KC-Checker/helper"
-	"fmt"
 	"github.com/charmbracelet/bubbles/viewport"
 	"os"
 	"strings"
@@ -60,7 +59,6 @@ type model struct {
 }
 
 var (
-	finished    = false
 	threadPhase = true
 
 	outputPath = ""
@@ -85,7 +83,6 @@ func RunBars() {
 	m.list.SetShowHelp(false)
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
-		fmt.Println("Oh no!", err)
 		os.Exit(1)
 	}
 }
@@ -95,10 +92,9 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if finished {
-		return m, tea.Quit
+	if helper.HasFinished {
+		threadPhase = false
 	}
-
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		if msg.String() == "ctrl+c" {
@@ -222,8 +218,4 @@ func getSum() int {
 
 func getSumWithInvalid() int {
 	return getSum() + helper.GetInvalid()
-}
-
-func SetFinished() {
-	finished = true
 }
