@@ -183,7 +183,7 @@ func (m model) View() string {
 	if threadPhase {
 		extraString = helpStyle("Press q to stop")
 	} else {
-		extraString = m.list.View() + "\n" + helpStyle("→ right • ← left")
+		extraString = m.list.View() + "\n" + helpStyle("→ right • ← left • enter select")
 	}
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, bars.String(),
