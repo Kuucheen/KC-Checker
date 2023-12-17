@@ -45,6 +45,7 @@ func getStyledQueue() string {
 		BorderRight(true).
 		PaddingLeft(5).
 		PaddingRight(5).
+		Height(5).
 		Width(36).
 		Render(retString)
 }
