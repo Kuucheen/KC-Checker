@@ -22,6 +22,8 @@ var (
 	threadsActive int32
 	mutex         sync.Mutex
 	wg            sync.WaitGroup
+
+	HasFinished = false
 )
 
 func Dispatcher(proxies []*Proxy) {
@@ -42,6 +44,7 @@ func Dispatcher(proxies []*Proxy) {
 	}
 
 	wg.Wait()
+	HasFinished = true
 }
 
 func check(proxy *Proxy) {
