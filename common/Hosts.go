@@ -68,7 +68,6 @@ func checkTime(host string) time.Duration {
 	return time.Since(startTime)
 }
 
-// GetLocalIP gets the outgoing ip address when a packet is sent
 func GetLocalIP() string {
 	for i := 0; i < 2; i++ {
 		resp, err := http.Get(GetConfig().IpLookup)
