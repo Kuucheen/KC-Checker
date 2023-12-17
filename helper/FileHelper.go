@@ -3,7 +3,7 @@ package helper
 import (
 	"fmt"
 	"os"
-	"strings"
+	"regexp"
 )
 
 var ProxySum float64
@@ -27,7 +27,6 @@ func Write(proxies map[int][]*Proxy, style int) string {
 
 			_, err := fmt.Fprintln(f, proxyString)
 			if err != nil {
-				fmt.Println("Error writing to file:", err)
 				return ""
 			}
 		}
@@ -45,11 +44,15 @@ func GetInput(file string) []string {
 	if err != nil {
 		fmt.Printf("Error while reading proxies: %s", err)
 	}
-	split := strings.Split(strings.ReplaceAll(string(dat), "\r\n", "\n"), "\n")
 
-	ProxySum = float64(len(split))
+	ipPortPattern := `\b(?:\d{1,3}\.){3}\d{1,3}:\d+\b`
+	re := regexp.MustCompile(ipPortPattern)
 
-	return split
+	matches := re.FindAllString(string(dat), -1)
+
+	ProxySum = float64(len(matches))
+
+	return matches
 }
 
 func GetFilePath(name string) string {
