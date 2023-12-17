@@ -10,8 +10,5 @@ func main() {
 
 	common.GetLocalIP()
 
-	//hostsList := common.CheckDomains()
-	//hosts.DisplayHosts(hostsList)
-
 	charm.RunHostsDisplay()
 }
