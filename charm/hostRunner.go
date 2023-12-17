@@ -15,8 +15,10 @@ func RunHostsDisplay() {
 	go common.CheckDomains()
 	hosts.Run()
 
+	if helper.ProxySum < 1 {
+		hosts.WaitForProxies()
+		go helper.Dispatcher(helper.ToProxies(helper.GetInput("proxies.txt")))
+	}
+
 	threadPhase.RunBars()
-	//
-	//wg.Wait()
-	//threadPhase.SetFinished()
 }
