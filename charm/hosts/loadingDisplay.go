@@ -22,8 +22,19 @@ type model struct {
 	err      error
 }
 
-var data = make(map[string]string)
-var finished = false
+var (
+	data     = make(map[string]string)
+	finished = false
+
+	re            = lipgloss.NewRenderer(os.Stdout)
+	baseStyle     = re.NewStyle().Padding(0, 1)
+	headerStyle   = baseStyle.Copy().Foreground(lipgloss.Color("252")).Bold(true)
+	selectedStyle = baseStyle.Copy().Foreground(lipgloss.Color("#01BE85")).Background(lipgloss.Color("#00432F"))
+	warningStyle  = baseStyle.Copy().Foreground(lipgloss.Color("#BEAA01")).Background(lipgloss.Color("#414300"))
+	errorStyle    = baseStyle.Copy().Foreground(lipgloss.Color("#BE0101")).Background(lipgloss.Color("#430000"))
+
+	centerstyle = lipgloss.NewStyle().Width(125).Align(lipgloss.Center).Render
+)
 
 func initialModel() model {
 	s := spinner.New()
@@ -88,13 +99,6 @@ func (m model) View() string {
 		return ""
 	}
 	str := fmt.Sprintf("\n\n   %s Loading hosts, please wait\n\n", m.spinner.View())
-
-	re := lipgloss.NewRenderer(os.Stdout)
-	baseStyle := re.NewStyle().Padding(0, 1)
-	headerStyle := baseStyle.Copy().Foreground(lipgloss.Color("252")).Bold(true)
-	selectedStyle := baseStyle.Copy().Foreground(lipgloss.Color("#01BE85")).Background(lipgloss.Color("#00432F"))
-	warningStyle := baseStyle.Copy().Foreground(lipgloss.Color("#BEAA01")).Background(lipgloss.Color("#414300"))
-	errorStyle := baseStyle.Copy().Foreground(lipgloss.Color("#BE0101")).Background(lipgloss.Color("#430000"))
 
 	headers := []string{"Name", "Time"}
 
@@ -165,13 +169,12 @@ func (m model) View() string {
 			return baseStyle.Copy().Foreground(lipgloss.Color("252"))
 		})
 
-	return str + t.Render() + "\n"
+	return centerstyle(str) + "\n" + centerstyle(t.Render())
 }
 
 func Run() {
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
-		fmt.Println(err)
 		os.Exit(1)
 	}
 
