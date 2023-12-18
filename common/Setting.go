@@ -10,8 +10,9 @@ type Config struct {
 	Threads  int      `json:"threads"`
 	Retries  int      `json:"retries"`
 	Timeout  int      `json:"timeout"`
-	Hosts    []string `json:"hosts"`
+	Judges   []string `json:"judges"`
 	IpLookup string   `json:"iplookup"`
+	Bancheck string   `json:"bancheck"`
 }
 
 var config Config
@@ -33,4 +34,8 @@ func ReadSettings() {
 
 func GetConfig() Config {
 	return config
+}
+
+func DoBanCheck() bool {
+	return config.Bancheck != ""
 }
