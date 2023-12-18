@@ -31,6 +31,10 @@ func GetProxyLevel(innerhtml string) int {
 }
 
 func Request(proxy *Proxy) (string, int) {
+	return RequestCustom(proxy, common.GetHosts()[0].Judge)
+}
+
+func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
 	log.SetOutput(io.Discard)
 
 	proxyURL, err := url.Parse(GetTypeName() + "://" + proxy.Full)
@@ -60,7 +64,7 @@ func Request(proxy *Proxy) (string, int) {
 		Timeout:   time.Millisecond * time.Duration(common.GetConfig().Timeout),
 	}
 
-	req, err := http.NewRequest("GET", common.GetHosts()[0].Host, nil)
+	req, err := http.NewRequest("GET", siteUrl, nil)
 	if err != nil {
 		return "Error creating HTTP request", -1
 	}
@@ -92,4 +96,5 @@ func Request(proxy *Proxy) (string, int) {
 	}
 
 	return string(resBody), status
+
 }
