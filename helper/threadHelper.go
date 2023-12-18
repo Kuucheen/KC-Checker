@@ -7,21 +7,16 @@ import (
 	"time"
 )
 
-const (
-	Transparent = 1
-	Anonymous   = 2
-	Elite       = 3
-)
-
 var (
-	proxyQueue    = ProxyQueue{}
-	ProxyMap      = make(map[int][]*Proxy)
-	ProxyCountMap = make(map[int]int)
-	stop          = false
-	Invalid       int32
-	threadsActive int32
-	mutex         sync.Mutex
-	wg            sync.WaitGroup
+	proxyQueue       = ProxyQueue{}
+	ProxyMap         = make(map[int][]*Proxy)
+	ProxyMapFiltered = make(map[int][]*Proxy)
+	ProxyCountMap    = make(map[int]int)
+	stop             = false
+	Invalid          int32
+	threadsActive    int32
+	mutex            sync.Mutex
+	wg               sync.WaitGroup
 
 	HasFinished = false
 )
@@ -48,7 +43,11 @@ func Dispatcher(proxies []*Proxy) {
 }
 
 func check(proxy *Proxy) {
-	for proxy.checks <= common.GetConfig().Retries {
+	responded := false
+	retries := common.GetConfig().Retries
+	level := 0
+
+	for proxy.checks <= retries {
 		body, status := Request(proxy)
 
 		if status >= 400 || status == -1 {
@@ -56,40 +55,45 @@ func check(proxy *Proxy) {
 			continue
 		}
 
-		level := GetProxyLevel(body)
+		level = GetProxyLevel(body)
+		levels := []int{1, 2, 3}
 
 		mutex.Lock()
-		switch level {
-		case Transparent:
-			proxy.Level = Transparent
-			ProxyMap[Transparent] = append(ProxyMap[Transparent], proxy)
-			ProxyCountMap[Transparent]++
+
+		if isInList(level, levels) {
+			proxy.Level = level
+			ProxyMap[level] = append(ProxyMap[level], proxy)
+			ProxyCountMap[level]++
 			proxyQueue.Enqueue(proxy)
-		case Anonymous:
-			proxy.Level = Anonymous
-			ProxyMap[Anonymous] = append(ProxyMap[Anonymous], proxy)
-			ProxyCountMap[Anonymous]++
-			proxyQueue.Enqueue(proxy)
-		case Elite:
-			proxy.Level = Elite
-			ProxyMap[Elite] = append(ProxyMap[Elite], proxy)
-			ProxyCountMap[Elite]++
-			proxyQueue.Enqueue(proxy)
-		default:
+		} else {
 			atomic.AddInt32(&Invalid, 1)
 		}
+
 		mutex.Unlock()
 
-		atomic.AddInt32(&threadsActive, -1)
-		wg.Done()
-		return
+		responded = true
+		break
+	}
+
+	if responded && common.DoBanCheck() {
+		for i := 0; i < retries; i++ {
+			_, status := RequestCustom(proxy, common.GetConfig().Bancheck)
+
+			if status >= 400 || status == -1 {
+				mutex.Lock()
+				ProxyMapFiltered[level] = append(ProxyMapFiltered[level], proxy)
+				mutex.Unlock()
+				break
+			}
+		}
+	} else {
+		atomic.AddInt32(&Invalid, 1)
 	}
 
 	defer func() {
 		atomic.AddInt32(&threadsActive, -1)
 		wg.Done()
 	}()
-	atomic.AddInt32(&Invalid, 1)
 }
 
 func GetInvalid() int {
@@ -106,4 +110,13 @@ func GetQueue() ProxyQueue {
 
 func StopThreads() {
 	stop = true
+}
+
+func isInList(target int, list []int) bool {
+	for _, value := range list {
+		if value == target {
+			return true
+		}
+	}
+	return false
 }
