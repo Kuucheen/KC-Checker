@@ -8,6 +8,7 @@ package threadPhase
 // transitions. For details on that approach see the elite-static example.
 
 import (
+	"KC-Checker/common"
 	"KC-Checker/helper"
 	"github.com/charmbracelet/bubbles/viewport"
 	"os"
@@ -109,7 +110,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			switch msg.String() {
 			case tea.KeyEnter.String():
-				outputPath = "\n\n" + helper.Write(helper.ProxyMap, m.list.Index())
+				if common.DoBanCheck() {
+					helper.Write(helper.ProxyMapFiltered, m.list.Index(), true)
+				}
+				outputPath = "\n\n" + helper.Write(helper.ProxyMap, m.list.Index(), false)
 			case tea.KeyRight.String():
 				m.list.CursorDown()
 			case tea.KeyLeft.String():
