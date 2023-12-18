@@ -8,11 +8,17 @@ import (
 
 var ProxySum float64
 
-func Write(proxies map[int][]*Proxy, style int) string {
+func Write(proxies map[int][]*Proxy, style int, bancheck bool) string {
 	pType := GetTypeName()
 
 	for _, proxyLevel := range proxies {
-		f, err := os.Create(GetFilePath(pType) + GetLevelNameOf(proxyLevel[0].Level-1) + ".txt")
+		filtered := ""
+
+		if bancheck {
+			filtered = "BanChecked/"
+		}
+
+		f, err := os.Create(GetFilePath(pType) + filtered + GetLevelNameOf(proxyLevel[0].Level-1) + ".txt")
 		if err != nil {
 			return ""
 		}
