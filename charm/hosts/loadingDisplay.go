@@ -98,12 +98,12 @@ func (m model) View() string {
 	if m.quitting {
 		return ""
 	}
-	str := fmt.Sprintf("\n\n   %s Loading hosts, please wait\n\n", m.spinner.View())
+	str := fmt.Sprintf("\n\n   %s Loading judges, please wait\n\n", m.spinner.View())
 
 	headers := []string{"Name", "Time"}
 
 	if len(data) == 0 {
-		for _, val := range common.GetConfig().Hosts {
+		for _, val := range common.GetConfig().Judges {
 			data[val] = "?"
 		}
 	}
@@ -117,7 +117,7 @@ func (m model) View() string {
 			response = "error"
 		}
 
-		data[val.Host] = response
+		data[val.Judge] = response
 	}
 
 	var dataString [][]string
@@ -151,7 +151,7 @@ func (m model) View() string {
 				return headerStyle
 			}
 
-			if len(common.GetHosts()) > 0 && dataString[row-1][0] == common.GetHosts()[0].Host {
+			if len(common.GetHosts()) > 0 && dataString[row-1][0] == common.GetHosts()[0].Judge {
 				return selectedStyle
 			}
 
