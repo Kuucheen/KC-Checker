@@ -7,12 +7,12 @@ import (
 	"time"
 )
 
-type HostTime struct {
-	Host         string
+type JudgesTimes struct {
+	Judge        string
 	ResponseTime time.Duration
 }
 
-type HostTimes []HostTime
+type HostTimes []JudgesTimes
 
 var UserIP string
 
@@ -31,12 +31,12 @@ func (ht HostTimes) Swap(i, j int) {
 var CurrentCheckedHosts HostTimes
 
 func CheckDomains() HostTimes {
-	configHosts := GetConfig().Hosts
+	configHosts := GetConfig().Judges
 
 	for _, value := range configHosts {
 		responseTime := checkTime(value)
-		hostTime := HostTime{
-			Host:         value,
+		hostTime := JudgesTimes{
+			Judge:        value,
 			ResponseTime: responseTime,
 		}
 		CurrentCheckedHosts = append(CurrentCheckedHosts, hostTime)
