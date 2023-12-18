@@ -2,10 +2,11 @@
   "threads": 750,
   "retries": 2,
   "timeout": 7500,
-  "hosts": [
+  "judges": [
     "http://pascal.hoez.free.fr/azenv.php",
     "http://azenv.net",
     "http://httpbin.org/get"
   ],
-  "iplookup": "http://api.ipify.org/"
+  "iplookup": "http://api.ipify.org/",
+  "bancheck": ""
 }
