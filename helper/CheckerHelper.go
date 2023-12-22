@@ -31,7 +31,7 @@ func GetProxyLevel(innerhtml string) int {
 }
 
 func Request(proxy *Proxy) (string, int) {
-	return RequestCustom(proxy, common.GetHosts()[0].Judge)
+	return RequestCustom(proxy, common.FastestJudge)
 }
 
 func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
@@ -50,7 +50,7 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
 	case "socks4", "socks5":
 		dialer, err := proxy2.SOCKS5("tcp", proxy.Full, nil, proxy2.Direct)
 		if err != nil {
-			return "Error creating SOCKS5 dialer", -1
+			return "Error creating SOCKS dialer", -1
 		}
 		transport = &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
