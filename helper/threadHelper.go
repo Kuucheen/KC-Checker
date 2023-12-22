@@ -77,13 +77,17 @@ func check(proxy *Proxy) {
 
 	if responded && common.DoBanCheck() {
 		for i := 0; i < retries; i++ {
-			_, status := RequestCustom(proxy, common.GetConfig().Bancheck)
+			body, status := RequestCustom(proxy, common.GetConfig().Bancheck)
 
 			if status >= 400 || status == -1 {
-				mutex.Lock()
-				ProxyMapFiltered[level] = append(ProxyMapFiltered[level], proxy)
-				mutex.Unlock()
-				break
+				keywords := common.GetConfig().Keywords
+
+				if len(keywords[0]) == 0 || ContainsSlice(keywords, body) {
+					mutex.Lock()
+					ProxyMapFiltered[level] = append(ProxyMapFiltered[level], proxy)
+					mutex.Unlock()
+					break
+				}
 			}
 		}
 	} else {
