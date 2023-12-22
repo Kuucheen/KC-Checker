@@ -14,7 +14,10 @@ type JudgesTimes struct {
 
 type HostTimes []JudgesTimes
 
-var UserIP string
+var (
+	UserIP       string
+	FastestJudge string
+)
 
 func (ht HostTimes) Len() int {
 	return len(ht)
@@ -49,6 +52,8 @@ func CheckDomains() HostTimes {
 	// Sort the original CurrentCheckedHosts based on response time
 	sort.Sort(CurrentCheckedHosts)
 
+	FastestJudge = CurrentCheckedHosts[0].Judge
+
 	// Return the unsorted CurrentCheckedHosts
 	return unsortedHosts
 }
@@ -79,9 +84,6 @@ func GetLocalIP() string {
 		err = resp.Body.Close()
 		if err != nil {
 			return ""
-		}
-		if err != nil {
-			panic(err)
 		}
 
 		UserIP = string(respBody)
