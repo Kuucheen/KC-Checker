@@ -24,6 +24,6 @@ func (q *ProxyQueue) Dequeue() *Proxy {
 
 	return nil
 }
-func (p *ProxyQueue) Data() []*Proxy {
-	return p.data
+func (q *ProxyQueue) Data() []*Proxy {
+	return q.data
 }
