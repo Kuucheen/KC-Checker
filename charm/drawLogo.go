@@ -1,6 +1,7 @@
 package charm
 
 import (
+	"KC-Checker/charm/threadPhase"
 	"github.com/charmbracelet/lipgloss"
 	"log"
 	"strings"
@@ -53,18 +54,22 @@ func (m logoModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // View returns a string based on data in the logoModel. That string which will be
 // rendered to the terminal.
 func (m logoModel) View() string {
-	logo := "_  _ ____    ____ _  _ ____ ____ _  _ ____ ____ \n|_/  |    __ |    |__| |___ |    |_/  |___ |__/ \n| \\_ |___    |___ |  | |___ |___ | \\_ |___ |  \\ \n"
+	logo := "  _  ______    ____ _               _             \n | |/ / ___|  / ___| |__   ___  ___| | _____ _ __ \n | ' / |     | |   | '_ \\ / _ \\/ __| |/ / _ \\ '__|\n | . \\ |___  | |___| | | |  __/ (__|   <  __/ |   \n |_|\\_\\____|  \\____|_| |_|\\___|\\___|_|\\_\\___|_|   \n \n\nby github.com/Kuucheen"
+
+	width := threadPhase.GetWidth()
 
 	var style = lipgloss.NewStyle().
-		PaddingLeft(38).
-		Foreground(lipgloss.Color("#758ECD")).
+		Width(width + 10).
+		Align(lipgloss.Center).
+		Foreground(lipgloss.Color("#8271BB")).
 		SetString(logo)
 
 	var linestyle = style.Copy().
-		PaddingLeft(60 - int(m)/2).
-		SetString(strings.Repeat("─", int(m)))
+		Width(width).
+		Align(lipgloss.Center).
+		SetString(strings.Repeat("─", threadPhase.GetWidth()))
 
-	str := style.Render() + "\n\n" + linestyle.Render() + "\n\n"
+	str := style.Render() + "\n" + linestyle.Render() + "\n\n"
 
 	return str
 }
