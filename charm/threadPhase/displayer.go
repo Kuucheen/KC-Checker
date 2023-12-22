@@ -44,8 +44,10 @@ var (
 	anonymousCount   = 0
 	transparentCount = 0
 
-	helpStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
+	helpStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Width(GetWidth() / 2).Align(lipgloss.Center).Render
 	greenStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#01BE85")).Render
+
+	centerStyle = lipgloss.NewStyle().Width(GetWidth() / 2).Align(lipgloss.Center).Render
 )
 
 type tickMsg time.Time
@@ -123,11 +125,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.WindowSizeMsg:
-		width := 55
+		width := GetWidth() / 2
 		m.elite.Width = width
 		m.anonymous.Width = width
 		m.transparent.Width = width
-		m.percentage.Width = width - 10
+		m.percentage.Width = width - 20
 		m.list.SetWidth(msg.Width)
 		return m, nil
 
@@ -176,9 +178,8 @@ func (m model) View() string {
 
 	percentageBar := lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
-		PaddingLeft(3).
-		PaddingRight(3).
-		Width(64).
+		Align(lipgloss.Center).
+		Width(GetWidth() / 2).
 		BorderBottom(true).
 		SetString("Progress  " + m.percentage.View())
 
@@ -187,12 +188,12 @@ func (m model) View() string {
 	if threadPhase {
 		extraString = helpStyle("Press q to stop")
 	} else {
-		extraString = m.list.View() + "\n" + helpStyle("→ right • ← left • enter select")
+		extraString = centerStyle(m.list.View()) + "\n" + helpStyle("→ right • ← left • enter select")
 	}
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, bars.String(),
 		lipgloss.JoinVertical(lipgloss.Center,
-			lipgloss.JoinVertical(lipgloss.Center, lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinHorizontal(lipgloss.Top, getStyledQueue(),
+			lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinHorizontal(lipgloss.Top, getStyledQueue(),
 				getStyledInfo(eliteCount, anonymousCount, transparentCount)),
 				percentageBar.String()), extraString), greenStyle(outputPath)),
 	)
@@ -200,7 +201,7 @@ func (m model) View() string {
 
 func (m model) renderLine(str string) string {
 	title := titleStyle.Render(str)
-	line := strings.Repeat("─", max(0, 57-lipgloss.Width(title)))
+	line := strings.Repeat("─", max(0, GetWidth()/2-lipgloss.Width(title)+2))
 	return lipgloss.JoinHorizontal(lipgloss.Center, title, line)
 }
 

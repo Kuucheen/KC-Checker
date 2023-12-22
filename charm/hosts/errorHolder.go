@@ -1,6 +1,7 @@
 package hosts
 
 import (
+	"KC-Checker/charm/threadPhase"
 	"KC-Checker/helper"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -11,7 +12,7 @@ import (
 )
 
 var (
-	style = lipgloss.NewStyle().Foreground(lipgloss.Color("#BE0101")).Width(125).Align(lipgloss.Center)
+	style = lipgloss.NewStyle().Foreground(lipgloss.Color("#BE0101")).Width(threadPhase.GetWidth()).Align(lipgloss.Center)
 	found = false
 )
 
@@ -24,7 +25,7 @@ func (m waitingModel) Init() tea.Cmd {
 }
 
 func (m waitingModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	helper.GetInput("proxies.txt")
+	helper.GetProxiesFile("proxies.txt", true)
 
 	if found {
 		time.Sleep(time.Second * 3)
