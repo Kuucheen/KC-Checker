@@ -2,11 +2,18 @@
   "threads": 750,
   "retries": 2,
   "timeout": 7500,
+
   "judges": [
     "http://pascal.hoez.free.fr/azenv.php",
     "http://azenv.net",
     "http://httpbin.org/get"
   ],
+  "blacklisted": [
+    "https://www.spamhaus.org/drop/drop.txt",
+    "https://www.spamhaus.org/drop/edrop.txt",
+    "http://myip.ms/files/blacklist/general/latest_blacklist.txt"
+  ],
+
   "iplookup": "http://api.ipify.org/",
   "bancheck": ""
 }

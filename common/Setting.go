@@ -7,12 +7,13 @@ import (
 )
 
 type Config struct {
-	Threads  int      `json:"threads"`
-	Retries  int      `json:"retries"`
-	Timeout  int      `json:"timeout"`
-	Judges   []string `json:"judges"`
-	IpLookup string   `json:"iplookup"`
-	Bancheck string   `json:"bancheck"`
+	Threads     int      `json:"threads"`
+	Retries     int      `json:"retries"`
+	Timeout     int      `json:"timeout"`
+	Judges      []string `json:"judges"`
+	Blacklisted []string `json:"blacklisted"`
+	IpLookup    string   `json:"iplookup"`
+	Bancheck    string   `json:"bancheck"`
 }
 
 var config Config
