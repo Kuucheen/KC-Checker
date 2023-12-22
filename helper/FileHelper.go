@@ -45,22 +45,34 @@ func Write(proxies map[int][]*Proxy, style int, bancheck bool) string {
 	return "Wrote to " + GetFilePath(pType)
 }
 
-func GetInput(file string) []string {
+func GetFilePath(name string) string {
+	return fmt.Sprintf("output/%s/", name)
+}
+
+// GetProxiesFile gets proxies/ips from a file
+func GetProxiesFile(file string, full bool) []string {
 	dat, err := os.ReadFile(file)
 	if err != nil {
 		fmt.Printf("Error while reading proxies: %s", err)
 	}
 
-	ipPortPattern := `\b(?:\d{1,3}\.){3}\d{1,3}:\d+\b`
+	return GetProxies(string(dat), full)
+}
+
+func GetProxies(str string, full bool) []string {
+	ipPortPattern := ""
+
+	if full {
+		ipPortPattern = `\b(?:\d{1,3}\.){3}\d{1,3}:\d+\b`
+	} else {
+		ipPortPattern = `\b(?:\d{1,3}\.){3}\d{1,3}\b`
+	}
+
 	re := regexp.MustCompile(ipPortPattern)
 
-	matches := re.FindAllString(string(dat), -1)
+	matches := re.FindAllString(str, -1)
 
 	ProxySum = float64(len(matches))
 
 	return matches
-}
-
-func GetFilePath(name string) string {
-	return fmt.Sprintf("output/%s/", name)
 }
