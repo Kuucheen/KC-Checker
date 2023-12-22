@@ -87,7 +87,7 @@ func GetCleanedProxies() []*Proxy {
 	var cleaned []*Proxy
 
 	for _, value := range normal {
-		if !contains(forbidden, value.ip) {
+		if !ContainsSlice(forbidden, value.ip) {
 			cleaned = append(cleaned, value)
 		}
 	}
@@ -95,7 +95,7 @@ func GetCleanedProxies() []*Proxy {
 	return cleaned
 }
 
-func contains(slice []string, str string) bool {
+func ContainsSlice(slice []string, str string) bool {
 	for _, s := range slice {
 		if s == str {
 			return true
