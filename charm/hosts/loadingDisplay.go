@@ -1,6 +1,7 @@
 package hosts
 
 import (
+	"KC-Checker/charm/threadPhase"
 	"KC-Checker/common"
 	"KC-Checker/helper"
 	"fmt"
@@ -33,7 +34,7 @@ var (
 	warningStyle  = baseStyle.Copy().Foreground(lipgloss.Color("#BEAA01")).Background(lipgloss.Color("#414300"))
 	errorStyle    = baseStyle.Copy().Foreground(lipgloss.Color("#BE0101")).Background(lipgloss.Color("#430000"))
 
-	centerstyle = lipgloss.NewStyle().Width(125).Align(lipgloss.Center).Render
+	centerstyle = lipgloss.NewStyle().Width(threadPhase.GetWidth()).Align(lipgloss.Center).Render
 )
 
 func initialModel() model {
@@ -57,7 +58,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if checked {
 		finished = true
-		go helper.Dispatcher(helper.ToProxies(helper.GetInput("proxies.txt")))
+		go helper.Dispatcher(helper.GetCleanedProxies())
 		time.Sleep(time.Second * 2)
 		m.View()
 		return m, tea.Quit
