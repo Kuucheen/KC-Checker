@@ -1,7 +1,10 @@
 package helper
 
 import (
+	"KC-Checker/common"
 	"fmt"
+	"io"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -14,8 +17,12 @@ type Proxy struct {
 	checks int
 }
 
-var proxyType int
+var (
+	proxyType   int
+	Blacklisted []string
+)
 
+// ToProxies converts a String array of proxies to proxy types
 func ToProxies(arr []string) []*Proxy {
 	var newArr []*Proxy
 	for _, value := range arr {
@@ -67,4 +74,54 @@ func GetLevelNameOf(typ int) string {
 
 func SetType(typ int) {
 	proxyType = typ
+}
+
+func GetCleanedProxies() []*Proxy {
+	forbidden := GetProxiesFile("blacklisted.txt", false)
+	for _, val := range Blacklisted {
+		forbidden = append(forbidden, val)
+	}
+
+	normal := ToProxies(GetProxiesFile("proxies.txt", true))
+
+	var cleaned []*Proxy
+
+	for _, value := range normal {
+		if !contains(forbidden, value.ip) {
+			cleaned = append(cleaned, value)
+		}
+	}
+
+	return cleaned
+}
+
+func contains(slice []string, str string) bool {
+	for _, s := range slice {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
+
+func GetBlacklisted() []string {
+	var blist []string
+
+	for _, site := range common.GetConfig().Blacklisted {
+		resp, _ := http.Get(site)
+
+		respBody, err := io.ReadAll(resp.Body)
+		err = resp.Body.Close()
+		if err != nil {
+			continue
+		}
+
+		for _, value := range GetProxies(string(respBody), false) {
+			blist = append(blist, value)
+		}
+	}
+
+	Blacklisted = blist
+
+	return Blacklisted
 }
