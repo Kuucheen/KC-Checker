@@ -4,6 +4,8 @@ import (
 	"KC-Checker/helper"
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
+	"golang.org/x/crypto/ssh/terminal"
+	"os"
 	"strings"
 )
 
@@ -43,10 +45,9 @@ func getStyledQueue() string {
 	return lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).
 		BorderBottom(true).
 		BorderRight(true).
-		PaddingLeft(5).
-		PaddingRight(5).
+		Align(lipgloss.Center).
 		Height(5).
-		Width(36).
+		Width(GetWidth() / 4).
 		Render(retString)
 }
 
@@ -62,8 +63,12 @@ func getStyledInfo(elite int, anon int, trans int) string {
 	return lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderBottom(true).
-		PaddingLeft(5).
-		PaddingRight(5).
-		Width(27).
+		Align(lipgloss.Center).
+		Width(GetWidth() / 4).
 		Render(retString)
+}
+
+func GetWidth() int {
+	width, _, _ := terminal.GetSize(int(os.Stdout.Fd()))
+	return width
 }
