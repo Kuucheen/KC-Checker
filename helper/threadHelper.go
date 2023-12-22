@@ -82,7 +82,7 @@ func check(proxy *Proxy) {
 			if status >= 400 || status == -1 {
 				keywords := common.GetConfig().Keywords
 
-				if len(keywords[0]) == 0 || ContainsSlice(keywords, body) {
+				if len(keywords) == 0 || len(keywords[0]) == 0 || ContainsSlice(keywords, body) {
 					mutex.Lock()
 					ProxyMapFiltered[level] = append(ProxyMapFiltered[level], proxy)
 					mutex.Unlock()
