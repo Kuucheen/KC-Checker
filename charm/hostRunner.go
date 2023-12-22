@@ -17,7 +17,7 @@ func RunHostsDisplay() {
 
 	if helper.ProxySum < 1 {
 		hosts.WaitForProxies()
-		go helper.Dispatcher(helper.ToProxies(helper.GetInput("proxies.txt")))
+		go helper.Dispatcher(helper.GetCleanedProxies())
 	}
 
 	threadPhase.RunBars()
