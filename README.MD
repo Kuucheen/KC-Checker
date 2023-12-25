@@ -78,29 +78,31 @@ Note: Normally you don't have to change these settings
 <details>
     <summary>Details</summary>
 
-1. Threads, Retries, Timeout:
-    threads: Maximum number of threads<br>
-    retries: Number of times to retry a request<br>
-    timeout: Timeout duration for requests in ms<br>
-   <br>
+1. threads: Maximum number of threads<br>
 
-2. IP Lookup: <br>
+2. retries: Number of times to retry a request<br>
+   
+3. timeout: Timeout duration for requests in ms<br>
+
+4. iplookup: <br>
     A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
 <br>
 
-
-3. Judges: <br>
+5. judges: <br>
     Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
 <br>
 
-4. Blacklisted:<br>
+6. blacklisted:<br>
     Websites that contain blacklisted ips. These ips won't be checked<br>
 <br>
 
-5. Bancheck, Keywords:<br>
-   bancheck: If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
-   keywords: It will check if the website the proxy has opened contains the text given<br>
+7. bancheck: If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br> 
+<br>
 
+8. keywords: It will check if the website the proxy has opened contains the text given<br>
+<br>
+
+You can blacklist custom proxies by adding them in `blacklisted.txt`
 </details>
 
 
