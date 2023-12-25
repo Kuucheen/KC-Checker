@@ -3,6 +3,8 @@
   "retries": 2,
   "timeout": 7500,
 
+  "iplookup": "http://api.ipify.org/",
+
   "judges": [
     "http://pascal.hoez.free.fr/azenv.php",
     "http://azenv.net",
@@ -14,6 +16,8 @@
     "http://myip.ms/files/blacklist/general/latest_blacklist.txt"
   ],
 
-  "iplookup": "http://api.ipify.org/",
-  "bancheck": ""
+  "bancheck": "",
+  "keywords": [
+    ""
+  ]
 }

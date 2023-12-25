@@ -10,10 +10,11 @@ type Config struct {
 	Threads     int      `json:"threads"`
 	Retries     int      `json:"retries"`
 	Timeout     int      `json:"timeout"`
+	IpLookup    string   `json:"iplookup"`
 	Judges      []string `json:"judges"`
 	Blacklisted []string `json:"blacklisted"`
-	IpLookup    string   `json:"iplookup"`
 	Bancheck    string   `json:"bancheck"`
+	Keywords    []string `json:"keywords"`
 }
 
 var config Config
