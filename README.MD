@@ -84,17 +84,17 @@ Note: Normally you don't have to change these settings
     timeout: Timeout duration for requests in ms<br>
    <br>
 
-2. IP Lookup:
-    iplookup: A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
+2. IP Lookup: <br>
+    A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
 <br>
 
 
-3. Judges:
-    judges: Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
+3. Judges: <br>
+    Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
 <br>
 
-4. Blacklisted:
-   blacklisted: Websites that contain blacklisted ips. These ips won't be checked<br>
+4. Blacklisted:<br>
+    Websites that contain blacklisted ips. These ips won't be checked<br>
 <br>
 
 5. Bancheck, Keywords:<br>
