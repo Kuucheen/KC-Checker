@@ -79,27 +79,27 @@ Note: Normally you don't have to change these settings
     <summary>Details</summary>
 
 1. Threads, Retries, Timeout:
-    : threads: Maximum number of threads<br>
+    threads: Maximum number of threads<br>
     retries: Number of times to retry a request<br>
     timeout: Timeout duration for requests in ms<br>
    <br>
 
 2. IP Lookup:
-    : iplookup: A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
+    iplookup: A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
 <br>
 
 
 3. Judges:
-    : judges: Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
+    judges: Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
 <br>
 
 4. Blacklisted:
-   : blacklisted: Websites that contain blacklisted ips. These ips won't be checked<br>
+   blacklisted: Websites that contain blacklisted ips. These ips won't be checked<br>
 <br>
 
 5. Bancheck, Keywords:<br>
-   : bancheck: If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
-   : keywords: It will check if the website the proxy has opened contains the text given<br>
+   bancheck: If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
+   keywords: It will check if the website the proxy has opened contains the text given<br>
 
 </details>
 
