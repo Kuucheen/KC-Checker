@@ -64,7 +64,7 @@ Install [go](https://go.dev/doc/install)
   
     go get .
 
-  Run
+  Run with
   
     go run .
 </details>
@@ -100,6 +100,7 @@ Note: Normally you don't have to change these settings
 5. Bancheck, Keywords:<br>
    : bancheck: If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
    : keywords: It will check if the website the proxy has opened contains the text given<br>
+
 </details>
 
 
@@ -109,4 +110,3 @@ Note: Normally you don't have to change these settings
 <div align="center">
 Help me keep my projects open source by <a href="https://ko-fi.com/kuucheen">sponsoring</a> me
 </div>
-</details>
