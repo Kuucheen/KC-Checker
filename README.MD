@@ -15,12 +15,12 @@
 </div>
 
 <br>
+<br>
 
 <p align="center">
 <img src="assets/preview.gif" alt="preview">
 </p>
 
-<br>
 <br>
 
 -----
