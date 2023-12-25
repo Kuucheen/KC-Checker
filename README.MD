@@ -14,6 +14,8 @@
 <img src="https://img.shields.io/github/issues/Kuucheen/KC-Checker.svg" alt="issues">
 </div>
 
+<br>
+
 <p align="center">
 <img src="assets/preview.gif" alt="preview">
 </p>
@@ -79,10 +81,10 @@ Note: Normally you don't have to change these settings
     timeout: Timeout duration for requests in ms<br>
    <br>
 2. IP Lookup:<br>
-    iplookup: A website that returns the [ip](https://de.wikipedia.org/wiki/Internet_Protocol)<br>
+    iplookup: A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
 <br>
 3. Judges:<br>
-    judges: Websites that returns the [header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers?retiredLocale=de) of the request<br>
+    judges: Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
 <br>
 4. Blacklisted:<br>
     blacklisted: Websites that contain blacklisted ips. These ips won't be checked<br>
