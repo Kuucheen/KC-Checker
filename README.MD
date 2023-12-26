@@ -38,7 +38,11 @@
 
 ### <p align="center">Getting started</p>
 
-Install [go](https://go.dev/doc/install)
+Install [go](https://go.dev/doc/install) and [git](https://git-scm.com/downloads)
+
+Clone the project
+
+`git clone https://github.com/Kuucheen/KC-Checker.git`
 
 **Run**
 <details>
