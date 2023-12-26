@@ -85,7 +85,7 @@ Note: Normally you don't have to change these settings
    Maximum number of threads<br>
 
 2. **retries**: <br>
-   Number of times to retry a request<br>
+   Number of retries for a request<br>
    
 3. **timeout**: <br>
    Timeout duration for requests in ms<br>
