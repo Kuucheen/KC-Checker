@@ -40,7 +40,7 @@
 
 Install [go](https://go.dev/doc/install) and [git](https://git-scm.com/downloads)
 
-Clone the project
+Now open your terminal & clone the project with
 
 `git clone https://github.com/Kuucheen/KC-Checker.git`
 
