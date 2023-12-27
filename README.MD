@@ -38,6 +38,18 @@
 
 ### <p align="center">Getting started</p>
 
+Download [latest release](https://github.com/Kuucheen/KC-Checker/releases/)
+
+**Windows**<br>
+Double click on KC-Checker.exe
+
+**Linux**<br>
+Open terminal and enter `./KC-Checker`
+
+------
+
+### Or run it yourself
+
 Install [go](https://go.dev/doc/install) and [git](https://git-scm.com/downloads)
 
 Now open your terminal & clone the project with
@@ -47,34 +59,34 @@ Now open your terminal & clone the project with
 **Run**
 <details>
   <summary>Using provided scripts</summary>
-  
-  ### Windows
-  
-  Double click on `start.bat`
 
-  ### Linux
+### Windows
 
-  Open terminal in the directory and make the script executeable 
+Double click on `start.bat`
 
-  `chmod +x start.sh`
+### Linux
 
-  Now you can run it with
+Open terminal in the directory and make the script executeable
 
-  `./start.sh`
+`chmod +x start.sh`
+
+Now you can run it with
+
+`./start.sh`
 </details>
 <details>
   <summary>Using terminal</summary>
 
-  Navigate to your directory
-        
+Navigate to your directory
+
     cd your-directory
- 
-  Install dependencies
-  
+
+Install dependencies
+
     go get .
 
-  Run with
-  
+Run with
+
     go run .
 </details>
 
@@ -92,18 +104,18 @@ Note: Normally you don't have to change these settings
 
 2. **retries**: <br>
    Number of retries for a request<br>
-   
+
 3. **timeout**: <br>
    Timeout duration for requests in ms<br>
 
 4. **iplookup**: <br>
-    A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
+   A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
 
 5. **judges**: <br>
-    Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
+   Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
 
 6. **blacklisted**:<br>
-    Websites that contain blacklisted ips. These ips won't be checked<br>
+   Websites that contain blacklisted ips. These ips won't be checked<br>
 
 7. **bancheck**: <br>
    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
