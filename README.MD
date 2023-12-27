@@ -55,9 +55,11 @@ Now open your terminal & clone the project with
   ### Linux
 
   Open terminal in the directory and make the script executeable 
+
   `chmod +x start.sh`
 
   Now you can run it with
+
   `./start.sh`
 </details>
 <details>
