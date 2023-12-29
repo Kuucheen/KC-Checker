@@ -34,6 +34,20 @@
 
 <br>
 
+---
+
+### <p align="center">Requirements</p>
+
+Your terminal needs to support true color
+These are tested terminals on different operating systems:
+
+| System | Tested | Notes |
+|--|--|--|
+| Windows 11| ✅ | Works fine |
+| Windows 10 | ✅ | Works with true color
+| Linux (ubuntu) | ✅ | Works fine
+| Mac OS | ❌ | Should work fine
+
 -----
 
 ### <p align="center">Getting started</p>
