@@ -38,7 +38,7 @@
 
 ### <p align="center">Requirements</p>
 
-Your terminal needs to support true color
+Your terminal needs to support true color. <br><br>
 These are tested terminals on different operating systems:
 
 | System | Tested | Notes |
