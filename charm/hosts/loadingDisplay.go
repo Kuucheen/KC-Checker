@@ -34,7 +34,7 @@ var (
 	warningStyle  = baseStyle.Copy().Foreground(lipgloss.Color("#BEAA01")).Background(lipgloss.Color("#414300"))
 	errorStyle    = baseStyle.Copy().Foreground(lipgloss.Color("#BE0101")).Background(lipgloss.Color("#430000"))
 
-	centerstyle = lipgloss.NewStyle().Width(threadPhase.GetWidth()).Align(lipgloss.Center).Render
+	centerstyle = lipgloss.NewStyle().Width(threadPhase.GetWidth() - 5).Align(lipgloss.Center).Render
 )
 
 func initialModel() model {
