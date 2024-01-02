@@ -59,7 +59,7 @@ func (m logoModel) View() string {
 	width := threadPhase.GetWidth()
 
 	var style = lipgloss.NewStyle().
-		Width(width + 10).
+		Width(width).
 		Align(lipgloss.Center).
 		Foreground(lipgloss.Color("#8271BB")).
 		SetString(logo)
