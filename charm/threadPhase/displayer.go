@@ -179,7 +179,7 @@ func (m model) View() string {
 	percentageBar := lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
 		Align(lipgloss.Center).
-		Width(GetWidth() / 2).
+		Width((GetWidth() - 10) / 2).
 		BorderBottom(true).
 		SetString("Progress  " + m.percentage.View())
 
