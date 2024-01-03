@@ -58,7 +58,10 @@ Download [latest release](https://github.com/Kuucheen/KC-Checker/releases/)
 Double click on KC-Checker.exe
 
 **Linux**<br>
-Open terminal and enter `./KC-Checker`
+Open terminal and enter 
+`chmod +x KC-Checker`
+Now run it with
+`./KC-Checker`
 
 ------
 
