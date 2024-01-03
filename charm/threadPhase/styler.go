@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -54,21 +55,27 @@ func getStyledQueue() string {
 func getStyledInfo(elite int, anon int, trans int) string {
 	activeThreads := helper.GetActive()
 
-	retString := fmt.Sprintf("Threads: %d\n"+
-		"Elite: %d\n"+
-		"Anonymous: %d\n"+
-		"Transparent: %d\n"+
-		"Invalid: %d", activeThreads, elite, anon, trans, helper.GetInvalid())
+	retString := getFormattedInfo("Threads:", activeThreads) + "\n" +
+		getFormattedInfo("Elite:", elite) + "\n" +
+		getFormattedInfo("Anonymous:", anon) + "\n" +
+		getFormattedInfo("Transparent:", trans) + "\n" +
+		getFormattedInfo("Invalid:", helper.GetInvalid())
 
 	return lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderBottom(true).
 		Align(lipgloss.Center).
+		PaddingRight(5).
 		Width(GetWidth() / 4).
 		Render(retString)
 }
 
 func GetWidth() int {
 	width, _, _ := terminal.GetSize(int(os.Stdout.Fd()))
-	return width
+	return width + 5
+}
+
+func getFormattedInfo(str string, num int) string {
+	numStr := strconv.Itoa(num)
+	return str + strings.Repeat(" ", 18-len(str)-len(numStr)) + numStr
 }
