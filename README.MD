@@ -97,9 +97,9 @@ Now you can run it with
 <details>
   <summary>Using terminal</summary>
 
-Navigate to your directory
+Navigate to the directory
 
-    cd your-directory
+    cd KC-Checker
 
 Install dependencies
 
