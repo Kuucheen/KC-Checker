@@ -13,19 +13,22 @@ import (
 	"time"
 )
 
-func GetProxyLevel(innerhtml string) int {
-	if strings.Contains(innerhtml, common.UserIP) {
+func GetProxyLevel(html string) int {
+	//When the headers contain UserIp proxy is transparent
+	if strings.Contains(html, common.UserIP) {
 		return 1
 	}
 
+	//When containing one of these headers proxy is anonymous
 	proxyVars := []string{"HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"}
 
 	for _, value := range proxyVars {
-		if strings.Contains(innerhtml, value) {
+		if strings.Contains(html, value) {
 			return 2
 		}
 	}
 
+	//Proxy is elite
 	return 3
 
 }
@@ -73,12 +76,9 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		if strings.Contains(err.Error(), "Maximum number of open connections reached.") {
-			return "Maximum number of open connections reached", -1
-		}
-
 		return "Error making HTTP request", -1
 	}
+
 	defer func() {
 		if r := recover(); r != nil {
 		}

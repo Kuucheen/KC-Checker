@@ -1,5 +1,6 @@
 package helper
 
+// ProxyQueue This is for displaying the latest proxies in the threadPhase
 type ProxyQueue struct {
 	data []*Proxy
 }

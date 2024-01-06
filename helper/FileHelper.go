@@ -8,13 +8,13 @@ import (
 
 var ProxySum float64
 
-func Write(proxies map[int][]*Proxy, style int, bancheck bool) string {
+func Write(proxies map[int][]*Proxy, style int, banCheck bool) string {
 	pType := GetTypeName()
 
 	for _, proxyLevel := range proxies {
 		filtered := ""
 
-		if bancheck {
+		if banCheck {
 			filtered = "BanChecked/"
 		}
 

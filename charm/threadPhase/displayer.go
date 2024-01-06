@@ -1,12 +1,5 @@
 package threadPhase
 
-// A simple example that shows how to render an animated elite bar. In this
-// example we bump the elite by 25% every two seconds, animating our
-// elite bar to its new target state.
-//
-// It's also possible to render a elite bar in a more static fashion without
-// transitions. For details on that approach see the elite-static example.
-
 import (
 	"KC-Checker/common"
 	"KC-Checker/helper"
