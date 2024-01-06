@@ -58,28 +58,29 @@ func check(proxy *Proxy) {
 		level = GetProxyLevel(body)
 		levels := []int{1, 2, 3}
 
-		mutex.Lock()
-
 		if isInList(level, levels) {
+			mutex.Lock()
+
 			proxy.Level = level
 			ProxyMap[level] = append(ProxyMap[level], proxy)
 			ProxyCountMap[level]++
 			proxyQueue.Enqueue(proxy)
+
+			mutex.Unlock()
 		} else {
 			atomic.AddInt32(&Invalid, 1)
 		}
-
-		mutex.Unlock()
 
 		responded = true
 		break
 	}
 
+	//Ban check for websites
 	if responded && common.DoBanCheck() {
 		for i := 0; i < retries; i++ {
 			body, status := RequestCustom(proxy, common.GetConfig().Bancheck)
 
-			if status >= 400 || status == -1 {
+			if !(status >= 400) && status != -1 {
 				keywords := common.GetConfig().Keywords
 
 				if len(keywords) == 0 || len(keywords[0]) == 0 || ContainsSlice(keywords, body) {
