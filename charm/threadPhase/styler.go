@@ -65,7 +65,7 @@ func getStyledInfo(elite int, anon int, trans int) string {
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderBottom(true).
 		Align(lipgloss.Center).
-		PaddingRight(5).
+		PaddingRight(6).
 		Width(GetWidth() / 4).
 		Render(retString)
 }
