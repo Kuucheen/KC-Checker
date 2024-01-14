@@ -14,10 +14,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-const (
-	padding = 2
-)
-
 type item struct {
 	title, desc string
 }
@@ -36,6 +32,7 @@ var (
 	eliteCount       = 0
 	anonymousCount   = 0
 	transparentCount = 0
+	banCheckCount    = 0
 
 	helpStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Width(GetWidth() / 2).Align(lipgloss.Center).Render
 	greenStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#01BE85")).Render
@@ -46,12 +43,17 @@ var (
 type tickMsg time.Time
 
 type model struct {
+	//Displays how many % of total good proxies are elite,anonymous or transparent
 	elite       progress.Model
 	anonymous   progress.Model
 	transparent progress.Model
-	percentage  progress.Model
-	viewport    viewport.Model
-	list        list.Model
+	//Displays % of good proxies that passed the bancheck
+	bancheck progress.Model
+	//Displays % of progress made while checking
+	percentage progress.Model
+
+	viewport viewport.Model
+	list     list.Model
 }
 
 var (
@@ -70,6 +72,7 @@ func RunBars() {
 		elite:       progress.New(progress.WithDefaultGradient()),
 		anonymous:   progress.New(progress.WithDefaultGradient()),
 		transparent: progress.New(progress.WithDefaultGradient()),
+		bancheck:    progress.New(progress.WithDefaultGradient()),
 		percentage:  progress.New(progress.WithDefaultGradient()),
 		list:        list.New(items, list.NewDefaultDelegate(), 75, 0),
 	}
@@ -118,11 +121,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.WindowSizeMsg:
-		width := GetWidth() / 2
+		width := GetWidth()/2 - 14
 		m.elite.Width = width
 		m.anonymous.Width = width
 		m.transparent.Width = width
-		m.percentage.Width = width - 20
+		m.bancheck.Width = width
+		m.percentage.Width = width - 10
 		m.list.SetWidth(msg.Width)
 		return m, nil
 
@@ -132,13 +136,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		eliteCount = helper.ProxyCountMap[3]
 		anonymousCount = helper.ProxyCountMap[2]
 		transparentCount = helper.ProxyCountMap[1]
+		banCheckCount = helper.ProxyCountMap[-1]
 
 		eliteCmd := m.elite.SetPercent(float64(eliteCount) / sum)
 		anonymousCmd := m.anonymous.SetPercent(float64(anonymousCount) / sum)
 		transparentCmd := m.transparent.SetPercent(float64(transparentCount) / sum)
+		banCheckCmd := m.bancheck.SetPercent(float64(banCheckCount) / sum)
 		percentageCmd := m.percentage.SetPercent(float64(getSumWithInvalid()) / helper.ProxySum)
 
-		return m, tea.Batch(tickCmd(), eliteCmd, anonymousCmd, transparentCmd, percentageCmd)
+		return m, tea.Batch(tickCmd(), eliteCmd, anonymousCmd, transparentCmd, banCheckCmd, percentageCmd)
 
 	case progress.FrameMsg:
 		eliteModel, eliteCmd := m.elite.Update(msg)
@@ -150,24 +156,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		transparentModel, transparentCmd := m.transparent.Update(msg)
 		m.transparent = transparentModel.(progress.Model)
 
+		bancheckModel, bancheckCmd := m.bancheck.Update(msg)
+		m.bancheck = bancheckModel.(progress.Model)
+
 		percentageModel, percentageCmd := m.percentage.Update(msg)
 		m.percentage = percentageModel.(progress.Model)
 
-		return m, tea.Batch(eliteCmd, anonymousCmd, transparentCmd, percentageCmd)
+		return m, tea.Batch(eliteCmd, anonymousCmd, transparentCmd, bancheckCmd, percentageCmd)
 	default:
 		return m, nil
 	}
 }
 
 func (m model) View() string {
-	pad := strings.Repeat(" ", padding)
+	pad := "\n\n"
+
 	bars := lipgloss.NewStyle().
 		BorderStyle(lipgloss.ThickBorder()).
 		BorderRight(true).
-		SetString(m.renderLine("Elite") + "\n\n" +
-			pad + m.elite.View() + "\n\n" + m.renderLine("Anonymous") + "\n\n" +
-			pad + m.anonymous.View() + "\n\n" + m.renderLine("Transparent") + "\n\n" +
-			pad + m.transparent.View())
+		SetString(lipgloss.JoinHorizontal(lipgloss.Center, titleStyle.Render("Elite"), "───────"+m.elite.View()) +
+			pad + lipgloss.JoinHorizontal(lipgloss.Center, titleStyle.Render("Anonymous"), "───"+m.anonymous.View()) +
+			pad + lipgloss.JoinHorizontal(lipgloss.Center, titleStyle.Render("Transparent"), "─"+m.transparent.View()) +
+			pad + strings.Repeat("━", GetWidth()/2+2) +
+			pad + lipgloss.JoinHorizontal(lipgloss.Center, titleStyle.Render("Banchecked"), "──"+m.bancheck.View()))
 
 	percentageBar := lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
