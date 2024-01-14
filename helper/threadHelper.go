@@ -86,6 +86,7 @@ func check(proxy *Proxy) {
 				if len(keywords) == 0 || len(keywords[0]) == 0 || ContainsSlice(keywords, body) {
 					mutex.Lock()
 					ProxyMapFiltered[level] = append(ProxyMapFiltered[level], proxy)
+					ProxyCountMap[-1]++
 					mutex.Unlock()
 					break
 				}
