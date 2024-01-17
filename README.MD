@@ -14,7 +14,7 @@
 <img src="https://img.shields.io/github/issues/Kuucheen/KC-Checker.svg" alt="issues">
 <br>
 <a href="https://discord.gg/7FWAGXzhkC">
-  <img src="https://img.shields.io/discord/1196551495571738665?logo=discord&colorB=7289DA&style=flat-square" alt="discord">
+  <img src="https://img.shields.io/discord/1196551495571738665?logo=discord&colorB=7289DA" alt="discord">
 </a>
 </div>
 
