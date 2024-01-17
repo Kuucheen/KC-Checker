@@ -12,6 +12,10 @@
 <!--<img src="https://img.shields.io/github/downloads/Kuucheen/KC-Checker/total.svg" alt="downloads">-->
 <img src="https://img.shields.io/github/license/Kuucheen/KC-Checker.svg" alt="license">
 <img src="https://img.shields.io/github/issues/Kuucheen/KC-Checker.svg" alt="issues">
+<br>
+<a href="https://discord.gg/7FWAGXzhkC">
+  <img src="https://img.shields.io/discord/1196551495571738665?logo=discord&colorB=7289DA&style=flat-square" alt="discord">
+</a>
 </div>
 
 <br>
