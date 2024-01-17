@@ -156,5 +156,7 @@ You can blacklist custom proxies by adding them in `blacklisted.txt`
 ### <p align="center">Other</p>
 
 <div align="center">
+If you need help with anything join our <a href="https://discord.gg/7FWAGXzhkC">discord server</a>
+
 Help me keep my projects open source by <a href="https://ko-fi.com/kuucheen">sponsoring</a> me
 </div>
