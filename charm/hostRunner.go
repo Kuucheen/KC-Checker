@@ -20,5 +20,6 @@ func RunHostsDisplay() {
 		go helper.Dispatcher(helper.GetCleanedProxies())
 	}
 
+	threadPhase.SetTime()
 	threadPhase.RunBars()
 }
