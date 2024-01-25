@@ -5,12 +5,17 @@ import (
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/crypto/ssh/terminal"
+	"math"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
+	startTime        = time.Now()
+	stopTime         = time.Now()
+	stoppedTime      = false
 	typeStyle        = lipgloss.NewStyle().Italic(true)
 	eliteStyle       = typeStyle.Copy().Foreground(lipgloss.Color("#624CAB"))
 	anonymousStyle   = typeStyle.Copy().Foreground(lipgloss.Color("#57CC99"))
@@ -35,13 +40,13 @@ func getStyledQueue() string {
 			addString += transparentStyle.Render("T")
 		}
 
-		times := strings.Repeat(" ", 21-len(value.Full))
+		times := strings.Repeat(" ", int(math.Abs(float64(21-len(value.Full)))))
 
 		retString += fmt.Sprintf("[%s]%s %s\n", addString, times, value.Full)
 	}
-	if len(retString) >= 2 {
-		retString = retString[:len(retString)-1]
-	}
+
+	retString += strings.Repeat("─", GetWidth()/4) + "\n" +
+		getFormattedInfo("CPM:", int(helper.GetCPM()))
 
 	return lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).
 		BorderBottom(true).
@@ -55,11 +60,23 @@ func getStyledQueue() string {
 func getStyledInfo(elite int, anon int, trans int) string {
 	activeThreads := helper.GetActive()
 
+	timeCalc := time.Now()
+
+	if stoppedTime {
+		timeCalc = stopTime
+	}
+
+	timeSince := timeCalc.Sub(startTime)
+
+	ms := fmt.Sprintf("%02d", int(timeSince.Milliseconds()%1000/10))
+
 	retString := getFormattedInfo("Threads:", activeThreads) + "\n" +
 		getFormattedInfo("Elite:", elite) + "\n" +
 		getFormattedInfo("Anonymous:", anon) + "\n" +
 		getFormattedInfo("Transparent:", trans) + "\n" +
-		getFormattedInfo("Invalid:", helper.GetInvalid())
+		getFormattedInfo("Invalid:", helper.GetInvalid()) + "\n" +
+		strings.Repeat("─", GetWidth()/4-6) + "\n" +
+		getFormattedInfoStr("Time:", strconv.Itoa(int(timeSince.Seconds()))+"."+ms+"s")
 
 	return lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
@@ -76,6 +93,29 @@ func GetWidth() int {
 }
 
 func getFormattedInfo(str string, num int) string {
+	MAXLENGTH := 18
+
 	numStr := strconv.Itoa(num)
-	return str + strings.Repeat(" ", 18-len(str)-len(numStr)) + numStr
+	length := len(str) + len(numStr)
+
+	if length > MAXLENGTH {
+		length = MAXLENGTH
+	}
+
+	return str + strings.Repeat(" ", MAXLENGTH-length) + numStr
+}
+
+func getFormattedInfoStr(str string, value string) string {
+	return str + strings.Repeat(" ", 18-len(str)-len(value)) + value
+}
+
+func SetTime() {
+	startTime = time.Now()
+}
+
+func SetStopTime() {
+	if !stoppedTime {
+		stopTime = time.Now()
+		stoppedTime = true
+	}
 }
