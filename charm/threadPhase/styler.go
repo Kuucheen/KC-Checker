@@ -52,7 +52,7 @@ func getStyledQueue() string {
 		BorderBottom(true).
 		BorderRight(true).
 		Align(lipgloss.Center).
-		Height(5).
+		Height(7).
 		Width(GetWidth() / 4).
 		Render(retString)
 }
