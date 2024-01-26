@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+const (
+	DelayBetweenChecks = time.Millisecond * 10
+)
+
 var (
 	proxyQueue       = ProxyQueue{}
 	ProxyMap         = make(map[int][]*Proxy)
@@ -21,6 +25,14 @@ var (
 	HasFinished = false
 )
 
+type CPMCounter struct {
+	mu          sync.Mutex
+	checks      int
+	lastUpdated time.Time
+}
+
+var cpmCounter = CPMCounter{}
+
 func Dispatcher(proxies []*Proxy) {
 	threads := common.GetConfig().Threads
 
@@ -31,7 +43,7 @@ func Dispatcher(proxies []*Proxy) {
 			atomic.AddInt32(&threadsActive, 1)
 			proxies = proxies[1:]
 		} else {
-			time.Sleep(time.Millisecond * 10)
+			time.Sleep(DelayBetweenChecks)
 		}
 		if stop {
 			break
@@ -39,6 +51,9 @@ func Dispatcher(proxies []*Proxy) {
 	}
 
 	wg.Wait()
+	cpmCounter.mu.Lock()
+	cpmCounter.checks = 0
+	cpmCounter.mu.Unlock()
 	HasFinished = true
 }
 
@@ -46,6 +61,18 @@ func check(proxy *Proxy) {
 	responded := false
 	retries := common.GetConfig().Retries
 	level := 0
+
+	cpmCounter.mu.Lock()
+	cpmCounter.checks++
+	now := time.Now()
+
+	if now.Sub(cpmCounter.lastUpdated) >= time.Minute {
+		cpmCounter.checks = 1
+		cpmCounter.lastUpdated = now
+	} else {
+		cpmCounter.checks++
+	}
+	cpmCounter.mu.Unlock()
 
 	for proxy.checks <= retries {
 		body, status := Request(proxy)
@@ -125,4 +152,17 @@ func isInList(target int, list []int) bool {
 		}
 	}
 	return false
+}
+
+func GetCPM() float64 {
+	cpmCounter.mu.Lock()
+	defer cpmCounter.mu.Unlock()
+
+	now := time.Now()
+	if now.Sub(cpmCounter.lastUpdated) >= time.Minute {
+		defer func() { cpmCounter.checks = 0 }()
+		cpmCounter.lastUpdated = now
+	}
+
+	return float64(cpmCounter.checks) / now.Sub(cpmCounter.lastUpdated).Minutes()
 }
