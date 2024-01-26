@@ -1,6 +1,7 @@
 package threadPhase
 
 import (
+	"KC-Checker/common"
 	"KC-Checker/helper"
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
@@ -40,9 +41,15 @@ func getStyledQueue() string {
 			addString += transparentStyle.Render("T")
 		}
 
-		times := strings.Repeat(" ", int(math.Abs(float64(21-len(value.Full)))))
+		ip := value.Full
 
-		retString += fmt.Sprintf("[%s]%s %s\n", addString, times, value.Full)
+		if common.GetPrivacyMode() {
+			ip = getPrivateFull(value)
+		}
+
+		times := strings.Repeat(" ", int(math.Abs(float64(21-len(ip)))))
+
+		retString += fmt.Sprintf("[%s]%s %s\n", addString, times, ip)
 	}
 
 	retString += strings.Repeat("─", GetWidth()/4) + "\n" +
@@ -55,6 +62,15 @@ func getStyledQueue() string {
 		Height(7).
 		Width(GetWidth() / 4).
 		Render(retString)
+}
+
+func getPrivateFull(proxy *helper.Proxy) string {
+	splitted := strings.Split(proxy.Ip, ".")
+	return splitted[0] + "." +
+		strings.Repeat("*", len(splitted[1])) + "." +
+		strings.Repeat("*", len(splitted[2])) + "." +
+		strings.Repeat("*", len(splitted[3])) + ":" +
+		strings.Repeat("*", 5)
 }
 
 func getStyledInfo(elite int, anon int, trans int) string {
