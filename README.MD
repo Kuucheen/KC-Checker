@@ -132,19 +132,22 @@ Note: Normally you don't have to change these settings
 3. **timeout**: <br>
    Timeout duration for requests in ms<br>
 
-4. **iplookup**: <br>
+4. **privacy_mode**: <br>
+   If set to true, the proxies will be blured with "*" while checking
+
+5. **iplookup**: <br>
    A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
 
-5. **judges**: <br>
+6. **judges**: <br>
    Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
 
-6. **blacklisted**:<br>
+7. **blacklisted**:<br>
    Websites that contain blacklisted ips. These ips won't be checked<br>
 
-7. **bancheck**: <br>
+8. **bancheck**: <br>
    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
 
-8. **keywords**: <br>
+9. **keywords**: <br>
    It will check if the website the proxy has opened contains the text given<br>
 
 </details>
