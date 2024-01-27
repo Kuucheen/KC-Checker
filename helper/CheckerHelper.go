@@ -37,7 +37,9 @@ func Request(proxy *Proxy) (string, int) {
 	return RequestCustom(proxy, common.FastestJudge)
 }
 
+// RequestCustom makes a request to the provided siteUrl with the provided proxy
 func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
+	//Errors would destroy the whole display while checking
 	log.SetOutput(io.Discard)
 
 	proxyURL, err := url.Parse(GetTypeName() + "://" + proxy.Full)
@@ -49,8 +51,9 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
 
 	switch GetTypeName() {
 	case "http":
-		transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
+		transport = &http.Transport{Proxy: http.ProxyURL(proxyURL), DisableKeepAlives: true}
 	case "socks4", "socks5":
+		//udp doesn't work for some reason
 		dialer, err := proxy2.SOCKS5("tcp", proxy.Full, nil, proxy2.Direct)
 		if err != nil {
 			return "Error creating SOCKS dialer", -1
@@ -58,7 +61,7 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
 		transport = &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 				return dialer.Dial(network, addr)
-			},
+			}, DisableKeepAlives: true,
 		}
 	}
 
@@ -96,5 +99,4 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
 	}
 
 	return string(resBody), status
-
 }

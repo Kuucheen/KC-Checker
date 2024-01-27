@@ -93,6 +93,7 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if helper.HasFinished {
 		threadPhase = false
+		SetStopTime()
 	}
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -197,8 +198,9 @@ func (m model) View() string {
 
 	return lipgloss.JoinHorizontal(lipgloss.Top, bars.String(),
 		lipgloss.JoinVertical(lipgloss.Center,
-			lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinHorizontal(lipgloss.Top, getStyledQueue(),
-				getStyledInfo(eliteCount, anonymousCount, transparentCount)),
+			lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinVertical(lipgloss.Left,
+				lipgloss.JoinHorizontal(lipgloss.Top, getStyledQueue(),
+					getStyledInfo(eliteCount, anonymousCount, transparentCount)),
 				percentageBar.String()), extraString), greenStyle(outputPath)),
 	)
 }

@@ -10,8 +10,8 @@ import (
 )
 
 type Proxy struct {
-	ip     string
-	port   int
+	Ip     string
+	Port   int
 	Full   string
 	Level  int
 	checks int
@@ -35,12 +35,12 @@ func ToProxies(arr []string) []*Proxy {
 		dat, err := strconv.Atoi(temp[1])
 
 		if err != nil {
-			fmt.Print("Not a valid port: ", err)
+			fmt.Print("Not a valid Port: ", err)
 		}
 
 		newArr = append(newArr, &Proxy{
-			ip:   temp[0],
-			port: dat,
+			Ip:   temp[0],
+			Port: dat,
 			Full: temp[0] + ":" + temp[1],
 		})
 	}
@@ -87,7 +87,7 @@ func GetCleanedProxies() []*Proxy {
 	var cleaned []*Proxy
 
 	for _, value := range normal {
-		if !hasString(forbidden, value.ip) {
+		if !hasString(forbidden, value.Ip) {
 			cleaned = append(cleaned, value)
 		}
 	}

@@ -3,6 +3,8 @@
   "retries": 2,
   "timeout": 7500,
 
+  "privacy_mode": true,
+
   "iplookup": "http://api.ipify.org/",
 
   "judges": [

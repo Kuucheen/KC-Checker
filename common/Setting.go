@@ -10,6 +10,7 @@ type Config struct {
 	Threads     int      `json:"threads"`
 	Retries     int      `json:"retries"`
 	Timeout     int      `json:"timeout"`
+	PrivacyMode bool     `json:"privacy_mode"`
 	IpLookup    string   `json:"iplookup"`
 	Judges      []string `json:"judges"`
 	Blacklisted []string `json:"blacklisted"`
@@ -37,6 +38,8 @@ func ReadSettings() {
 func GetConfig() Config {
 	return config
 }
+
+func GetPrivacyMode() bool { return config.PrivacyMode }
 
 func DoBanCheck() bool {
 	return config.Bancheck != ""
