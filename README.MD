@@ -56,7 +56,7 @@ These are tested terminals on different operating systems:
 
 ### <p align="center">Getting started</p>
 
-Download [latest release](https://github.com/Kuucheen/KC-Checker/releases/)
+Download [latest release](https://github.com/Kuucheen/KC-Checker/releases/) & unzip the file
 
 **Windows**<br>
 Double click on KC-Checker.exe
