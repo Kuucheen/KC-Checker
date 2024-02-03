@@ -1,5 +1,5 @@
 {
-  "threads": 2500,
+  "threads": 250,
   "retries": 2,
   "timeout": 7500,
 
