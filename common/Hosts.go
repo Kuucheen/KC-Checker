@@ -4,6 +4,8 @@ import (
 	"io"
 	"net/http"
 	"sort"
+	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -31,19 +33,29 @@ func (ht HostTimes) Swap(i, j int) {
 	ht[i], ht[j] = ht[j], ht[i]
 }
 
-var CurrentCheckedHosts HostTimes
+var (
+	CurrentCheckedHosts HostTimes
+	wg                  sync.WaitGroup
+	mutex               sync.Mutex
+	currentThreads      int32
+)
 
 func CheckDomains() HostTimes {
 	configHosts := GetConfig().Judges
+	maxThreads := GetConfig().JudgesThreads
 
-	for _, value := range configHosts {
-		responseTime := checkTime(value)
-		hostTime := JudgesTimes{
-			Judge:        value,
-			ResponseTime: responseTime,
+	for i := 0; i < len(configHosts); i++ {
+		if int(currentThreads) < maxThreads {
+			wg.Add(1)
+			go checkTimeAsync(configHosts[i])
+			atomic.AddInt32(&currentThreads, 1)
+		} else {
+			i--
 		}
-		CurrentCheckedHosts = append(CurrentCheckedHosts, hostTime)
 	}
+
+	// Wait for all goroutines to finish
+	wg.Wait()
 
 	// Create a copy of the unsorted CurrentCheckedHosts
 	unsortedHosts := make(HostTimes, len(CurrentCheckedHosts))
@@ -58,8 +70,19 @@ func CheckDomains() HostTimes {
 	return unsortedHosts
 }
 
-func GetHosts() HostTimes {
-	return CurrentCheckedHosts
+func checkTimeAsync(host string) {
+	defer wg.Done()
+	defer atomic.AddInt32(&currentThreads, -1)
+
+	responseTime := checkTime(host)
+	hostTime := JudgesTimes{
+		Judge:        host,
+		ResponseTime: responseTime,
+	}
+
+	mutex.Lock()
+	CurrentCheckedHosts = append(CurrentCheckedHosts, hostTime)
+	mutex.Unlock()
 }
 
 func checkTime(host string) time.Duration {
@@ -71,6 +94,10 @@ func checkTime(host string) time.Duration {
 	}
 
 	return time.Since(startTime)
+}
+
+func GetHosts() HostTimes {
+	return CurrentCheckedHosts
 }
 
 func GetLocalIP() string {
