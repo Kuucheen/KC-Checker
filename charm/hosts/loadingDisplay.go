@@ -59,7 +59,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if checked {
 		finished = true
 		go helper.Dispatcher(helper.GetCleanedProxies())
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Second * 3)
 		m.View()
 		return m, tea.Quit
 	}
