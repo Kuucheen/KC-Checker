@@ -22,6 +22,8 @@ var (
 	mutex            sync.Mutex
 	wg               sync.WaitGroup
 
+	retries int
+
 	HasFinished = false
 )
 
@@ -35,6 +37,7 @@ var cpmCounter = CPMCounter{}
 
 func Dispatcher(proxies []*Proxy) {
 	threads := common.GetConfig().Threads
+	retries = common.GetConfig().Retries
 
 	for len(proxies) > 0 {
 		if int(atomic.LoadInt32(&threadsActive)) < threads {
@@ -59,7 +62,6 @@ func Dispatcher(proxies []*Proxy) {
 
 func check(proxy *Proxy) {
 	responded := false
-	retries := common.GetConfig().Retries
 	level := 0
 
 	cpmCounter.mu.Lock()
