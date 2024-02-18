@@ -7,10 +7,6 @@ import (
 	"time"
 )
 
-const (
-	DelayBetweenChecks = time.Millisecond * 10
-)
-
 var (
 	proxyQueue       = ProxyQueue{}
 	ProxyMap         = make(map[int][]*Proxy)
@@ -33,24 +29,23 @@ type CPMCounter struct {
 	lastUpdated time.Time
 }
 
+type ProxyListing struct {
+	mu      sync.Mutex
+	proxies []*Proxy
+}
+
 var cpmCounter = CPMCounter{}
+var proxyList = ProxyListing{}
 
 func Dispatcher(proxies []*Proxy) {
 	threads := common.GetConfig().Threads
 	retries = common.GetConfig().Retries
+	proxyList.proxies = proxies
 
-	for len(proxies) > 0 {
-		if int(atomic.LoadInt32(&threadsActive)) < threads {
-			wg.Add(1)
-			go check(proxies[0])
-			atomic.AddInt32(&threadsActive, 1)
-			proxies = proxies[1:]
-		} else {
-			time.Sleep(DelayBetweenChecks)
-		}
-		if stop {
-			break
-		}
+	for i := 0; i < threads; i++ {
+		wg.Add(1)
+		go threadHandling()
+		atomic.AddInt32(&threadsActive, 1)
 	}
 
 	wg.Wait()
@@ -58,6 +53,28 @@ func Dispatcher(proxies []*Proxy) {
 	cpmCounter.checks = 0
 	cpmCounter.mu.Unlock()
 	HasFinished = true
+}
+
+func threadHandling() {
+	for len(proxyList.proxies) > 0 {
+		proxyList.mu.Lock()
+		if len(proxyList.proxies) > 0 {
+			proxy := proxyList.proxies[0]
+			proxyList.proxies = proxyList.proxies[1:]
+			proxyList.mu.Unlock()
+			check(proxy)
+		} else {
+			proxyList.mu.Unlock()
+		}
+		if stop {
+			break
+		}
+	}
+
+	defer func() {
+		atomic.AddInt32(&threadsActive, -1)
+		wg.Done()
+	}()
 }
 
 func check(proxy *Proxy) {
@@ -96,8 +113,6 @@ func check(proxy *Proxy) {
 			proxyQueue.Enqueue(proxy)
 
 			mutex.Unlock()
-		} else {
-			atomic.AddInt32(&Invalid, 1)
 		}
 
 		responded = true
@@ -105,30 +120,28 @@ func check(proxy *Proxy) {
 	}
 
 	//Ban check for websites
-	if responded && common.DoBanCheck() {
-		for i := 0; i < retries; i++ {
-			body, status := RequestCustom(proxy, common.GetConfig().Bancheck)
+	if responded {
+		//Extra if because of performance
+		if common.DoBanCheck() {
+			for i := 0; i < retries; i++ {
+				body, status := RequestCustom(proxy, common.GetConfig().Bancheck)
 
-			if !(status >= 400) && status != -1 {
-				keywords := common.GetConfig().Keywords
+				if !(status >= 400) && status != -1 {
+					keywords := common.GetConfig().Keywords
 
-				if len(keywords) == 0 || len(keywords[0]) == 0 || ContainsSlice(keywords, body) {
-					mutex.Lock()
-					ProxyMapFiltered[level] = append(ProxyMapFiltered[level], proxy)
-					ProxyCountMap[-1]++
-					mutex.Unlock()
-					break
+					if len(keywords) == 0 || len(keywords[0]) == 0 || ContainsSlice(keywords, body) {
+						mutex.Lock()
+						ProxyMapFiltered[level] = append(ProxyMapFiltered[level], proxy)
+						ProxyCountMap[-1]++
+						mutex.Unlock()
+						break
+					}
 				}
 			}
 		}
 	} else {
 		atomic.AddInt32(&Invalid, 1)
 	}
-
-	defer func() {
-		atomic.AddInt32(&threadsActive, -1)
-		wg.Done()
-	}()
 }
 
 func GetInvalid() int {
