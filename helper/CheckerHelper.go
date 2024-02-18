@@ -51,7 +51,7 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
 
 	switch GetTypeName() {
 	case "http":
-		transport = &http.Transport{Proxy: http.ProxyURL(proxyURL), DisableKeepAlives: true}
+		transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 	case "socks4", "socks5":
 		//udp doesn't work for some reason
 		dialer, err := proxy2.SOCKS5("tcp", proxy.Full, nil, proxy2.Direct)
@@ -61,7 +61,7 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
 		transport = &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 				return dialer.Dial(network, addr)
-			}, DisableKeepAlives: true,
+			},
 		}
 	}
 
@@ -82,20 +82,16 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
 		return "Error making HTTP request", -1
 	}
 
-	defer func() {
-		if r := recover(); r != nil {
-		}
-
-		err := resp.Body.Close()
-		if err != nil {
-		}
-	}()
-
 	status := resp.StatusCode
 
 	resBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "Error reading response body", -1
+	}
+
+	err = resp.Body.Close()
+	if err != nil {
+		return "Error closing Body", -1
 	}
 
 	return string(resBody), status

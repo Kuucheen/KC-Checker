@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	//Lets the terminal on Windows 10 support true color
 	supportscolor.Stdout()
 
 	common.ReadSettings()
