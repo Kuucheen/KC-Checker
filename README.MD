@@ -159,7 +159,7 @@ You can blacklist custom proxies by adding them in `blacklisted.txt`
 ### <p align="center">Other</p>
 
 <div align="center">
-**this tool is made for educational purposes only**
+__this tool is made for educational purposes only__
 <br>
 <br>
 If you need help with anything join our <a href="https://discord.gg/7FWAGXzhkC">discord server</a>
