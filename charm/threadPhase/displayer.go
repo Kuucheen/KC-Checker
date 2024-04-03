@@ -64,8 +64,9 @@ var (
 
 func RunBars() {
 	items := []list.Item{
-		item{"ip:port", ""},
-		item{title: "type://ip:port", desc: ""},
+		item{title: "ip:port"},
+		item{title: "type://ip:port"},
+		item{title: "ip:port;ms"},
 	}
 
 	m := model{
@@ -104,7 +105,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if msg.String() == "q" {
 				threadPhase = false
 				helper.StopThreads()
-
 			}
 		} else {
 			switch msg.String() {

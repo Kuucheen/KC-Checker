@@ -10,7 +10,7 @@ import (
 var (
 	proxyQueue       = ProxyQueue{}
 	ProxyMap         = make(map[int][]*Proxy)
-	ProxyMapFiltered = make(map[int][]*Proxy)
+	ProxyMapFiltered = make(map[int][]*Proxy) //ProxyMapFiltered is for Banchecked proxies
 	ProxyCountMap    = make(map[int]int)
 	stop             = false
 	Invalid          int32
@@ -94,7 +94,16 @@ func check(proxy *Proxy) {
 	cpmCounter.mu.Unlock()
 
 	for proxy.checks <= retries {
-		body, status := Request(proxy)
+
+		timeStart := time.Now()
+		body, status, err := Request(proxy)
+		timeEnd := time.Now()
+
+		proxy.time = int(timeEnd.Sub(timeStart).Milliseconds())
+
+		if err != nil {
+			status = -1
+		}
 
 		if status >= 400 || status == -1 {
 			proxy.checks++
@@ -121,10 +130,14 @@ func check(proxy *Proxy) {
 
 	//Ban check for websites
 	if responded {
-		//Extra if because of performance
+		//Extra if because of performance (else)
 		if common.DoBanCheck() {
 			for i := 0; i < retries; i++ {
-				body, status := RequestCustom(proxy, common.GetConfig().Bancheck)
+				body, status, err := RequestCustom(proxy, common.GetConfig().Bancheck)
+
+				if err != nil {
+					status = -1
+				}
 
 				if !(status >= 400) && status != -1 {
 					keywords := common.GetConfig().Keywords

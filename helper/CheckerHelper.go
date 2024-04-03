@@ -33,18 +33,18 @@ func GetProxyLevel(html string) int {
 
 }
 
-func Request(proxy *Proxy) (string, int) {
+func Request(proxy *Proxy) (string, int, error) {
 	return RequestCustom(proxy, common.FastestJudge)
 }
 
 // RequestCustom makes a request to the provided siteUrl with the provided proxy
-func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
+func RequestCustom(proxy *Proxy, siteUrl string) (string, int, error) {
 	//Errors would destroy the whole display while checking
 	log.SetOutput(io.Discard)
 
 	proxyURL, err := url.Parse(GetTypeName() + "://" + proxy.Full)
 	if err != nil {
-		return "Error parsing proxy URL", -1
+		return "Error parsing proxy URL", -1, err
 	}
 
 	var transport *http.Transport
@@ -56,7 +56,7 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
 		//udp doesn't work for some reason
 		dialer, err := proxy2.SOCKS5("tcp", proxy.Full, nil, proxy2.Direct)
 		if err != nil {
-			return "Error creating SOCKS dialer", -1
+			return "Error creating SOCKS dialer", -1, err
 		}
 		transport = &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
@@ -72,27 +72,27 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int) {
 
 	req, err := http.NewRequest("GET", siteUrl, nil)
 	if err != nil {
-		return "Error creating HTTP request", -1
+		return "Error creating HTTP request", -1, err
 	}
 
 	req.Header.Set("Connection", "close")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return "Error making HTTP request", -1
+		return "Error making HTTP request", -1, err
 	}
 
 	status := resp.StatusCode
 
 	resBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "Error reading response body", -1
+		return "Error reading response body", -1, err
 	}
 
 	err = resp.Body.Close()
 	if err != nil {
-		return "Error closing Body", -1
+		return "Error closing Body", -1, err
 	}
 
-	return string(resBody), status
+	return string(resBody), status, nil
 }

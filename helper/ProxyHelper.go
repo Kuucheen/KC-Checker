@@ -15,6 +15,7 @@ type Proxy struct {
 	Full   string
 	Level  int
 	checks int
+	time   int //in ms
 }
 
 var (
