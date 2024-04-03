@@ -138,16 +138,19 @@ Note: Normally you don't have to change these settings
 5. **iplookup**: <br>
    A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
 
-6. **judges**: <br>
+6. **judges_threads**: <br>
+   Maximum threads for selecting the judge
+
+7. **judges**: <br>
    Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
 
-7. **blacklisted**:<br>
+8. **blacklisted**:<br>
    Websites that contain blacklisted ips. These ips won't be checked<br>
 
-8. **bancheck**: <br>
+9. **bancheck**: <br>
    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
 
-9. **keywords**: <br>
+10. **keywords**: <br>
    It will check if the website the proxy has opened contains the text given<br>
 
 </details>
