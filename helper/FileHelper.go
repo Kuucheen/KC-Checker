@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 )
 
 var ProxySum float64
@@ -12,6 +13,11 @@ func Write(proxies map[int][]*Proxy, style int, banCheck bool) string {
 	pType := GetTypeName()
 
 	for _, proxyLevel := range proxies {
+
+		sort.Slice(proxyLevel, func(i, j int) bool {
+			return proxyLevel[i].time < proxyLevel[j].time
+		})
+
 		filtered := ""
 
 		if banCheck {
@@ -29,6 +35,9 @@ func Write(proxies map[int][]*Proxy, style int, banCheck bool) string {
 				proxyString = proxy.Full
 			case 1:
 				proxyString = fmt.Sprintf("%s://%s", pType, proxy.Full)
+
+			case 2:
+				proxyString = fmt.Sprintf("%s;%d", proxy.Full, proxy.time)
 			}
 
 			_, err := fmt.Fprintln(f, proxyString)
