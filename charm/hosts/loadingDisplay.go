@@ -34,7 +34,7 @@ var (
 	warningStyle  = baseStyle.Copy().Foreground(lipgloss.Color("#BEAA01")).Background(lipgloss.Color("#414300"))
 	errorStyle    = baseStyle.Copy().Foreground(lipgloss.Color("#BE0101")).Background(lipgloss.Color("#430000"))
 
-	centerstyle = lipgloss.NewStyle().Width(threadPhase.GetWidth() - 5).Align(lipgloss.Center).Render
+	centerStyle = lipgloss.NewStyle().Width(threadPhase.GetWidth() - 5).Align(lipgloss.Center).Render
 )
 
 func initialModel() model {
@@ -92,13 +92,10 @@ func (m model) View() string {
 		return m.err.Error()
 	}
 
-	if finished {
+	if finished || m.quitting {
 		return ""
 	}
 
-	if m.quitting {
-		return ""
-	}
 	str := fmt.Sprintf("\n\n   %s Loading judges, please wait\n\n", m.spinner.View())
 
 	headers := []string{"Name", "Time"}
@@ -170,7 +167,7 @@ func (m model) View() string {
 			return baseStyle.Copy().Foreground(lipgloss.Color("252"))
 		})
 
-	return centerstyle(str) + "\n" + centerstyle(t.Render())
+	return centerStyle(str) + "\n" + centerStyle(t.Render())
 }
 
 func Run() {
