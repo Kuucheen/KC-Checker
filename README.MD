@@ -64,7 +64,7 @@ Now run it with
 
 `./KC-Checker`
 
-## Or run it yourself
+## Or build it yourself
 
 Install [go](https://go.dev/doc/install) and [git](https://git-scm.com/downloads)
 
@@ -101,9 +101,11 @@ Install dependencies
 
     go get .
 
-Run with
+Build with
 
-    go run .
+    go build .
+
+Now you have an executable. You can run it like described in **Getting Started**
 </details>
 
 # Customize Settings
