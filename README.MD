@@ -86,9 +86,11 @@ Open terminal in the directory and make the script executeable
 
 `chmod +x start.sh`
 
-Now you can run it with
+Run it with
 
 `./start.sh`
+
+Now you have an executable. You can run it like described in **Getting Started**
 </details>
 <details>
   <summary>Using terminal</summary>
