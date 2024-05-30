@@ -26,7 +26,7 @@
 
 <br>
 
-### Features
+# Features
 
 - Multi-Threaded
 - Keyword website check
@@ -36,7 +36,7 @@
 
 <br>
 
-### Requirements
+# Requirements
 
 Your terminal needs to support true color. <br><br>
 These are tested terminals on different operating systems:
@@ -48,7 +48,7 @@ These are tested terminals on different operating systems:
 | Linux (ubuntu) | <div align="center">✅</div> | Works fine
 | Mac OS | <div align="center">❌</div> | Should work fine
 
-### Getting started
+# Getting started
 
 Download [latest release](https://github.com/Kuucheen/KC-Checker/releases/) & unzip the file
 
@@ -64,7 +64,7 @@ Now run it with
 
 `./KC-Checker`
 
-### Or run it yourself
+## Or run it yourself
 
 Install [go](https://go.dev/doc/install) and [git](https://git-scm.com/downloads)
 
@@ -106,7 +106,7 @@ Run with
     go run .
 </details>
 
-### Customize Settings
+# Customize Settings
 
 Note: Normally you don't have to change these settings
 
