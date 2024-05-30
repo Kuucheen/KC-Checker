@@ -42,7 +42,7 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int, error) {
 	//Errors would destroy the whole display while checking
 	log.SetOutput(io.Discard)
 
-	proxyURL, err := url.Parse(GetTypeName() + "://" + proxy.Full)
+	proxyURL, err := url.Parse(GetTypeNameForRequest() + "://" + proxy.Full)
 	if err != nil {
 		return "Error parsing proxy URL", -1, err
 	}
@@ -50,7 +50,7 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int, error) {
 	var transport *http.Transport
 
 	switch GetTypeName() {
-	case "http":
+	case "http", "https":
 		transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 	case "socks4", "socks5":
 		//udp doesn't work for some reason
