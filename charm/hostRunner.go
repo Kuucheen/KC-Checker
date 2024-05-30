@@ -1,6 +1,7 @@
 package charm
 
 import (
+	"KC-Checker/charm/errorDisplays"
 	"KC-Checker/charm/hosts"
 	"KC-Checker/charm/threadPhase"
 	"KC-Checker/common"
@@ -14,6 +15,18 @@ func RunHostsDisplay() {
 
 	//Sets the proxy type (http, socks4 or socks5) from user input (GetProxyType())
 	helper.SetType(GetProxyType())
+
+	//Select only the judges for the selected type
+	if helper.GetTypeName() == "https" {
+		common.RemoveHttpJudges()
+	} else if helper.GetTypeName() == "http" {
+		common.RemoveHttpsJudges()
+	}
+
+	//No more judge left
+	if len(common.GetConfig().Judges) < 1 {
+		errorDisplays.PrintErrorForJudge(helper.GetTypeName())
+	}
 
 	//Check the judges for the fastest
 	go common.CheckDomains()
