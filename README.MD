@@ -26,9 +26,7 @@
 
 <br>
 
------
-
-### <p align="center">Features</p>
+### Features
 
 - Multi-Threaded
 - Keyword website check
@@ -38,9 +36,7 @@
 
 <br>
 
----
-
-### <p align="center">Requirements</p>
+### Requirements
 
 Your terminal needs to support true color. <br><br>
 These are tested terminals on different operating systems:
@@ -52,9 +48,7 @@ These are tested terminals on different operating systems:
 | Linux (ubuntu) | <div align="center">✅</div> | Works fine
 | Mac OS | <div align="center">❌</div> | Should work fine
 
------
-
-### <p align="center">Getting started</p>
+### Getting started
 
 Download [latest release](https://github.com/Kuucheen/KC-Checker/releases/) & unzip the file
 
@@ -69,8 +63,6 @@ Open terminal and enter
 Now run it with
 
 `./KC-Checker`
-
-------
 
 ### Or run it yourself
 
@@ -114,9 +106,7 @@ Run with
     go run .
 </details>
 
----
-
-### <p align="center">Customize Settings</p>
+### Customize Settings
 
 Note: Normally you don't have to change these settings
 
@@ -141,25 +131,26 @@ Note: Normally you don't have to change these settings
 6. **judges_threads**: <br>
    Maximum threads for selecting the judge
 
-7. **judges**: <br>
+7. **judges_timeout**: <br>
+   Timeout duration of judges in ms
+
+8. **judges**: <br>
    Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
 
-8. **blacklisted**:<br>
+9. **blacklisted**:<br>
    Websites that contain blacklisted ips. These ips won't be checked<br>
 
-9. **bancheck**: <br>
-   If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
+10. **bancheck**: <br>
+    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
 
-10. **keywords**: <br>
-   It will check if the website the proxy has opened contains the text given<br>
+11. **keywords**: <br>
+    It will check if the website the proxy has opened contains the text given<br>
 
 </details>
 
 You can blacklist custom proxies by adding them in `blacklisted.txt`
 
-
----
-### <p align="center">Other</p>
+### <p align="center">Other
 
 <div align="center">
 <strong>this tool is made for educational purposes only</strong>
