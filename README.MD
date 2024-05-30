@@ -150,7 +150,7 @@ Note: Normally you don't have to change these settings
 
 You can blacklist custom proxies by adding them in `blacklisted.txt`
 
-### <p align="center">Other
+## <p align="center">Other
 
 <div align="center">
 <strong>this tool is made for educational purposes only</strong>
