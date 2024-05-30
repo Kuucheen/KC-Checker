@@ -56,7 +56,8 @@ func (m model) View() string {
 func GetProxyType() int {
 
 	items := []list.Item{
-		item{"HTTP/s", "for various web applications"},
+		item{"HTTP", "for various web applications"},
+		item{"HTTPS", "for various web applications"},
 		item{title: "SOCKS4", desc: "for various app applications"},
 		item{title: "SOCKS5", desc: "for various app applications"},
 	}

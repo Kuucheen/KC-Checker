@@ -8,6 +8,7 @@
   "iplookup": "http://api.ipify.org/",
 
   "judges_threads": 3,
+  "judges_timeout": 5000,
   "judges": [
     "http://pascal.hoez.free.fr/azenv.php",
     "http://azenv.net",

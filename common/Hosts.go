@@ -86,9 +86,14 @@ func checkTimeAsync(host string) {
 }
 
 func checkTime(host string) time.Duration {
+	client := http.Client{
+		Timeout: time.Millisecond * time.Duration(config.JudgesTimeOut),
+	}
+
 	startTime := time.Now()
 
-	_, err := http.Get(host)
+	_, err := client.Get(host)
+
 	if err != nil {
 		return time.Hour * 999
 	}

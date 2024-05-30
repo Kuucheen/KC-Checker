@@ -1,13 +1,12 @@
 package threadPhase
 
 import (
+	"KC-Checker/charm/errorDisplays"
 	"KC-Checker/common"
 	"KC-Checker/helper"
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
-	"golang.org/x/crypto/ssh/terminal"
 	"math"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -104,8 +103,7 @@ func getStyledInfo(elite int, anon int, trans int) string {
 }
 
 func GetWidth() int {
-	width, _, _ := terminal.GetSize(int(os.Stdout.Fd()))
-	return width + 5
+	return errorDisplays.GetWidth()
 }
 
 func getFormattedInfo(str string, num int) string {

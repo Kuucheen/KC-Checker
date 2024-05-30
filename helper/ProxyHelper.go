@@ -64,7 +64,12 @@ func checkIp(ip string) bool {
 }
 
 func GetTypeName() string {
-	names := []string{"http", "socks4", "socks5"}
+	names := []string{"http", "https", "socks4", "socks5"}
+	return names[proxyType]
+}
+
+func GetTypeNameForRequest() string {
+	names := []string{"http", "http", "socks4", "socks5"}
 	return names[proxyType]
 }
 
