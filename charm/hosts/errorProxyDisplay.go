@@ -1,7 +1,7 @@
 package hosts
 
 import (
-	"KC-Checker/charm/threadPhase"
+	"KC-Checker/charm/errorDisplays"
 	"KC-Checker/helper"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	style = lipgloss.NewStyle().Foreground(lipgloss.Color("#BE0101")).Width(threadPhase.GetWidth()).Align(lipgloss.Center)
+	style = lipgloss.NewStyle().Foreground(lipgloss.Color("#BE0101")).Width(errorDisplays.GetWidth()).Align(lipgloss.Center)
 	found = false
 )
 
@@ -46,7 +46,7 @@ func (m waitingModel) View() string {
 	}
 
 	return style.Render("It seems like you forgot to put proxies\nin proxies.txt\n"+
-		"You don't have to close this tab\n") + style.Copy().Foreground(lipgloss.Color("#FFF")).Render(
+		"You don't have to restart the program\n") + style.Copy().Foreground(lipgloss.Color("#FFF")).Render(
 		"\nIf you need proxies check out\nhttps://github.com/Kuucheen/KC-Scraper")
 }
 
