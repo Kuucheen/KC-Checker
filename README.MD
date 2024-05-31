@@ -9,7 +9,7 @@
 <br>
 
 <div align="center">
-<img src="https://img.shields.io/github/downloads/Kuucheen/KC-Checker/total.svg" alt="downloads">
+<!--<img src="https://img.shields.io/github/downloads/Kuucheen/KC-Checker/total.svg" alt="downloads">-->
 <img src="https://img.shields.io/github/license/Kuucheen/KC-Checker.svg" alt="license">
 <img src="https://img.shields.io/github/issues/Kuucheen/KC-Checker.svg" alt="issues">
 <br>
