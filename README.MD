@@ -72,7 +72,7 @@ Now open your terminal & clone the project with
 
 `git clone https://github.com/Kuucheen/KC-Checker.git`
 
-**Run**
+**Build**
 <details>
   <summary>Using provided scripts</summary>
 
