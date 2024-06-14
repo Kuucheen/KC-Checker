@@ -115,7 +115,7 @@ Now you have an executable. You can run it like described in **Getting Started**
 Note: Normally you don't have to change these settings
 
 <details>
-    <summary>Details for settings.txt</summary>
+    <summary>Details for settings.json</summary>
 
 1. **threads**: <br>
    Maximum number of threads<br>
