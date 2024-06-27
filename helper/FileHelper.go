@@ -1,7 +1,9 @@
 package helper
 
 import (
+	"KC-Checker/common"
 	"fmt"
+	"golang.design/x/clipboard"
 	"os"
 	"regexp"
 	"sort"
@@ -11,6 +13,19 @@ var ProxySum float64
 
 func Write(proxies map[int][]*Proxy, style int, banCheck bool) string {
 	pType := GetTypeName()
+
+	var allFile *os.File
+	var allFileErr error
+
+	if common.GetConfig().CopyToClipboard {
+		cliperr := clipboard.Init()
+
+		if cliperr != nil {
+			return "ClipBoard error"
+		}
+	}
+
+	clipString := ""
 
 	for _, proxyLevel := range proxies {
 
@@ -25,9 +40,15 @@ func Write(proxies map[int][]*Proxy, style int, banCheck bool) string {
 		}
 
 		f, err := os.Create(GetFilePath(pType) + filtered + GetLevelNameOf(proxyLevel[0].Level-1) + ".txt")
-		if err != nil {
+
+		if allFile == nil {
+			allFile, allFileErr = os.Create(GetFilePath(pType) + filtered + "all.txt")
+		}
+
+		if err != nil || allFileErr != nil {
 			return ""
 		}
+
 		for _, proxy := range proxyLevel {
 			var proxyString string
 			switch style {
@@ -41,11 +62,21 @@ func Write(proxies map[int][]*Proxy, style int, banCheck bool) string {
 			}
 
 			_, err := fmt.Fprintln(f, proxyString)
-			if err != nil {
+			_, allFileErr = fmt.Fprintln(allFile, proxyString)
+
+			clipString += proxyString + "\n"
+
+			if err != nil || allFileErr != nil {
 				return ""
 			}
 		}
+
 		err = f.Close()
+
+		if common.GetConfig().CopyToClipboard {
+			clipboard.Write(clipboard.FmtText, []byte(clipString))
+		}
+
 		if err != nil {
 			return ""
 		}
