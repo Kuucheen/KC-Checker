@@ -3,7 +3,7 @@ package helper
 import (
 	"KC-Checker/common"
 	"golang.org/x/net/context"
-	proxy2 "golang.org/x/net/proxy"
+	"golang.org/x/net/proxy"
 	"io"
 	"log"
 	"net"
@@ -38,23 +38,25 @@ func Request(proxy *Proxy) (string, int, error) {
 }
 
 // RequestCustom makes a request to the provided siteUrl with the provided proxy
-func RequestCustom(proxy *Proxy, siteUrl string) (string, int, error) {
+func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 	//Errors would destroy the whole display while checking
 	log.SetOutput(io.Discard)
 
-	proxyURL, err := url.Parse(GetTypeNameForRequest() + "://" + proxy.Full)
+	proxyURL, err := url.Parse(GetTypeNameForRequest() + "://" + proxyToCheck.Full)
 	if err != nil {
-		return "Error parsing proxy URL", -1, err
+		return "Error parsing proxyToCheck URL", -1, err
 	}
 
 	var transport *http.Transport
 
 	switch GetTypeName() {
 	case "http", "https":
-		transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
+		transport = &http.Transport{
+			Proxy: http.ProxyURL(proxyURL),
+		}
 	case "socks4", "socks5":
 		//udp doesn't work for some reason
-		dialer, err := proxy2.SOCKS5("tcp", proxy.Full, nil, proxy2.Direct)
+		dialer, err := proxy.SOCKS5("tcp", proxyToCheck.Full, nil, proxy.Direct)
 		if err != nil {
 			return "Error creating SOCKS dialer", -1, err
 		}
@@ -62,8 +64,13 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int, error) {
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 				return dialer.Dial(network, addr)
 			},
+			DisableKeepAlives: !common.GetConfig().KeepAlive,
 		}
 	}
+
+	transport.DisableKeepAlives = !common.GetConfig().KeepAlive
+	transport.MaxIdleConns = 3
+	transport.IdleConnTimeout = time.Duration(common.GetConfig().Timeout) * time.Millisecond
 
 	client := &http.Client{
 		Transport: transport,
@@ -74,8 +81,6 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int, error) {
 	if err != nil {
 		return "Error creating HTTP request", -1, err
 	}
-
-	req.Header.Set("Connection", "close")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -89,10 +94,12 @@ func RequestCustom(proxy *Proxy, siteUrl string) (string, int, error) {
 		return "Error reading response body", -1, err
 	}
 
-	err = resp.Body.Close()
-	if err != nil {
-		return "Error closing Body", -1, err
-	}
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			return
+		}
+	}()
 
 	return string(resBody), status, nil
 }
