@@ -12,7 +12,7 @@ type Config struct {
 	Threads         int      `json:"threads"`
 	Retries         int      `json:"retries"`
 	Timeout         int      `json:"timeout"`
-	PrivacyMode     bool     `json:"privacy_mode"`
+	KeepAlive       bool     `json:"keep_alive"`
 	IpLookup        string   `json:"iplookup"`
 	JudgesThreads   int      `json:"judges_threads"`
 	JudgesTimeOut   int      `json:"judges_timeout"`
@@ -20,6 +20,7 @@ type Config struct {
 	Blacklisted     []string `json:"blacklisted"`
 	Bancheck        string   `json:"bancheck"`
 	Keywords        []string `json:"keywords"`
+	PrivacyMode     bool     `json:"privacy_mode"`
 	CopyToClipboard bool     `json:"copyToClipboard"`
 }
 

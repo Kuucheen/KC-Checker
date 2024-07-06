@@ -31,10 +31,12 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		if msg.String() == "ctrl+c" || msg.String() == "enter" {
+		if msg.String() == "enter" {
 			finished = true
 			index = m.list.Index()
 			return m, tea.Quit
+		} else if msg.String() == "ctrl+c" {
+			os.Exit(1)
 		}
 	case tea.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
@@ -64,7 +66,8 @@ func GetProxyType() int {
 
 	m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
 	m.list.Title = "What type of proxies do you want to check?"
-	m.list.SetStatusBarItemName("Type", "Types")
+	//m.list.SetStatusBarItemName("Type", "Types")
+	m.list.SetShowStatusBar(false)
 
 	p := tea.NewProgram(m)
 

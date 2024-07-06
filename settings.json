@@ -2,8 +2,7 @@
   "threads": 250,
   "retries": 2,
   "timeout": 7500,
-
-  "privacy_mode": false,
+  "keep_alive": true,
 
   "iplookup": "http://api.ipify.org/",
 
@@ -28,5 +27,6 @@
     ""
   ],
 
+  "privacy_mode": false,
   "copyToClipboard": false
 }
