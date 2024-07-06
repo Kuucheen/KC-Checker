@@ -9,9 +9,13 @@
 <br>
 
 <div align="center">
-<!--<img src="https://img.shields.io/github/downloads/Kuucheen/KC-Checker/total.svg" alt="downloads">-->
-<!--<img src="https://img.shields.io/github/license/Kuucheen/KC-Checker.svg" alt="license">-->
+<img src="https://img.shields.io/github/downloads/Kuucheen/KC-Checker/total.svg" alt="downloads">
+<img src="https://img.shields.io/github/license/Kuucheen/KC-Checker.svg" alt="license">
 <img src="https://img.shields.io/github/issues/Kuucheen/KC-Checker.svg" alt="issues">
+<br>
+<!--<a href="https://discord.gg/7FWAGXzhkC">
+  <img src="https://img.shields.io/discord/1196551495571738665?logo=discord&colorB=7289DA" alt="discord">
+</a>-->
 </div>
 
 <br>
@@ -22,9 +26,7 @@
 
 <br>
 
------
-
-### <p align="center">Features</p>
+# Features
 
 - Multi-Threaded
 - Keyword website check
@@ -34,21 +36,35 @@
 
 <br>
 
------
+# Requirements
 
-### <p align="center">Getting started</p>
+Your terminal needs to support true color. <br><br>
+These are tested terminals on different operating systems:
 
-Download [latest release](https://github.com/Kuucheen/KC-Checker/releases/)
+| System | Tested | Notes |
+|--|--|--|
+| Windows 11| <div align="center">✅</div> | Works fine |
+| Windows 10 | <div align="center">✅</div> | Works without true color
+| Linux (ubuntu) | <div align="center">✅</div> | Works fine
+| Mac OS | <div align="center">❌</div> | Should work fine
+
+# Getting started
+
+Download [latest release](https://github.com/Kuucheen/KC-Checker/releases/) & unzip the file
 
 **Windows**<br>
 Double click on KC-Checker.exe
 
 **Linux**<br>
-Open terminal and enter `./KC-Checker`
+Open terminal and enter
 
-------
+`chmod +x KC-Checker`
 
-### Or run it yourself
+Now run it with
+
+`./KC-Checker`
+
+## Or build it yourself
 
 Install [go](https://go.dev/doc/install) and [git](https://git-scm.com/downloads)
 
@@ -56,7 +72,7 @@ Now open your terminal & clone the project with
 
 `git clone https://github.com/Kuucheen/KC-Checker.git`
 
-**Run**
+**Build**
 <details>
   <summary>Using provided scripts</summary>
 
@@ -70,34 +86,36 @@ Open terminal in the directory and make the script executeable
 
 `chmod +x start.sh`
 
-Now you can run it with
+Run it with
 
 `./start.sh`
+
+Now you have an executable. You can run it like described in **Getting Started**
 </details>
 <details>
   <summary>Using terminal</summary>
 
-Navigate to your directory
+Navigate to the directory
 
-    cd your-directory
+    cd KC-Checker
 
 Install dependencies
 
     go get .
 
-Run with
+Build with
 
-    go run .
+    go build .
+
+Now you have an executable. You can run it like described in **Getting Started**
 </details>
 
----
-
-### <p align="center">Customize Settings</p>
+# Customize Settings
 
 Note: Normally you don't have to change these settings
 
 <details>
-    <summary>Details for settings.txt</summary>
+    <summary>Details for settings.json</summary>
 
 1. **threads**: <br>
    Maximum number of threads<br>
@@ -108,29 +126,42 @@ Note: Normally you don't have to change these settings
 3. **timeout**: <br>
    Timeout duration for requests in ms<br>
 
-4. **iplookup**: <br>
+4. **privacy_mode**: <br>
+   If set to true, the proxies will be blured with "*" while checking
+
+5. **iplookup**: <br>
    A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
 
-5. **judges**: <br>
+6. **judges_threads**: <br>
+   Maximum threads for selecting the judge
+
+7. **judges_timeout**: <br>
+   Timeout duration of judges in ms
+
+8. **judges**: <br>
    Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
 
-6. **blacklisted**:<br>
+9. **blacklisted**:<br>
    Websites that contain blacklisted ips. These ips won't be checked<br>
 
-7. **bancheck**: <br>
-   If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
+10. **bancheck**: <br>
+    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
 
-8. **keywords**: <br>
-   It will check if the website the proxy has opened contains the text given<br>
+11. **keywords**: <br>
+    It will check if the website the proxy has opened contains the text given<br>
 
 </details>
 
 You can blacklist custom proxies by adding them in `blacklisted.txt`
 
-
----
-### <p align="center">Other</p>
+## <p align="center">Other
 
 <div align="center">
+<strong>this tool is made for educational purposes only</strong>
+<br>
+<br>
+If you need help with anything join our <a href="https://discord.gg/7FWAGXzhkC">discord server</a>
+<br>
+<br>
 Help me keep my projects open source by <a href="https://ko-fi.com/kuucheen">sponsoring</a> me
 </div>
