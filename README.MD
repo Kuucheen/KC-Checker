@@ -118,19 +118,19 @@ Note: Normally you don't have to change these settings
     <summary>Details for settings.json</summary>
 
 1. **threads**: <br>
-   Maximum number of threads<br>
+   Maximum number of threads
 
 2. **retries**: <br>
-   Number of retries for a request<br>
+   Number of retries for a request
 
 3. **timeout**: <br>
-   Timeout duration for requests in ms<br>
+   Timeout duration for requests in ms
 
-4. **privacy_mode**: <br>
-   If set to true, the proxies will be blured with "*" while checking
+4. **keep_alive**: <br>
+   If set to true, the request will have the keep-alive header
 
 5. **iplookup**: <br>
-   A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
+   A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a>
 
 6. **judges_threads**: <br>
    Maximum threads for selecting the judge
@@ -139,16 +139,22 @@ Note: Normally you don't have to change these settings
    Timeout duration of judges in ms
 
 8. **judges**: <br>
-   Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
+   Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request
 
 9. **blacklisted**:<br>
-   Websites that contain blacklisted ips. These ips won't be checked<br>
+   Websites that contain blacklisted ips. These ips won't be checked
 
 10. **bancheck**: <br>
-    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
+    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory
 
 11. **keywords**: <br>
-    It will check if the website the proxy has opened contains the text given<br>
+    It will check if the website the proxy has opened contains the text given
+
+12. **privacy_mode**: <br>
+   If set to true, the proxies will be blured with "*" while checking
+
+13. **copyToClipboard**: <br>
+   If set to true, all proxies checked will be copied to clipboard when saving them to a file
 
 </details>
 
