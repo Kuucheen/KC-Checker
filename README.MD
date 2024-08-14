@@ -38,7 +38,10 @@
 
 # Requirements
 
-Your terminal needs to support true color. <br><br>
+> [!IMPORTANT]
+> Your terminal needs to support true color, and using different fonts in your terminal may cause display errors.
+
+<br><br>
 These are tested terminals on different operating systems:
 
 | System | Tested | Notes |
