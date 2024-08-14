@@ -112,7 +112,8 @@ Now you have an executable. You can run it like described in **Getting Started**
 
 # Customize Settings
 
-Note: Normally you don't have to change these settings
+> [!NOTE]
+> For most users, the default settings will probably be sufficient.
 
 <details>
     <summary>Details for settings.json</summary>
