@@ -94,18 +94,6 @@ func GetTypeNames() []string {
 	return selected
 }
 
-func GetTypeNameForRequest() []string {
-	names := []string{"http", "http", "socks4", "socks5"}
-
-	var selected = []string{}
-
-	for _, i := range proxyType {
-		selected = append(selected, names[i])
-	}
-
-	return selected
-}
-
 func ContainsTypeName(str string) bool {
 	for _, s := range GetTypeNames() {
 		if s == str {
