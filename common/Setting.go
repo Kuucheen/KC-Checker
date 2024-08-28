@@ -70,3 +70,23 @@ func GetPrivacyMode() bool { return config.PrivacyMode }
 func DoBanCheck() bool {
 	return config.Bancheck != ""
 }
+
+func IsAllowedToCheck(typeNames []string) bool {
+
+	for _, name := range typeNames {
+		hasBeenFound := false
+
+		for _, judge := range config.Judges {
+			if strings.HasPrefix(judge, name) {
+				hasBeenFound = true
+				break
+			}
+		}
+
+		if !hasBeenFound {
+			return false
+		}
+	}
+
+	return true
+}

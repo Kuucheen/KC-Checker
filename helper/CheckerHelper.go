@@ -34,7 +34,7 @@ func GetProxyLevel(html string) int {
 }
 
 func Request(proxy *Proxy) (string, int, error) {
-	return RequestCustom(proxy, common.FastestJudge)
+	return RequestCustom(proxy, common.GetFastestJudgeForProtocol(proxy.Protocol))
 }
 
 // RequestCustom makes a request to the provided siteUrl with the provided proxy
@@ -42,14 +42,15 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 	//Errors would destroy the whole display while checking
 	log.SetOutput(io.Discard)
 
-	proxyURL, err := url.Parse(GetTypeNameForRequest() + "://" + proxyToCheck.Full)
+	proxyURL, err := url.Parse(strings.Replace(proxyToCheck.Protocol, "https", "http", 1) +
+		"://" + proxyToCheck.Full)
 	if err != nil {
 		return "Error parsing proxyToCheck URL", -1, err
 	}
 
 	var transport *http.Transport
 
-	switch GetTypeName() {
+	switch proxyToCheck.Protocol {
 	case "http", "https":
 		transport = &http.Transport{
 			Proxy: http.ProxyURL(proxyURL),

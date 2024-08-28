@@ -10,17 +10,19 @@ import (
 )
 
 type Proxy struct {
-	Ip     string
-	Port   int
-	Full   string
-	Level  int
-	checks int
-	time   int //in ms
+	Ip       string
+	Port     int
+	Full     string
+	Level    int
+	Protocol string
+	checks   int
+	time     int //in ms
 }
 
 var (
-	proxyType   int
-	Blacklisted []string
+	proxyType     []int
+	Blacklisted   []string
+	AllProxiesSum float64
 )
 
 // ToProxies converts a String array of proxies to proxy types
@@ -49,6 +51,23 @@ func ToProxies(arr []string) []*Proxy {
 	return newArr
 }
 
+// AddAllProtocols adds for every Protocol selected a proxy with the Protocol
+func AddAllProtocols(arr []*Proxy) []*Proxy {
+	typeNames := GetTypeNames()
+
+	var newArr []*Proxy
+
+	for _, protocol := range typeNames {
+		for _, proxy := range arr {
+			newProxy := *proxy
+			newProxy.Protocol = protocol
+			newArr = append(newArr, &newProxy)
+		}
+	}
+
+	return newArr
+}
+
 func checkIp(ip string) bool {
 	temp := strings.Split(ip, ".")
 
@@ -63,14 +82,38 @@ func checkIp(ip string) bool {
 	return true
 }
 
-func GetTypeName() string {
+func GetTypeNames() []string {
 	names := []string{"http", "https", "socks4", "socks5"}
-	return names[proxyType]
+
+	var selected = []string{}
+
+	for _, i := range proxyType {
+		selected = append(selected, names[i])
+	}
+
+	return selected
 }
 
-func GetTypeNameForRequest() string {
+func GetTypeNameForRequest() []string {
 	names := []string{"http", "http", "socks4", "socks5"}
-	return names[proxyType]
+
+	var selected = []string{}
+
+	for _, i := range proxyType {
+		selected = append(selected, names[i])
+	}
+
+	return selected
+}
+
+func ContainsTypeName(str string) bool {
+	for _, s := range GetTypeNames() {
+		if s == str {
+			return true
+		}
+	}
+
+	return false
 }
 
 func GetLevelNameOf(typ int) string {
@@ -78,7 +121,7 @@ func GetLevelNameOf(typ int) string {
 	return names[typ]
 }
 
-func SetType(typ int) {
+func SetType(typ []int) {
 	proxyType = typ
 }
 
@@ -97,6 +140,10 @@ func GetCleanedProxies() []*Proxy {
 			cleaned = append(cleaned, value)
 		}
 	}
+
+	cleaned = AddAllProtocols(cleaned)
+
+	AllProxiesSum = float64(len(cleaned))
 
 	return cleaned
 }

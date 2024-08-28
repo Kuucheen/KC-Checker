@@ -42,7 +42,7 @@ func (m waitingModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m waitingModel) View() string {
 	if found {
 		return style.Copy().Foreground(lipgloss.Color("#01BE85")).Render("Found " +
-			strconv.FormatFloat(helper.ProxySum, 'f', -1, 64) + " proxies")
+			strconv.Itoa(helper.ProxySum) + " proxies")
 	}
 
 	return style.Render("It seems like you forgot to put proxies\nin proxies.txt\n"+

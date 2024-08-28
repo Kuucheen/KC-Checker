@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -17,8 +18,9 @@ type JudgesTimes struct {
 type HostTimes []JudgesTimes
 
 var (
-	UserIP       string
-	FastestJudge string
+	UserIP        string
+	FastestJudge  string
+	FastestJudges map[string]string
 )
 
 func (ht HostTimes) Len() int {
@@ -41,6 +43,8 @@ var (
 )
 
 func CheckDomains() HostTimes {
+	FastestJudges = make(map[string]string)
+
 	configHosts := GetConfig().Judges
 	maxThreads := GetConfig().JudgesThreads
 
@@ -65,6 +69,17 @@ func CheckDomains() HostTimes {
 	sort.Sort(CurrentCheckedHosts)
 
 	FastestJudge = CurrentCheckedHosts[0].Judge
+
+	for _, host := range CurrentCheckedHosts {
+
+		protocol := strings.Split(host.Judge, "://")[0]
+
+		_, ok := FastestJudges[protocol]
+
+		if !ok {
+			FastestJudges[protocol] = host.Judge
+		}
+	}
 
 	// Return the unsorted CurrentCheckedHosts
 	return unsortedHosts
@@ -123,5 +138,13 @@ func GetLocalIP() string {
 		return UserIP
 	}
 
-	panic("Couldnt get the Users IP please provide an other ip sources!")
+	panic("Couldn't get the Users IP please provide an other ip sources!")
+}
+
+func GetFastestJudgeForProtocol(protocol string) string {
+	if strings.HasPrefix(protocol, "socks") {
+		return FastestJudge
+	}
+
+	return FastestJudges[protocol]
 }
