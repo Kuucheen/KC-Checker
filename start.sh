@@ -1,2 +1,2 @@
 go get .
-go run .
+go build .
