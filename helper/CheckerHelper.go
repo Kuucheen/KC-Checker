@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+var (
+	proxyHeader = []string{"HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"}
+)
+
 func GetProxyLevel(html string) int {
 	//When the headers contain UserIp proxy is transparent
 	if strings.Contains(html, common.UserIP) {
@@ -20,10 +24,8 @@ func GetProxyLevel(html string) int {
 	}
 
 	//When containing one of these headers proxy is anonymous
-	proxyVars := []string{"HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"}
-
-	for _, value := range proxyVars {
-		if strings.Contains(html, value) {
+	for _, header := range proxyHeader {
+		if strings.Contains(html, header) {
 			return 2
 		}
 	}
@@ -102,5 +104,11 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 		}
 	}()
 
-	return string(resBody), status, nil
+	html := string(resBody)
+
+	if !common.CheckForValidResponse(html) {
+		return "Invalid response", -1, nil
+	}
+
+	return html, status, nil
 }

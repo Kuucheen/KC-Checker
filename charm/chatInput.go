@@ -21,13 +21,11 @@ var (
 	selectedStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#624CAB"))
 	borderStyle       = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true)
 
-	checkButtonStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#57CC99")).
+	helpStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Width(threadPhase.GetWidth() / 2).Align(lipgloss.Center).MarginTop(2).Render
+	checkButtonStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#2b664c")).
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(lipgloss.Color("#419972")).
-				MarginTop(2).
-		//Background(lipgloss.Color("#419972")).
-		Blink(true)
-	//BorderStyle(lipgloss.ThickBorder())
+				MarginTop(2)
 )
 
 type model struct {
@@ -50,7 +48,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if !inSelectedItems(index) {
 				selectedItems = append(selectedItems, index)
 			} else {
-				newSelectedItems := []int{}
+				var newSelectedItems []int
 				for _, v := range selectedItems {
 					if v != index {
 						newSelectedItems = append(newSelectedItems, v)
@@ -58,28 +56,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				selectedItems = newSelectedItems
 			}
-			break
 		case tea.KeyRight.String():
 			if index < maxIndex && index != -1 {
 				index++
 			}
-			break
 		case tea.KeyLeft.String():
-			if index > 0 || index == -1 {
+			if index > 0 {
 				index--
 			}
-			break
 		case tea.KeyDown.String():
 			if index != -1 {
 				prevIndex = index
 				index = -1
 			}
-			break
 		case tea.KeyUp.String():
 			if index == -1 {
 				index = prevIndex
 			}
-			break
 		case tea.KeyCtrlC.String():
 			os.Exit(1)
 		}
@@ -94,7 +87,7 @@ func (m model) View() string {
 		return ""
 	}
 
-	style := borderStyle.Copy().
+	style := borderStyle.
 		MarginRight(threadPhase.GetWidth() / 8).
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderBottom(true)
@@ -129,9 +122,20 @@ func (m model) View() string {
 
 	selectBar = lipgloss.NewStyle().Align(lipgloss.Center).Width(threadPhase.GetWidth()).Render(selectBar)
 
-	selectBar = lipgloss.JoinVertical(lipgloss.Center, selectBar, checkButtonStyle.Render("CHECK"))
+	color := ""
 
-	return lipgloss.JoinVertical(lipgloss.Bottom, title, selectBar)
+	if index == -1 {
+		color = "#57CC99"
+	} else {
+		color = "#2b664c"
+	}
+
+	selectBar = lipgloss.JoinVertical(lipgloss.Center, selectBar,
+		checkButtonStyle.Foreground(lipgloss.Color(color)).Render("CHECK"))
+
+	selectBar = lipgloss.JoinVertical(lipgloss.Bottom, title, selectBar)
+
+	return lipgloss.JoinVertical(lipgloss.Center, selectBar, helpStyle("↑ up • ↓ down • → right • ← left • enter select"))
 }
 
 func GetProxyType() []int {

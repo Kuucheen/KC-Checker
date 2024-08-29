@@ -1,5 +1,5 @@
 {
-  "threads": 250,
+  "threads": 2000,
   "retries": 2,
   "timeout": 7500,
   "keep_alive": true,
@@ -11,8 +11,6 @@
   "judges": [
     "http://pascal.hoez.free.fr/azenv.php",
     "http://azenv.net",
-    "http://httpbin.org/get",
-    "https://httpbin.org/get",
     "https://www.cooleasy.com/azenv.php"
   ],
 

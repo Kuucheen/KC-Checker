@@ -21,6 +21,8 @@ var (
 	UserIP        string
 	FastestJudge  string
 	FastestJudges map[string]string
+
+	standardHeader = []string{"HTTP_HOST", "REQUEST_METHOD", "HTTP_USER", "REMOTE_ADDR", "REMOTE_PORT"}
 )
 
 func (ht HostTimes) Len() int {
@@ -101,16 +103,38 @@ func checkTimeAsync(host string) {
 }
 
 func checkTime(host string) time.Duration {
-	client := http.Client{
-		Timeout: time.Millisecond * time.Duration(config.JudgesTimeOut),
+	transport := &http.Transport{
+		DisableKeepAlives: !GetConfig().KeepAlive,
+		MaxIdleConns:      3,
+		IdleConnTimeout:   time.Duration(GetConfig().JudgesTimeOut) * time.Millisecond,
+	}
+
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   time.Millisecond * time.Duration(config.JudgesTimeOut),
 	}
 
 	startTime := time.Now()
 
-	_, err := client.Get(host)
-
+	resp, err := client.Get(host)
 	if err != nil {
 		return time.Hour * 999
+	}
+	defer func(Body io.ReadCloser) {
+		bodyErr := Body.Close()
+		if bodyErr != nil {
+
+		}
+	}(resp.Body)
+
+	// Read the response body
+	resBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return time.Hour * 999
+	}
+
+	if !CheckForValidResponse(string(resBody)) {
+		return time.Hour * 99
 	}
 
 	return time.Since(startTime)
@@ -147,4 +171,14 @@ func GetFastestJudgeForProtocol(protocol string) string {
 	}
 
 	return FastestJudges[protocol]
+}
+
+func CheckForValidResponse(html string) bool {
+	for _, header := range standardHeader {
+		if !strings.Contains(html, header) {
+			return false
+		}
+	}
+
+	return true
 }

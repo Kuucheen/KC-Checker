@@ -29,10 +29,10 @@ var (
 
 	re            = lipgloss.NewRenderer(os.Stdout)
 	baseStyle     = re.NewStyle().Padding(0, 1)
-	headerStyle   = baseStyle.Copy().Foreground(lipgloss.Color("252")).Bold(true)
-	selectedStyle = baseStyle.Copy().Foreground(lipgloss.Color("#01BE85")).Background(lipgloss.Color("#00432F"))
-	warningStyle  = baseStyle.Copy().Foreground(lipgloss.Color("#BEAA01")).Background(lipgloss.Color("#414300"))
-	errorStyle    = baseStyle.Copy().Foreground(lipgloss.Color("#BE0101")).Background(lipgloss.Color("#430000"))
+	headerStyle   = baseStyle.Foreground(lipgloss.Color("252")).Bold(true)
+	selectedStyle = baseStyle.Foreground(lipgloss.Color("#01BE85")).Background(lipgloss.Color("#00432F"))
+	warningStyle  = baseStyle.Foreground(lipgloss.Color("#BEAA01")).Background(lipgloss.Color("#414300"))
+	errorStyle    = baseStyle.Foreground(lipgloss.Color("#BE0101")).Background(lipgloss.Color("#430000"))
 
 	centerStyle = lipgloss.NewStyle().Width(threadPhase.GetWidth() - 5).Align(lipgloss.Center).Render
 )
@@ -113,6 +113,8 @@ func (m model) View() string {
 
 		if response == "999h0m0s" {
 			response = "error"
+		} else if response == "99h0m0s" {
+			response = "invalid"
 		}
 
 		data[val.Judge] = response
@@ -153,18 +155,20 @@ func (m model) View() string {
 				return selectedStyle
 			}
 
-			if dataString[row-1][1] == "error" {
+			currentData := dataString[row-1][1]
+
+			if currentData == "error" || currentData == "invalid" {
 				return errorStyle
 			}
 
-			if dataString[row-1][1] == "?" {
+			if currentData == "?" {
 				return warningStyle
 			}
 
 			if row%2 == 0 {
-				return baseStyle.Copy().Foreground(lipgloss.Color("245"))
+				return baseStyle.Foreground(lipgloss.Color("245"))
 			}
-			return baseStyle.Copy().Foreground(lipgloss.Color("252"))
+			return baseStyle.Foreground(lipgloss.Color("252"))
 		})
 
 	return centerStyle(str) + "\n" + centerStyle(t.Render())

@@ -55,7 +55,7 @@ func (m logoModel) View() string {
 		Foreground(lipgloss.Color("#6C44BB")).
 		SetString(logo)
 
-	var linestyle = style.Copy().
+	var linestyle = style.
 		Width(width).
 		Align(lipgloss.Center).
 		SetString(strings.Repeat("─", threadPhase.GetWidth()))
