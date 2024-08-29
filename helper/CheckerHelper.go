@@ -97,12 +97,7 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 		return "Error reading response body", -1, err
 	}
 
-	defer func() {
-		err := resp.Body.Close()
-		if err != nil {
-			return
-		}
-	}()
+	defer resp.Body.Close()
 
 	html := string(resBody)
 

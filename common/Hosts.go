@@ -120,12 +120,7 @@ func checkTime(host string) time.Duration {
 	if err != nil {
 		return time.Hour * 999
 	}
-	defer func(Body io.ReadCloser) {
-		bodyErr := Body.Close()
-		if bodyErr != nil {
-
-		}
-	}(resp.Body)
+	defer resp.Body.Close()
 
 	// Read the response body
 	resBody, err := io.ReadAll(resp.Body)

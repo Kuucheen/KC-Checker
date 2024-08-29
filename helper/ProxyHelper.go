@@ -4,9 +4,11 @@ import (
 	"KC-Checker/common"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Proxy struct {
@@ -27,25 +29,47 @@ var (
 
 // ToProxies converts a String array of proxies to proxy types
 func ToProxies(arr []string) []*Proxy {
-	var newArr []*Proxy
+	var wg sync.WaitGroup
+	proxyChan := make(chan *Proxy, len(arr))
+
+	// Process each proxy line concurrently
 	for _, value := range arr {
-		temp := strings.Split(value, ":")
+		wg.Add(1)
+		go func(value string) {
+			defer wg.Done()
+			temp := strings.Split(value, ":")
 
-		if !checkIp(temp[0]) {
-			continue
+			if len(temp) != 2 || !checkIp(temp[0]) {
+				return
+			}
+
+			dat, err := strconv.Atoi(temp[1])
+
+			if err != nil {
+				fmt.Printf("Not a valid Port: %v\n", err)
+				return
+			}
+
+			proxyChan <- &Proxy{
+				Ip:   temp[0],
+				Port: dat,
+				Full: value,
+			}
+		}(value)
+	}
+
+	// Close the channel when all processing is done
+	go func() {
+		wg.Wait()
+		close(proxyChan)
+	}()
+
+	// Collect results from the channel
+	var newArr []*Proxy
+	for proxy := range proxyChan {
+		if proxy != nil {
+			newArr = append(newArr, proxy)
 		}
-
-		dat, err := strconv.Atoi(temp[1])
-
-		if err != nil {
-			fmt.Print("Not a valid Port: ", err)
-		}
-
-		newArr = append(newArr, &Proxy{
-			Ip:   temp[0],
-			Port: dat,
-			Full: temp[0] + ":" + temp[1],
-		})
 	}
 
 	return newArr
@@ -69,17 +93,7 @@ func AddAllProtocols(arr []*Proxy) []*Proxy {
 }
 
 func checkIp(ip string) bool {
-	temp := strings.Split(ip, ".")
-
-	for _, value := range temp {
-		value, err := strconv.Atoi(value)
-
-		if err != nil || (value > 255 || value < 0) {
-			return false
-		}
-	}
-
-	return true
+	return net.ParseIP(ip) != nil && net.ParseIP(ip).To4() != nil
 }
 
 func GetTypeNames() []string {
@@ -119,12 +133,17 @@ func GetCleanedProxies() []*Proxy {
 		forbidden = append(forbidden, val)
 	}
 
+	forbiddenSet := make(map[string]struct{}, len(forbidden))
+	for _, ip := range forbidden {
+		forbiddenSet[ip] = struct{}{}
+	}
+
 	normal := ToProxies(GetProxiesFile("proxies.txt", true))
 
 	var cleaned []*Proxy
 
 	for _, value := range normal {
-		if !hasString(forbidden, value.Ip) {
+		if _, found := forbiddenSet[value.Ip]; !found {
 			cleaned = append(cleaned, value)
 		}
 	}
@@ -134,15 +153,6 @@ func GetCleanedProxies() []*Proxy {
 	AllProxiesSum = float64(len(cleaned))
 
 	return cleaned
-}
-
-func hasString(slice []string, str string) bool {
-	for _, s := range slice {
-		if s == str {
-			return true
-		}
-	}
-	return false
 }
 
 func ContainsSlice(slice []string, str string) bool {

@@ -2,6 +2,7 @@ package helper
 
 import (
 	"KC-Checker/common"
+	"bufio"
 	"fmt"
 	"golang.design/x/clipboard"
 	"os"
@@ -96,14 +97,65 @@ func GetFilePath(name string) string {
 	return fmt.Sprintf("output/%s/", name)
 }
 
-// GetProxiesFile gets proxies/ips from a file
-func GetProxiesFile(file string, full bool) []string {
-	dat, err := os.ReadFile(file)
+func GetFullProxies(file string) []string {
+	f, err := os.Open(file)
 	if err != nil {
 		fmt.Printf("Error while reading proxies: %s", err)
+		return nil
+	}
+	defer f.Close()
+
+	fileInfo, err := f.Stat()
+	if err != nil {
+		fmt.Printf("Error while getting file info: %s", err)
+		return nil
 	}
 
-	return GetProxies(string(dat), full)
+	// Preallocate slice capacity based on an estimate
+	var proxies []string
+	if size := fileInfo.Size(); size > 0 {
+		proxies = make([]string, 0, size/20) // Assuming average line length is 20 bytes
+	}
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		proxies = append(proxies, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Printf("Error while scanning file: %s", err)
+	}
+
+	return proxies
+}
+
+// GetProxiesFile gets proxies/ips from a file with an option to filter full proxies.
+func GetProxiesFile(file string, full bool) []string {
+	if full {
+		return GetFullProxies(file)
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		fmt.Printf("Error while reading proxies: %s", err)
+		return nil
+	}
+	defer f.Close()
+
+	var proxies []string
+	scanner := bufio.NewScanner(f)
+
+	for scanner.Scan() {
+		proxies = append(proxies, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Printf("Error while scanning file: %s", err)
+	}
+
+	ProxySum = len(proxies)
+
+	return proxies
 }
 
 func GetProxies(str string, full bool) []string {
