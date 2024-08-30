@@ -111,18 +111,14 @@ func check(proxy *Proxy) {
 		}
 
 		level = GetProxyLevel(body)
-		levels := []int{1, 2, 3}
+		mutex.Lock()
 
-		if isInList(level, levels) {
-			mutex.Lock()
+		proxy.Level = level
+		ProxyMap[level] = append(ProxyMap[level], proxy)
+		ProxyCountMap[level]++
+		proxyQueue.Enqueue(proxy)
 
-			proxy.Level = level
-			ProxyMap[level] = append(ProxyMap[level], proxy)
-			ProxyCountMap[level]++
-			proxyQueue.Enqueue(proxy)
-
-			mutex.Unlock()
-		}
+		mutex.Unlock()
 
 		responded = true
 		break
@@ -171,15 +167,6 @@ func GetQueue() ProxyQueue {
 
 func StopThreads() {
 	stop = true
-}
-
-func isInList(target int, list []int) bool {
-	for _, value := range list {
-		if value == target {
-			return true
-		}
-	}
-	return false
 }
 
 func GetCPM() float64 {
