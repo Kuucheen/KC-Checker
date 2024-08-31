@@ -41,12 +41,12 @@ func (m waitingModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m waitingModel) View() string {
 	if found {
-		return style.Copy().Foreground(lipgloss.Color("#01BE85")).Render("Found " +
-			strconv.FormatFloat(helper.ProxySum, 'f', -1, 64) + " proxies")
+		return style.Foreground(lipgloss.Color("#01BE85")).Render("Found " +
+			strconv.Itoa(helper.ProxySum) + " proxies")
 	}
 
 	return style.Render("It seems like you forgot to put proxies\nin proxies.txt\n"+
-		"You don't have to restart the program\n") + style.Copy().Foreground(lipgloss.Color("#FFF")).Render(
+		"You don't have to restart the program\n") + style.Foreground(lipgloss.Color("#FFF")).Render(
 		"\nIf you need proxies check out\nhttps://github.com/Kuucheen/KC-Scraper")
 }
 

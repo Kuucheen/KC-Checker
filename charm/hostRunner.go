@@ -17,15 +17,17 @@ func RunHostsDisplay() {
 	helper.SetType(GetProxyType())
 
 	//Select only the judges for the selected type
-	if helper.GetTypeName() == "https" {
-		common.RemoveHttpJudges()
-	} else if helper.GetTypeName() == "http" {
-		common.RemoveHttpsJudges()
-	}
+	if !helper.ContainsTypeName("socks4") && !helper.ContainsTypeName("socks5") {
+		if !helper.ContainsTypeName("http") {
+			common.RemoveHttpJudges()
+		} else if !helper.ContainsTypeName("https") {
+			common.RemoveHttpsJudges()
+		}
 
-	//No more judge left
-	if len(common.GetConfig().Judges) < 1 {
-		errorDisplays.PrintErrorForJudge(helper.GetTypeName())
+		//No more judge left
+		if !common.IsAllowedToCheck(helper.GetTypeNames()) {
+			errorDisplays.PrintErrorForJudge(helper.GetTypeNames())
+		}
 	}
 
 	//Check the judges for the fastest

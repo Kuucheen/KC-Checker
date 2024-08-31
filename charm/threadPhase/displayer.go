@@ -65,7 +65,7 @@ var (
 func RunBars() {
 	items := []list.Item{
 		item{title: "ip:port"},
-		item{title: "type://ip:port"},
+		item{title: "protocol://ip:port"},
 		item{title: "ip:port;ms"},
 	}
 
@@ -143,7 +143,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		anonymousCmd := m.anonymous.SetPercent(float64(anonymousCount) / sum)
 		transparentCmd := m.transparent.SetPercent(float64(transparentCount) / sum)
 		banCheckCmd := m.bancheck.SetPercent(float64(banCheckCount) / sum)
-		percentageCmd := m.percentage.SetPercent(float64(getSumWithInvalid()) / helper.ProxySum)
+		percentageCmd := m.percentage.SetPercent(float64(getSumWithInvalid()) / helper.AllProxiesSum)
 
 		return m, tea.Batch(tickCmd(), eliteCmd, anonymousCmd, transparentCmd, banCheckCmd, percentageCmd)
 

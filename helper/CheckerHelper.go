@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+var (
+	proxyHeader = []string{"HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"}
+)
+
 func GetProxyLevel(html string) int {
 	//When the headers contain UserIp proxy is transparent
 	if strings.Contains(html, common.UserIP) {
@@ -20,10 +24,8 @@ func GetProxyLevel(html string) int {
 	}
 
 	//When containing one of these headers proxy is anonymous
-	proxyVars := []string{"HTTP_X_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "HTTP_X_PROXY_ID"}
-
-	for _, value := range proxyVars {
-		if strings.Contains(html, value) {
+	for _, header := range proxyHeader {
+		if strings.Contains(html, header) {
 			return 2
 		}
 	}
@@ -34,7 +36,7 @@ func GetProxyLevel(html string) int {
 }
 
 func Request(proxy *Proxy) (string, int, error) {
-	return RequestCustom(proxy, common.FastestJudge)
+	return RequestCustom(proxy, common.GetFastestJudgeForProtocol(proxy.Protocol))
 }
 
 // RequestCustom makes a request to the provided siteUrl with the provided proxy
@@ -42,14 +44,15 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 	//Errors would destroy the whole display while checking
 	log.SetOutput(io.Discard)
 
-	proxyURL, err := url.Parse(GetTypeNameForRequest() + "://" + proxyToCheck.Full)
+	proxyURL, err := url.Parse(strings.Replace(proxyToCheck.Protocol, "https", "http", 1) +
+		"://" + proxyToCheck.Full)
 	if err != nil {
 		return "Error parsing proxyToCheck URL", -1, err
 	}
 
 	var transport *http.Transport
 
-	switch GetTypeName() {
+	switch proxyToCheck.Protocol {
 	case "http", "https":
 		transport = &http.Transport{
 			Proxy: http.ProxyURL(proxyURL),
@@ -69,7 +72,7 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 	}
 
 	transport.DisableKeepAlives = !common.GetConfig().KeepAlive
-	transport.MaxIdleConns = 3
+	transport.MaxIdleConns = min(common.GetConfig().Threads, 200)
 	transport.IdleConnTimeout = time.Duration(common.GetConfig().Timeout) * time.Millisecond
 
 	client := &http.Client{
@@ -86,6 +89,7 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 	if err != nil {
 		return "Error making HTTP request", -1, err
 	}
+	defer resp.Body.Close()
 
 	status := resp.StatusCode
 
@@ -94,12 +98,11 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 		return "Error reading response body", -1, err
 	}
 
-	defer func() {
-		err := resp.Body.Close()
-		if err != nil {
-			return
-		}
-	}()
+	html := string(resBody)
 
-	return string(resBody), status, nil
+	if !common.CheckForValidResponse(html) {
+		return "Invalid response", -1, nil
+	}
+
+	return html, status, nil
 }

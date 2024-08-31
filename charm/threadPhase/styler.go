@@ -17,9 +17,9 @@ var (
 	stopTime         = time.Now()
 	stoppedTime      = false
 	typeStyle        = lipgloss.NewStyle().Italic(true)
-	eliteStyle       = typeStyle.Copy().Foreground(lipgloss.Color("#624CAB"))
-	anonymousStyle   = typeStyle.Copy().Foreground(lipgloss.Color("#57CC99"))
-	transparentStyle = typeStyle.Copy().Foreground(lipgloss.Color("#4F4F4F"))
+	eliteStyle       = typeStyle.Foreground(lipgloss.Color("#624CAB"))
+	anonymousStyle   = typeStyle.Foreground(lipgloss.Color("#57CC99"))
+	transparentStyle = typeStyle.Foreground(lipgloss.Color("#4F4F4F"))
 )
 
 func getStyledQueue() string {

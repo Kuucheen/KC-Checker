@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -17,8 +18,11 @@ type JudgesTimes struct {
 type HostTimes []JudgesTimes
 
 var (
-	UserIP       string
-	FastestJudge string
+	UserIP        string
+	FastestJudge  string
+	FastestJudges map[string]string
+
+	standardHeader = []string{"HTTP_HOST", "REQUEST_METHOD", "HTTP_USER", "REMOTE_ADDR", "REMOTE_PORT"}
 )
 
 func (ht HostTimes) Len() int {
@@ -41,6 +45,8 @@ var (
 )
 
 func CheckDomains() HostTimes {
+	FastestJudges = make(map[string]string)
+
 	configHosts := GetConfig().Judges
 	maxThreads := GetConfig().JudgesThreads
 
@@ -66,6 +72,17 @@ func CheckDomains() HostTimes {
 
 	FastestJudge = CurrentCheckedHosts[0].Judge
 
+	for _, host := range CurrentCheckedHosts {
+
+		protocol := strings.Split(host.Judge, "://")[0]
+
+		_, ok := FastestJudges[protocol]
+
+		if !ok {
+			FastestJudges[protocol] = host.Judge
+		}
+	}
+
 	// Return the unsorted CurrentCheckedHosts
 	return unsortedHosts
 }
@@ -86,16 +103,33 @@ func checkTimeAsync(host string) {
 }
 
 func checkTime(host string) time.Duration {
-	client := http.Client{
-		Timeout: time.Millisecond * time.Duration(config.JudgesTimeOut),
+	transport := &http.Transport{
+		DisableKeepAlives: !GetConfig().KeepAlive,
+		MaxIdleConns:      3,
+		IdleConnTimeout:   time.Duration(GetConfig().JudgesTimeOut) * time.Millisecond,
+	}
+
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   time.Millisecond * time.Duration(config.JudgesTimeOut),
 	}
 
 	startTime := time.Now()
 
-	_, err := client.Get(host)
-
+	resp, err := client.Get(host)
 	if err != nil {
 		return time.Hour * 999
+	}
+	defer resp.Body.Close()
+
+	// Read the response body
+	resBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return time.Hour * 999
+	}
+
+	if !CheckForValidResponse(string(resBody)) {
+		return time.Hour * 99
 	}
 
 	return time.Since(startTime)
@@ -123,5 +157,23 @@ func GetLocalIP() string {
 		return UserIP
 	}
 
-	panic("Couldnt get the Users IP please provide an other ip sources!")
+	panic("Couldn't get the Users IP please provide an other ip sources!")
+}
+
+func GetFastestJudgeForProtocol(protocol string) string {
+	if strings.HasPrefix(protocol, "socks") {
+		return FastestJudge
+	}
+
+	return FastestJudges[protocol]
+}
+
+func CheckForValidResponse(html string) bool {
+	for _, header := range standardHeader {
+		if !strings.Contains(html, header) {
+			return false
+		}
+	}
+
+	return true
 }

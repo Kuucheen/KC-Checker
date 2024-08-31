@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -13,9 +14,11 @@ var errorStyling = lipgloss.NewStyle().
 	Align(lipgloss.Center).
 	Foreground(lipgloss.Color("#e64553"))
 
-func PrintErrorForJudge(ptype string) {
+func PrintErrorForJudge(ptype []string) {
+	ptypeStr := strings.Join(ptype, ", ")
+
 	fmt.Println(errorStyling.
-		Render("You need to have " + ptype + " judges in your settings file\n" +
+		Render("You need to have " + ptypeStr + " judges in your settings file\n" +
 			"Please restart the program"))
 
 	sleepForever()
