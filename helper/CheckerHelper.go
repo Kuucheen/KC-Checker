@@ -72,7 +72,7 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 	}
 
 	transport.DisableKeepAlives = !common.GetConfig().KeepAlive
-	transport.MaxIdleConns = 3
+	transport.MaxIdleConns = min(common.GetConfig().Threads, 200)
 	transport.IdleConnTimeout = time.Duration(common.GetConfig().Timeout) * time.Millisecond
 
 	client := &http.Client{
@@ -89,6 +89,7 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 	if err != nil {
 		return "Error making HTTP request", -1, err
 	}
+	defer resp.Body.Close()
 
 	status := resp.StatusCode
 
@@ -96,8 +97,6 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 	if err != nil {
 		return "Error reading response body", -1, err
 	}
-
-	defer resp.Body.Close()
 
 	html := string(resBody)
 
