@@ -40,9 +40,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case tea.KeyEnter.String():
-			if index == -1 && len(selectedItems) > 0 {
-				finished = true
-				return m, tea.Quit
+			if index == -1 {
+				if len(selectedItems) > 0 {
+					finished = true
+					return m, tea.Quit
+				} else {
+					break
+				}
 			}
 
 			if !inSelectedItems(index) {
