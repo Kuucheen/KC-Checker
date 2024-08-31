@@ -17,14 +17,14 @@ var (
 	index             = 0
 	selectedItems     []int
 	finished          = false
-	currentIndexStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#8A6EE3"))
-	selectedStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#624CAB"))
+	currentIndexStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#B393EB"))
+	selectedStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#4F3793"))
 	borderStyle       = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true)
 
-	helpStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Width(threadPhase.GetWidth() / 2).Align(lipgloss.Center).MarginTop(2).Render
-	checkButtonStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#2b664c")).
+	helpStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#504A61")).Width(threadPhase.GetWidth() / 2).Align(lipgloss.Center).MarginTop(2).Render
+	checkButtonStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#3E8262")).
 				BorderStyle(lipgloss.NormalBorder()).
-				BorderForeground(lipgloss.Color("#419972")).
+				BorderForeground(lipgloss.Color("#55B08C")).
 				MarginTop(2)
 )
 
@@ -100,7 +100,7 @@ func (m model) View() string {
 		Width(threadPhase.GetWidth()).
 		Align(lipgloss.Center).
 		MarginBottom(2).
-		Render(lipgloss.NewStyle().Background(lipgloss.Color("#5f5fd7")).
+		Render(lipgloss.NewStyle().Background(lipgloss.Color("#4B2D85")).
 			Render("What type of proxies do you want to check?"))
 
 	httpText := style.Render("HTTP")
@@ -118,7 +118,7 @@ func (m model) View() string {
 		} else if inSelectedItems(i) {
 			options[i] = selectedStyle.Render(options[i])
 		} else {
-			options[i] = lipgloss.NewStyle().Foreground(lipgloss.Color("#777777")).Render(options[i])
+			options[i] = lipgloss.NewStyle().Foreground(lipgloss.Color("#504A61")).Render(options[i])
 		}
 
 		selectBar = lipgloss.JoinHorizontal(lipgloss.Right, selectBar, options[i])
@@ -131,11 +131,11 @@ func (m model) View() string {
 	if index == -1 {
 		color = "#57CC99"
 	} else {
-		color = "#2b664c"
+		color = "#3E8262"
 	}
 
 	selectBar = lipgloss.JoinVertical(lipgloss.Center, selectBar,
-		checkButtonStyle.Foreground(lipgloss.Color(color)).Render("CHECK"))
+		checkButtonStyle.Foreground(lipgloss.Color(color)).BorderForeground(lipgloss.Color(color)).Render("CHECK"))
 
 	selectBar = lipgloss.JoinVertical(lipgloss.Bottom, title, selectBar)
 
