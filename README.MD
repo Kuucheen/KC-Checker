@@ -159,6 +159,9 @@ Now you have an executable. You can run it like described in **Getting Started**
 13. **copyToClipboard**: <br>
    If set to true, all proxies checked will be copied to clipboard when saving them to a file
 
+14. **autoSelect*: <br>
+   When setting http, https, socks4 or socks5 to true (or multiple at once) the check will automatically begin when the checker is started with the protocols you set to true
+
 </details>
 
 You can blacklist custom proxies by adding them in `blacklisted.txt`
