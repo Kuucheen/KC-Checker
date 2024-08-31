@@ -1,11 +1,11 @@
 {
-  "threads": 2000,
+  "threads": 250,
   "retries": 2,
   "timeout": 7500,
   "keep_alive": true,
-
+  
   "iplookup": "http://api.ipify.org/",
-
+  
   "judges_threads": 3,
   "judges_timeout": 5000,
   "judges": [
@@ -13,18 +13,25 @@
     "http://azenv.net",
     "https://www.cooleasy.com/azenv.php"
   ],
-
+  
   "blacklisted": [
     "https://www.spamhaus.org/drop/drop.txt",
     "https://www.spamhaus.org/drop/edrop.txt",
     "http://myip.ms/files/blacklist/general/latest_blacklist.txt"
   ],
-
+  
   "bancheck": "",
   "keywords": [
     ""
   ],
-
+  
   "privacy_mode": false,
-  "copyToClipboard": false
+  "copyToClipboard": false,
+  
+  "autoSelect": {
+    "http": false,
+    "https": false,
+    "socks4": false,
+    "socks5": false
+  }
 }

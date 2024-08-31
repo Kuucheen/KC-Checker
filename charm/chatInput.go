@@ -2,6 +2,7 @@ package charm
 
 import (
 	"KC-Checker/charm/threadPhase"
+	"KC-Checker/common"
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -143,6 +144,12 @@ func (m model) View() string {
 }
 
 func GetProxyType() []int {
+	checkForAutoUpdate()
+
+	if len(selectedItems) > 0 {
+		return selectedItems
+	}
+
 	m := model{}
 	p := tea.NewProgram(m)
 
@@ -162,4 +169,21 @@ func inSelectedItems(index int) bool {
 	}
 
 	return false
+}
+
+func checkForAutoUpdate() {
+	autoSelect := common.GetConfig().AutoSelect
+
+	if autoSelect.Http {
+		selectedItems = append(selectedItems, 0)
+	}
+	if autoSelect.Https {
+		selectedItems = append(selectedItems, 1)
+	}
+	if autoSelect.Socks4 {
+		selectedItems = append(selectedItems, 2)
+	}
+	if autoSelect.Socks5 {
+		selectedItems = append(selectedItems, 3)
+	}
 }

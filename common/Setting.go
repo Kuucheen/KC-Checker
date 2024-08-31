@@ -9,19 +9,27 @@ import (
 )
 
 type Config struct {
-	Threads         int      `json:"threads"`
-	Retries         int      `json:"retries"`
-	Timeout         int      `json:"timeout"`
-	KeepAlive       bool     `json:"keep_alive"`
-	IpLookup        string   `json:"iplookup"`
-	JudgesThreads   int      `json:"judges_threads"`
-	JudgesTimeOut   int      `json:"judges_timeout"`
-	Judges          []string `json:"judges"`
-	Blacklisted     []string `json:"blacklisted"`
-	Bancheck        string   `json:"bancheck"`
-	Keywords        []string `json:"keywords"`
-	PrivacyMode     bool     `json:"privacy_mode"`
-	CopyToClipboard bool     `json:"copyToClipboard"`
+	Threads         int        `json:"threads"`
+	Retries         int        `json:"retries"`
+	Timeout         int        `json:"timeout"`
+	KeepAlive       bool       `json:"keep_alive"`
+	IpLookup        string     `json:"iplookup"`
+	JudgesThreads   int        `json:"judges_threads"`
+	JudgesTimeOut   int        `json:"judges_timeout"`
+	Judges          []string   `json:"judges"`
+	Blacklisted     []string   `json:"blacklisted"`
+	Bancheck        string     `json:"bancheck"`
+	Keywords        []string   `json:"keywords"`
+	PrivacyMode     bool       `json:"privacy_mode"`
+	CopyToClipboard bool       `json:"copyToClipboard"`
+	AutoSelect      autoSelect `json:"autoSelect"`
+}
+
+type autoSelect struct {
+	Http   bool
+	Https  bool
+	Socks4 bool
+	Socks5 bool
 }
 
 var config Config
