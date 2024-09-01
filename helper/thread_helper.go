@@ -23,24 +23,22 @@ var (
 	HasFinished = false
 )
 
-type CPMCounter struct {
-	mu          sync.Mutex
-	checks      int
-	lastUpdated time.Time
-}
-
 type ProxyListing struct {
 	mu      sync.Mutex
 	proxies []*Proxy
+	length  int64
+	index   atomic.Int64
 }
 
-var cpmCounter = CPMCounter{}
 var proxyList = ProxyListing{}
 
 func Dispatcher(proxies []*Proxy) {
+	InitializeCPM()
 	threads := common.GetConfig().Threads
 	retries = common.GetConfig().Retries
 	proxyList.proxies = proxies
+	proxyList.length = int64(len(proxies))
+	proxyList.index.Store(0)
 
 	for i := 0; i < threads; i++ {
 		wg.Add(1)
@@ -49,18 +47,16 @@ func Dispatcher(proxies []*Proxy) {
 	}
 
 	wg.Wait()
-	cpmCounter.mu.Lock()
-	cpmCounter.checks = 0
-	cpmCounter.mu.Unlock()
+	EndCPMCounter()
 	HasFinished = true
 }
 
 func threadHandling() {
-	for len(proxyList.proxies) > 0 {
+	for proxyList.index.Load() < proxyList.length {
 		proxyList.mu.Lock()
-		if len(proxyList.proxies) > 0 {
-			proxy := proxyList.proxies[0]
-			proxyList.proxies = proxyList.proxies[1:]
+		if proxyList.index.Load() < proxyList.length {
+			proxy := proxyList.proxies[proxyList.index.Load()]
+			proxyList.index.Add(1)
 			proxyList.mu.Unlock()
 			check(proxy)
 		} else {
@@ -81,23 +77,11 @@ func check(proxy *Proxy) {
 	responded := false
 	level := 0
 
-	cpmCounter.mu.Lock()
-	cpmCounter.checks++
-	now := time.Now()
-
-	if now.Sub(cpmCounter.lastUpdated) >= time.Minute {
-		cpmCounter.checks = 1
-		cpmCounter.lastUpdated = now
-	} else {
-		cpmCounter.checks++
-	}
-	cpmCounter.mu.Unlock()
-
 	for proxy.checks <= retries {
-
 		timeStart := time.Now()
 		body, status, err := Request(proxy)
 		timeEnd := time.Now()
+		IncrementCheckCount()
 
 		proxy.time = int(timeEnd.Sub(timeStart).Milliseconds())
 
@@ -125,26 +109,24 @@ func check(proxy *Proxy) {
 	}
 
 	//Ban check for websites
-	if responded {
-		//Extra if because of performance (else)
-		if common.DoBanCheck() {
-			for i := 0; i < retries; i++ {
-				body, status, err := RequestCustom(proxy, common.GetConfig().Bancheck)
+	if responded && common.DoBanCheck() {
+		for i := 0; i < retries; i++ {
+			body, status, err := RequestCustom(proxy, common.GetConfig().Bancheck)
+			IncrementCheckCount()
 
-				if err != nil {
-					status = -1
-				}
+			if err != nil {
+				status = -1
+			}
 
-				if !(status >= 400) && status != -1 {
-					keywords := common.GetConfig().Keywords
+			if !(status >= 400) && status != -1 {
+				keywords := common.GetConfig().Keywords
 
-					if len(keywords) == 0 || len(keywords[0]) == 0 || ContainsSlice(keywords, body) {
-						mutex.Lock()
-						ProxyMapFiltered[level] = append(ProxyMapFiltered[level], proxy)
-						ProxyCountMap[-1]++
-						mutex.Unlock()
-						break
-					}
+				if len(keywords) == 0 || len(keywords[0]) == 0 || ContainsSlice(keywords, body) {
+					mutex.Lock()
+					ProxyMapFiltered[level] = append(ProxyMapFiltered[level], proxy)
+					ProxyCountMap[-1]++
+					mutex.Unlock()
+					break
 				}
 			}
 		}
@@ -167,17 +149,4 @@ func GetQueue() ProxyQueue {
 
 func StopThreads() {
 	stop = true
-}
-
-func GetCPM() float64 {
-	cpmCounter.mu.Lock()
-	defer cpmCounter.mu.Unlock()
-
-	now := time.Now()
-	if now.Sub(cpmCounter.lastUpdated) >= time.Minute {
-		defer func() { cpmCounter.checks = 0 }()
-		cpmCounter.lastUpdated = now
-	}
-
-	return float64(cpmCounter.checks) / now.Sub(cpmCounter.lastUpdated).Minutes()
 }
