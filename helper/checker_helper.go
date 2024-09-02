@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 )
 
 var (
@@ -41,65 +40,54 @@ func Request(proxy *Proxy) (string, int, error) {
 
 // RequestCustom makes a request to the provided siteUrl with the provided proxy
 func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
-	//Errors would destroy the whole display while checking
+	// Errors would destroy the whole display while checking
 	log.SetOutput(io.Discard)
 
-	proxyURL, err := url.Parse(strings.Replace(proxyToCheck.Protocol, "https", "http", 1) +
-		"://" + proxyToCheck.Full)
+	proxyURL, err := url.Parse(strings.Replace(proxyToCheck.Protocol, "https", "http", 1) + "://" + proxyToCheck.Full)
 	if err != nil {
 		return "Error parsing proxyToCheck URL", -1, err
 	}
 
-	var transport *http.Transport
+	privateTransport := GetSharedTransport()
 
 	switch proxyToCheck.Protocol {
 	case "http", "https":
-		transport = &http.Transport{
-			Proxy: http.ProxyURL(proxyURL),
-		}
+		privateTransport.Proxy = http.ProxyURL(proxyURL)
 	case "socks4", "socks5":
-		//udp doesn't work for some reason
+		// udp doesn't work for some reason
 		dialer, err := proxy.SOCKS5("tcp", proxyToCheck.Full, nil, proxy.Direct)
 		if err != nil {
 			return "Error creating SOCKS dialer", -1, err
 		}
-		transport = &http.Transport{
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				return dialer.Dial(network, addr)
-			},
-			DisableKeepAlives: !common.GetConfig().KeepAlive,
+		privateTransport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return dialer.Dial(network, addr)
 		}
 	}
 
-	transport.DisableKeepAlives = !common.GetConfig().KeepAlive
-	transport.MaxIdleConns = min(common.GetConfig().Threads, 200)
-	transport.IdleConnTimeout = time.Duration(common.GetConfig().Timeout) * time.Millisecond
-
-	client := &http.Client{
-		Transport: transport,
-		Timeout:   time.Millisecond * time.Duration(common.GetConfig().Timeout),
-	}
+	client := GetClientFromPool()
+	client.Transport = privateTransport
 
 	req, err := http.NewRequest("GET", siteUrl, nil)
 	if err != nil {
+		ReturnClientToPool(client)
 		return "Error creating HTTP request", -1, err
 	}
 
 	resp, err := client.Do(req)
+	ReturnClientToPool(client)
+
 	if err != nil {
 		return "Error making HTTP request", -1, err
 	}
 	defer resp.Body.Close()
 
 	status := resp.StatusCode
-
 	resBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "Error reading response body", -1, err
 	}
 
 	html := string(resBody)
-
 	if !common.CheckForValidResponse(html) {
 		return "Invalid response", -1, nil
 	}

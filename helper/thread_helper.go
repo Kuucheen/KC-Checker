@@ -32,8 +32,14 @@ type ProxyListing struct {
 
 var proxyList = ProxyListing{}
 
-func Dispatcher(proxies []*Proxy) {
+func Init() {
+	initClientPool()
+
 	InitializeCPM()
+}
+
+func Dispatcher(proxies []*Proxy) {
+	Init()
 	threads := common.GetConfig().Threads
 	retries = common.GetConfig().Retries
 	proxyList.proxies = proxies
@@ -44,6 +50,7 @@ func Dispatcher(proxies []*Proxy) {
 		wg.Add(1)
 		go threadHandling()
 		atomic.AddInt32(&threadsActive, 1)
+		time.Sleep(time.Millisecond * 5) //This is to prevent adding unnecessary httpClients to the pool
 	}
 
 	wg.Wait()
