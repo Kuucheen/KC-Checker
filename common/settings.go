@@ -12,7 +12,6 @@ type Config struct {
 	Threads         int        `json:"threads"`
 	Retries         int        `json:"retries"`
 	Timeout         int        `json:"timeout"`
-	KeepAlive       bool       `json:"keep_alive"`
 	IpLookup        string     `json:"iplookup"`
 	JudgesThreads   int        `json:"judges_threads"`
 	JudgesTimeOut   int        `json:"judges_timeout"`
@@ -23,6 +22,7 @@ type Config struct {
 	PrivacyMode     bool       `json:"privacy_mode"`
 	CopyToClipboard bool       `json:"copyToClipboard"`
 	AutoSelect      autoSelect `json:"autoSelect"`
+	Transport       transport  `json:"transport"`
 }
 
 type autoSelect struct {
@@ -30,6 +30,16 @@ type autoSelect struct {
 	Https  bool
 	Socks4 bool
 	Socks5 bool
+}
+
+type transport struct {
+	KeepAlive             bool `json:"KeepAlive"`
+	KeepAliveSeconds      int  `json:"KeepAliveSeconds"`
+	MaxIdleConns          int  `json:"MaxIdleConns"`
+	MaxIdleConnsPerHost   int  `json:"MaxIdleConnsPerHost"`
+	IdleConnTimeout       int  `json:"IdleConnTimeout"`
+	TLSHandshakeTimeout   int  `json:"TLSHandshakeTimeout"`
+	ExpectContinueTimeout int  `json:"ExpectContinueTimeout"`
 }
 
 var config Config

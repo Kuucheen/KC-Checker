@@ -104,7 +104,7 @@ func checkTimeAsync(host string) {
 
 func checkTime(host string) time.Duration {
 	transport := &http.Transport{
-		DisableKeepAlives: !GetConfig().KeepAlive,
+		DisableKeepAlives: !GetConfig().Transport.KeepAlive,
 		MaxIdleConns:      3,
 		IdleConnTimeout:   time.Duration(GetConfig().JudgesTimeOut) * time.Millisecond,
 	}

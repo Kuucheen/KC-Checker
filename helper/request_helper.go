@@ -14,17 +14,19 @@ var (
 )
 
 func initClientPool() {
+	configTransport := common.GetConfig().Transport
+
 	sharedTransport = &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   time.Duration(common.GetConfig().Timeout) * time.Millisecond,
-			KeepAlive: 30 * time.Second,
+			KeepAlive: time.Duration(configTransport.KeepAliveSeconds) * time.Second,
 		}).DialContext,
-		MaxIdleConns:          1000, // Adjust based on your needs
-		MaxIdleConnsPerHost:   100,  // Adjust based on your needs
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-		DisableKeepAlives:     !common.GetConfig().KeepAlive,
+		DisableKeepAlives:     !common.GetConfig().Transport.KeepAlive,
+		MaxIdleConns:          configTransport.MaxIdleConns,
+		MaxIdleConnsPerHost:   configTransport.MaxIdleConnsPerHost,
+		IdleConnTimeout:       time.Duration(configTransport.IdleConnTimeout) * time.Second,
+		TLSHandshakeTimeout:   time.Duration(configTransport.TLSHandshakeTimeout) * time.Second,
+		ExpectContinueTimeout: time.Duration(configTransport.ExpectContinueTimeout) * time.Second,
 	}
 
 	clientPool = sync.Pool{
@@ -37,7 +39,8 @@ func initClientPool() {
 	}
 }
 
-// Thread-safe borrowing and returning clients
+// GetClientFromPool Thread-safe borrowing and returning clients
+// This also creates a new http Client if non are available
 func GetClientFromPool() *http.Client {
 	return clientPool.Get().(*http.Client)
 }

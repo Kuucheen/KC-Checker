@@ -2,7 +2,6 @@
   "threads": 250,
   "retries": 2,
   "timeout": 7500,
-  "keep_alive": true,
   
   "iplookup": "http://api.ipify.org/",
   
@@ -33,5 +32,15 @@
     "https": false,
     "socks4": false,
     "socks5": false
+  },
+  
+  "transport": {
+    "KeepAlive":             true,
+    "KeepAliveSeconds":      100,
+    "MaxIdleConns":          1000,
+    "MaxIdleConnsPerHost":   100,
+    "IdleConnTimeout":       90,
+    "TLSHandshakeTimeout":   10,
+    "ExpectContinueTimeout": 1
   }
 }
