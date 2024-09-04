@@ -168,10 +168,17 @@ func GetBlacklisted() []string {
 	var blist []string
 
 	for _, site := range common.GetConfig().Blacklisted {
-		resp, _ := http.Get(site)
+		resp, err := http.Get(site)
+		if err != nil {
+			continue
+		}
 
 		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			continue
+		}
 		err = resp.Body.Close()
+
 		if err != nil {
 			continue
 		}
