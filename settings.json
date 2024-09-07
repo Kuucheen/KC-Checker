@@ -36,7 +36,7 @@
   "autoOutput": {
     "timeBetweenSafes": 15,
     
-    "ip:port": true,
+    "ip:port": false,
     "protocol://ip:port": false,
     "ip:port;ms": false
   },

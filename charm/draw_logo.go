@@ -23,7 +23,7 @@ type logoModel int
 var times int
 
 func (m logoModel) Init() tea.Cmd {
-	return tea.Batch(tick, tea.ClearScreen)
+	return tea.Batch(tick, tea.ClearScreen, tea.SetWindowTitle("KC-Checker - github.com/Kuucheen"))
 }
 
 func (m logoModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -60,7 +60,7 @@ func (m logoModel) View() string {
 		Align(lipgloss.Center).
 		SetString(strings.Repeat("─", threadPhase.GetWidth()))
 
-	str := style.Render() + "\n" + linestyle.Render() + "\n\n"
+	str := style.Render() + "\n" + linestyle.Render() + "\n"
 
 	return str
 }

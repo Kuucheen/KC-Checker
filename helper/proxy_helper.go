@@ -24,6 +24,7 @@ type Proxy struct {
 var (
 	proxyType     []int
 	Blacklisted   []string
+	AllProxies    []*Proxy
 	AllProxiesSum float64
 )
 
@@ -79,6 +80,10 @@ func ToProxies(arr []string) []*Proxy {
 func AddAllProtocols(arr []*Proxy) []*Proxy {
 	typeNames := GetTypeNames()
 
+	if len(typeNames) == 0 {
+		return arr
+	}
+
 	var newArr []*Proxy
 
 	for _, protocol := range typeNames {
@@ -128,6 +133,10 @@ func SetType(typ []int) {
 }
 
 func GetCleanedProxies() []*Proxy {
+	if AllProxiesSum > 0 {
+		return AddAllProtocols(AllProxies)
+	}
+
 	forbidden := GetProxiesFile("blacklisted.txt", false)
 	for _, val := range Blacklisted {
 		forbidden = append(forbidden, val)
@@ -148,11 +157,15 @@ func GetCleanedProxies() []*Proxy {
 		}
 	}
 
-	cleaned = AddAllProtocols(cleaned)
+	AllProxies = AddAllProtocols(cleaned)
 
 	AllProxiesSum = float64(len(cleaned))
 
-	return cleaned
+	if AllProxiesSum == 0 {
+		AllProxiesSum = -1
+	}
+
+	return AllProxies
 }
 
 func ContainsSlice(slice []string, str string) bool {

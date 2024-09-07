@@ -3,10 +3,13 @@ package charm
 import (
 	"KC-Checker/charm/threadPhase"
 	"KC-Checker/common"
+	"KC-Checker/helper"
 	"fmt"
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"os"
+	"strconv"
 )
 
 const (
@@ -27,13 +30,28 @@ var (
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(lipgloss.Color("#55B08C")).
 				MarginTop(2)
+
+	topStyle          = lipgloss.NewStyle().Align(lipgloss.Center).Width(threadPhase.GetWidth() / 3).Foreground(lipgloss.Color("#e3dcf7"))
+	middleStyle       = topStyle.BorderStyle(lipgloss.NormalBorder()).BorderLeft(true).BorderRight(true).BorderForeground(lipgloss.Color("#6C44BB"))
+	bottomBorderStyle = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true).
+				MarginBottom(2).BorderForeground(lipgloss.Color("#6C44BB"))
+
+	errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#D14D4D"))
 )
 
 type model struct {
+	spinner spinner.Model
+}
+
+func initialModel() model {
+	s := spinner.New()
+	s.Spinner = spinner.Meter
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("#624CAB")).MarginLeft(8)
+	return model{spinner: s}
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.SetWindowTitle("KC-Checker - github.com/Kuucheen")
+	return m.spinner.Tick
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -42,7 +60,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case tea.KeyEnter.String():
 			if index == -1 {
-				if len(selectedItems) > 0 {
+				if len(selectedItems) > 0 && helper.AllProxiesSum > 0 {
 					finished = true
 					return m, tea.Quit
 				} else {
@@ -84,6 +102,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	var cmd tea.Cmd
+	m.spinner, cmd = m.spinner.Update(msg)
 	return m, cmd
 }
 
@@ -91,6 +110,32 @@ func (m model) View() string {
 	if finished {
 		return ""
 	}
+
+	firstbox := topStyle.Render(threadPhase.GetFormattedInfoStr("Threads", strconv.Itoa(common.GetConfig().Threads)))
+
+	secBoxString := ""
+
+	if helper.AllProxiesSum == 0 {
+		secBoxString = "Proxies" + m.spinner.View()
+	} else if helper.AllProxiesSum == -1 {
+		secBoxString = errorStyle.Render("No proxies detected")
+	} else {
+		secBoxString = threadPhase.GetFormattedInfoStr("Proxies", strconv.Itoa(int(helper.AllProxiesSum)))
+	}
+
+	secBox := middleStyle.Render(secBoxString)
+
+	thirdBoxString := ""
+
+	if common.GetAutoOutput() > 0 {
+		thirdBoxString = lipgloss.NewStyle().MarginLeft(6).Foreground(lipgloss.Color("#57CC99")).Render("true")
+	} else {
+		thirdBoxString = errorStyle.MarginLeft(2).Render("false")
+	}
+
+	thirdBox := topStyle.Render("Autosafe", thirdBoxString)
+
+	combined := bottomBorderStyle.Render(lipgloss.JoinHorizontal(lipgloss.Right, firstbox, secBox, thirdBox))
 
 	style := borderStyle.
 		MarginRight(threadPhase.GetWidth() / 8).
@@ -140,7 +185,9 @@ func (m model) View() string {
 
 	selectBar = lipgloss.JoinVertical(lipgloss.Bottom, title, selectBar)
 
-	return lipgloss.JoinVertical(lipgloss.Center, selectBar, helpStyle("↑ up • ↓ down • → right • ← left • enter select"))
+	selectBar = lipgloss.JoinVertical(lipgloss.Center, selectBar, helpStyle("↑ up • ↓ down • → right • ← left • enter select"))
+
+	return lipgloss.JoinVertical(lipgloss.Center, combined, selectBar)
 }
 
 func GetProxyType() []int {
@@ -150,8 +197,9 @@ func GetProxyType() []int {
 		return selectedItems
 	}
 
-	m := model{}
-	p := tea.NewProgram(m)
+	go helper.GetCleanedProxies()
+
+	p := tea.NewProgram(initialModel())
 
 	if _, err := p.Run(); err != nil {
 		fmt.Println("Error running program:", err)

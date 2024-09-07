@@ -91,7 +91,7 @@ func getStyledInfo(elite int, anon int, trans int) string {
 		getFormattedInfo("Transparent:", trans) + "\n" +
 		getFormattedInfo("Invalid:", helper.GetInvalid()) + "\n" +
 		strings.Repeat("─", GetWidth()/4-6) + "\n" +
-		getFormattedInfoStr("Time:", strconv.Itoa(int(timeSince.Seconds()))+"."+ms+"s")
+		GetFormattedInfoStr("Time:", strconv.Itoa(int(timeSince.Seconds()))+"."+ms+"s")
 
 	return lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
@@ -119,7 +119,7 @@ func getFormattedInfo(str string, num int) string {
 	return str + strings.Repeat(" ", MAXLENGTH-length) + numStr
 }
 
-func getFormattedInfoStr(str string, value string) string {
+func GetFormattedInfoStr(str string, value string) string {
 	return str + strings.Repeat(" ", 18-len(str)-len(value)) + value
 }
 
