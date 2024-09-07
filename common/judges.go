@@ -2,7 +2,9 @@ package common
 
 import (
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"sort"
 	"strings"
 	"sync"
@@ -12,6 +14,7 @@ import (
 
 type JudgesTimes struct {
 	Judge        string
+	Ip           string
 	ResponseTime time.Duration
 }
 
@@ -70,7 +73,7 @@ func CheckDomains() HostTimes {
 	// Sort the original CurrentCheckedHosts based on response time
 	sort.Sort(CurrentCheckedHosts)
 
-	FastestJudge = CurrentCheckedHosts[0].Judge
+	FastestJudge = strings.Split(CurrentCheckedHosts[0].Judge, "://")[0] + "://" + CurrentCheckedHosts[0].Ip
 
 	for _, host := range CurrentCheckedHosts {
 
@@ -79,7 +82,7 @@ func CheckDomains() HostTimes {
 		_, ok := FastestJudges[protocol]
 
 		if !ok {
-			FastestJudges[protocol] = host.Judge
+			FastestJudges[protocol] = protocol + "://" + host.Ip
 		}
 	}
 
@@ -91,9 +94,10 @@ func checkTimeAsync(host string) {
 	defer wg.Done()
 	defer atomic.AddInt32(&currentThreads, -1)
 
-	responseTime := checkTime(host)
+	ip, responseTime := checkTime(host)
 	hostTime := JudgesTimes{
 		Judge:        host,
+		Ip:           ip,
 		ResponseTime: responseTime,
 	}
 
@@ -102,39 +106,54 @@ func checkTimeAsync(host string) {
 	mutex.Unlock()
 }
 
-func checkTime(host string) time.Duration {
-	transport := &http.Transport{
+// Main function to check the time
+func checkTime(host string) (string, time.Duration) {
+	// Parse the URL to extract the hostname
+	parsedURL, err := url.Parse(host)
+	if err != nil {
+		return "", time.Hour * 999
+	}
+
+	hostname := parsedURL.Hostname()
+
+	tempTransport := &http.Transport{
 		DisableKeepAlives: !GetConfig().Transport.KeepAlive,
 		MaxIdleConns:      3,
 		IdleConnTimeout:   time.Duration(GetConfig().JudgesTimeOut) * time.Millisecond,
 	}
 
 	client := &http.Client{
-		Transport: transport,
+		Transport: tempTransport,
 		Timeout:   time.Millisecond * time.Duration(config.JudgesTimeOut),
 	}
+
+	ips, err := net.LookupIP(hostname)
+	if err != nil || len(ips) == 0 {
+		return "", time.Hour * 999
+	}
+
+	ip := ips[0].String()
 
 	startTime := time.Now()
 
 	resp, err := client.Get(host)
 	if err != nil {
-		return time.Hour * 999
+		return ip, time.Hour * 999
 	}
 	defer resp.Body.Close()
 
 	// Read the response body
 	resBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return time.Hour * 999
+		return ip, time.Hour * 999
 	}
 
 	if !CheckForValidResponse(string(resBody)) {
-		return time.Hour * 99
+		return ip, time.Hour * 99
 	}
 
-	return time.Since(startTime)
+	return ip, time.Since(startTime)
 }
-
 func GetHosts() HostTimes {
 	return CurrentCheckedHosts
 }
