@@ -50,7 +50,7 @@ func Dispatcher(proxies []*Proxy) {
 		wg.Add(1)
 		go threadHandling()
 		atomic.AddInt32(&threadsActive, 1)
-		time.Sleep(time.Millisecond * 5) //This is to prevent adding unnecessary httpClients to the pool
+		time.Sleep(time.Millisecond * 1) //This is to prevent adding unnecessary httpClients to the pool
 	}
 
 	wg.Wait()

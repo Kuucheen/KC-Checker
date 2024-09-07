@@ -2,6 +2,7 @@ package helper
 
 import (
 	"KC-Checker/common"
+	"crypto/tls"
 	"golang.org/x/net/context"
 	"golang.org/x/net/proxy"
 	"io"
@@ -40,7 +41,7 @@ func Request(proxy *Proxy) (string, int, error) {
 
 // RequestCustom makes a request to the provided siteUrl with the provided proxy
 func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
-	// Errors would destroy the whole display while checking
+	// Suppress logging for this operation
 	log.SetOutput(io.Discard)
 
 	proxyURL, err := url.Parse(strings.Replace(proxyToCheck.Protocol, "https", "http", 1) + "://" + proxyToCheck.Full)
@@ -53,8 +54,14 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 	switch proxyToCheck.Protocol {
 	case "http", "https":
 		privateTransport.Proxy = http.ProxyURL(proxyURL)
+
+		if proxyToCheck.Protocol == "https" {
+			privateTransport.TLSClientConfig = &tls.Config{
+				InsecureSkipVerify: true,
+			}
+		}
+
 	case "socks4", "socks5":
-		// udp doesn't work for some reason
 		dialer, err := proxy.SOCKS5("tcp", proxyToCheck.Full, nil, proxy.Direct)
 		if err != nil {
 			return "Error creating SOCKS dialer", -1, err
@@ -75,10 +82,10 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 
 	resp, err := client.Do(req)
 	ReturnClientToPool(client)
-
 	if err != nil {
 		return "Error making HTTP request", -1, err
 	}
+
 	defer resp.Body.Close()
 
 	status := resp.StatusCode
