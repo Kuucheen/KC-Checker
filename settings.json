@@ -8,9 +8,8 @@
   "judges_threads": 3,
   "judges_timeout": 5000,
   "judges": [
-    "http://pascal.hoez.free.fr/azenv.php",
     "http://azenv.net",
-    "https://www.cooleasy.com/azenv.php"
+    "https://pool.proxyspace.pro/judge.php"
   ],
   
   "blacklisted": [
@@ -36,7 +35,7 @@
   
   "transport": {
     "KeepAlive":             true,
-    "KeepAliveSeconds":      100,
+    "KeepAliveSeconds":      30,
     "MaxIdleConns":          1000,
     "MaxIdleConnsPerHost":   100,
     "IdleConnTimeout":       90,
