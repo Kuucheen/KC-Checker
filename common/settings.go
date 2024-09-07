@@ -22,6 +22,7 @@ type Config struct {
 	PrivacyMode     bool       `json:"privacy_mode"`
 	CopyToClipboard bool       `json:"copyToClipboard"`
 	AutoSelect      autoSelect `json:"autoSelect"`
+	AutoOutput      autoOutput `json:"autoOutput"`
 	Transport       transport  `json:"transport"`
 }
 
@@ -30,6 +31,13 @@ type autoSelect struct {
 	Https  bool
 	Socks4 bool
 	Socks5 bool
+}
+
+type autoOutput struct {
+	TimeBetweenSafes int  `json:"timeBetweenSafes"`
+	IpPort           bool `json:"ip:port"`
+	ProtocolIpPort   bool `json:"protocol://ip:port"`
+	IpPortMs         bool `json:"ip:port;ms"`
 }
 
 type transport struct {
@@ -84,6 +92,20 @@ func GetConfig() Config {
 }
 
 func GetPrivacyMode() bool { return config.PrivacyMode }
+
+func GetAutoOutput() int {
+	auto := config.AutoOutput
+
+	if auto.IpPort {
+		return 1
+	} else if auto.ProtocolIpPort {
+		return 2
+	} else if auto.IpPortMs {
+		return 3
+	}
+
+	return -1
+}
 
 func DoBanCheck() bool {
 	return config.Bancheck != ""

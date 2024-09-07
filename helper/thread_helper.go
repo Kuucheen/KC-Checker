@@ -108,6 +108,7 @@ func check(proxy *Proxy) {
 		ProxyMap[level] = append(ProxyMap[level], proxy)
 		ProxyCountMap[level]++
 		proxyQueue.Enqueue(proxy)
+		AddToWriteQueue(proxy)
 
 		mutex.Unlock()
 
@@ -132,6 +133,7 @@ func check(proxy *Proxy) {
 					mutex.Lock()
 					ProxyMapFiltered[level] = append(ProxyMapFiltered[level], proxy)
 					ProxyCountMap[-1]++
+					AddToBancheckWriteQueue(proxy)
 					mutex.Unlock()
 					break
 				}

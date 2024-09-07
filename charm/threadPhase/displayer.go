@@ -110,9 +110,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch msg.String() {
 			case tea.KeyEnter.String():
 				if common.DoBanCheck() {
-					helper.Write(helper.ProxyMapFiltered, m.list.Index(), true)
+					helper.Write(helper.ProxyMapFiltered, m.list.Index(), true, false)
 				}
-				outputPath = "\n\n" + helper.Write(helper.ProxyMap, m.list.Index(), false)
+				outputPath = "\n\n" + helper.Write(helper.ProxyMap, m.list.Index(), false, false)
 			case tea.KeyRight.String():
 				m.list.CursorDown()
 			case tea.KeyLeft.String():

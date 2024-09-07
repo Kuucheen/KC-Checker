@@ -33,6 +33,14 @@
     "socks5": false
   },
   
+  "autoOutput": {
+    "timeBetweenSafes": 15,
+    
+    "ip:port": true,
+    "protocol://ip:port": false,
+    "ip:port;ms": false
+  },
+  
   "transport": {
     "KeepAlive":             true,
     "KeepAliveSeconds":      30,
