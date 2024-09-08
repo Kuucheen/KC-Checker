@@ -8,15 +8,16 @@ import (
 )
 
 var (
-	proxyQueue       = ProxyQueue{}
-	ProxyMap         = make(map[int][]*Proxy)
-	ProxyMapFiltered = make(map[int][]*Proxy) //ProxyMapFiltered is for Banchecked proxies
-	ProxyCountMap    = make(map[int]int)
-	stop             = false
-	Invalid          int32
-	threadsActive    int32
-	mutex            sync.Mutex
-	wg               sync.WaitGroup
+	proxyQueue            = ProxyQueue{}
+	ProxyMap              = make(map[int][]*Proxy)
+	ProxyMapFiltered      = make(map[int][]*Proxy) //ProxyMapFiltered is for Banchecked proxies
+	ProxyCountMap         = make(map[int]int)
+	ProxyProtocolCountMap = make(map[string]map[int]int)
+	stop                  = false
+	Invalid               int32
+	threadsActive         int32
+	mutex                 sync.Mutex
+	wg                    sync.WaitGroup
 
 	retries int
 
@@ -36,6 +37,11 @@ func Init() {
 	initClientPool()
 
 	InitializeCPM()
+
+	ProxyProtocolCountMap["http"] = make(map[int]int)
+	ProxyProtocolCountMap["https"] = make(map[int]int)
+	ProxyProtocolCountMap["socks4"] = make(map[int]int)
+	ProxyProtocolCountMap["socks5"] = make(map[int]int)
 }
 
 func Dispatcher(proxies []*Proxy) {
@@ -107,6 +113,7 @@ func check(proxy *Proxy) {
 		proxy.Level = level
 		ProxyMap[level] = append(ProxyMap[level], proxy)
 		ProxyCountMap[level]++
+		ProxyProtocolCountMap[proxy.Protocol][level]++
 		proxyQueue.Enqueue(proxy)
 		AddToWriteQueue(proxy)
 
@@ -119,7 +126,7 @@ func check(proxy *Proxy) {
 	//Ban check for websites
 	if responded && common.DoBanCheck() {
 		for i := 0; i < retries; i++ {
-			body, status, err := RequestCustom(proxy, common.GetConfig().Bancheck)
+			body, status, err := RequestCustom(proxy, common.GetConfig().Bancheck, true)
 			IncrementCheckCount()
 
 			if err != nil {
@@ -133,6 +140,7 @@ func check(proxy *Proxy) {
 					mutex.Lock()
 					ProxyMapFiltered[level] = append(ProxyMapFiltered[level], proxy)
 					ProxyCountMap[-1]++
+					ProxyProtocolCountMap[proxy.Protocol][-1]++
 					AddToBancheckWriteQueue(proxy)
 					mutex.Unlock()
 					break

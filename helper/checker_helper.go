@@ -36,11 +36,11 @@ func GetProxyLevel(html string) int {
 }
 
 func Request(proxy *Proxy) (string, int, error) {
-	return RequestCustom(proxy, common.GetFastestJudgeForProtocol(proxy.Protocol))
+	return RequestCustom(proxy, common.GetFastestJudgeForProtocol(proxy.Protocol), false)
 }
 
 // RequestCustom makes a request to the provided siteUrl with the provided proxy
-func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
+func RequestCustom(proxyToCheck *Proxy, siteUrl string, isBanCheck bool) (string, int, error) {
 	// Suppress logging for this operation
 	log.SetOutput(io.Discard)
 
@@ -95,7 +95,7 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string) (string, int, error) {
 	}
 
 	html := string(resBody)
-	if !common.CheckForValidResponse(html) {
+	if !isBanCheck && !common.CheckForValidResponse(html) {
 		return "Invalid response", -1, nil
 	}
 
