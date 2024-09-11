@@ -101,10 +101,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if helper.HasFinished {
 		threadPhase = false
 		SetStopTime()
+		finished = true
+		return m, tea.Quit
 	}
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		if msg.String() == "ctrl+c" {
+			os.Exit(200)
 			return m, tea.Quit
 		}
 		if threadPhase {

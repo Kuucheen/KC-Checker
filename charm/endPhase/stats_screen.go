@@ -88,7 +88,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 		case tea.KeyDown.String():
-			if customEnabled {
+			if customEnabled && index >= 0 {
 				prevIndex = index
 				index = -1
 			}
@@ -161,14 +161,14 @@ func (m model) View() string {
 
 	merged = lipgloss.JoinVertical(lipgloss.Left, merged, bottom)
 
-	savedBottomText := successStyle.Width(getWidth() / 3).Align(lipgloss.Center).Render(strings.Join(outputBuilder, ""))
+	savedBottomText := successStyle.Width(getWidth() / 2).Align(lipgloss.Center).Render(strings.Join(outputBuilder, ""))
 	saveButton := ""
 
 	if customEnabled {
 		if index == -1 {
-			saveButton = currentIndexStyle.Render("SAVE")
+			saveButton = currentIndexStyle.Align(lipgloss.Center).Width(getWidth() / 5).Render("SAVE")
 		} else {
-			saveButton = notSelectedStyle.Align(lipgloss.Right).Render(lipgloss.NewStyle().Width(getWidth() / 3).Align(lipgloss.Center).Render("SAVE"))
+			saveButton = notSelectedStyle.Align(lipgloss.Center).Width(getWidth() / 5).Render("SAVE")
 		}
 	}
 
@@ -290,10 +290,6 @@ func getTopLeftInfo() string {
 
 	bothMerged := lipgloss.JoinHorizontal(lipgloss.Right, leftMerged, rightMerged)
 	return bothMerged
-}
-
-func centerString(str string) string {
-	return lipgloss.NewStyle().Width(getWidth() / 5).Align(lipgloss.Center).Render(str)
 }
 
 func getTopItemInfo(leftStr string, rightStr string) string {
@@ -443,7 +439,7 @@ func setOptions() {
 	if customEnabled {
 		options = []item{
 			{title: customStyle.Render("Protocol"), format: "protocol"},
-			{title: customStyle.Render("IP"), format: "ip", seperatorIndicator: "protocol", seperators: []string{"://", ";"}},
+			{title: customStyle.Render("Ip"), format: "ip", seperatorIndicator: "protocol", seperators: []string{"://", ";"}},
 			{title: customStyle.Render("Port"), format: "port", seperatorIndicator: "ip", seperators: []string{":", ";"}},
 			{title: customStyle.Render("Time"), format: "time"},
 			{title: customStyle.Render("Country"), format: "country"},
