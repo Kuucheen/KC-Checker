@@ -60,7 +60,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		finished = true
 		go helper.Dispatcher(helper.GetCleanedProxies())
 
-		if common.GetAutoOutput() >= 0 {
+		if common.GetAutoOutput() != "" {
 			go helper.StartAutoOutputManager()
 		}
 

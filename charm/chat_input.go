@@ -139,7 +139,7 @@ func (m model) View() string {
 
 	thirdBoxString := ""
 
-	if common.GetAutoOutput() >= 0 {
+	if common.GetAutoOutput() != "" {
 		thirdBoxString = lipgloss.NewStyle().MarginLeft(6).Foreground(lipgloss.Color("#57CC99")).Render("enabled")
 	} else {
 		thirdBoxString = errorStyle.MarginLeft(2).Render("disabled")

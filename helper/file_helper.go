@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -23,7 +25,8 @@ var (
 	bancheckProxiesToWrite = make(map[int][]*Proxy)
 )
 
-func Write(proxies map[int][]*Proxy, style int, banCheck bool, appendToFile bool) string {
+func Write(proxies map[int][]*Proxy, outputFormat string, banCheck bool, appendToFile bool) string {
+	outputFormat = strings.ToLower(outputFormat)
 	pTypes := GetTypeNames()
 
 	if common.GetConfig().CopyToClipboard {
@@ -72,15 +75,12 @@ func Write(proxies map[int][]*Proxy, style int, banCheck bool, appendToFile bool
 					continue
 				}
 
-				var proxyString string
-				switch style {
-				case 0:
-					proxyString = proxy.Full
-				case 1:
-					proxyString = fmt.Sprintf("%s://%s", pType, proxy.Full)
-				case 2:
-					proxyString = fmt.Sprintf("%s;%d", proxy.Full, proxy.Time)
-				}
+				proxyString := outputFormat
+
+				proxyString = strings.Replace(proxyString, "ip", proxy.Ip, 1)
+				proxyString = strings.Replace(proxyString, "port", strconv.Itoa(proxy.Port), 1)
+				proxyString = strings.Replace(proxyString, "protocol", proxy.Protocol, 1)
+				proxyString = strings.Replace(proxyString, "time", strconv.Itoa(proxy.Time), 1)
 
 				_, err := fmt.Fprintln(f, proxyString)
 				_, allFileErr = fmt.Fprintln(allFile, proxyString)

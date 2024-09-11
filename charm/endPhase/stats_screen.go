@@ -29,13 +29,25 @@ var (
 	borderBottomStyle = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true)
 
 	currentIndexStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#B393EB"))
+	prevIndex         = 0
 	index             = 0
 	maxIndex          = 3
 
 	customEnabled = false
 
-	savedText = ""
+	savedText     = ""
+	options       []item
+	outputBuilder []string
 )
+
+type item struct {
+	title  string
+	format string
+
+	seperatorIndicator string
+	seperators         []string
+	seperatorIndex     int
+}
 
 type model struct {
 }
@@ -49,6 +61,8 @@ func RunEndScreen() {
 }
 
 func (m model) Init() tea.Cmd {
+	setOptions()
+
 	return tickCmd()
 }
 
@@ -73,16 +87,46 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				index = maxIndex
 			}
 
-		case tea.KeyEnter.String():
-			if index < maxIndex {
-				if common.DoBanCheck() {
-					helper.Write(helper.ProxyMapFiltered, index, true, false)
-				}
-				helper.Write(helper.ProxyMap, index, false, false)
+		case tea.KeyDown.String():
+			if customEnabled {
+				prevIndex = index
+				index = -1
+			}
 
-				savedText = successStyle.Render("Saved proxies in output folder!")
+		case tea.KeyUp.String():
+			if customEnabled {
+				index = prevIndex
+			}
+
+		case tea.KeyEnter.String():
+			if index == -1 {
+				writeToFile(strings.Join(outputBuilder, ""))
+				savedText = successStyle.Width(getWidth() / 3).Align(lipgloss.Center).Render("Saved proxies in output folder!")
+				return m, nil
+			}
+
+			if index < maxIndex {
+				if !customEnabled {
+					writeToFile(options[index].format)
+
+					savedText = successStyle.Width(getWidth() / 3).Align(lipgloss.Center).Render("Saved proxies in output folder!")
+				} else {
+					setOutputBuilder()
+				}
+
 			} else {
 				customEnabled = !customEnabled
+				setOptions()
+				savedText = successStyle.Width(getWidth() / 3).Align(lipgloss.Center).Render("")
+
+				if customEnabled {
+					maxIndex = 5
+				} else {
+					outputBuilder = []string{}
+					maxIndex = 3
+				}
+
+				index = maxIndex
 			}
 		}
 		return m, nil
@@ -116,15 +160,82 @@ func (m model) View() string {
 	bottom := getSelection()
 
 	merged = lipgloss.JoinVertical(lipgloss.Left, merged, bottom)
-	merged = lipgloss.JoinVertical(lipgloss.Left, merged, savedText)
+
+	savedBottomText := successStyle.Width(getWidth() / 3).Align(lipgloss.Center).Render(strings.Join(outputBuilder, ""))
+	saveButton := ""
+
+	if customEnabled {
+		if index == -1 {
+			saveButton = currentIndexStyle.Render("SAVE")
+		} else {
+			saveButton = notSelectedStyle.Align(lipgloss.Right).Render(lipgloss.NewStyle().Width(getWidth() / 3).Align(lipgloss.Center).Render("SAVE"))
+		}
+	}
+
+	savedBottomText = lipgloss.JoinHorizontal(lipgloss.Left, savedBottomText, savedText, saveButton)
+	savedBottomText = lipgloss.NewStyle().MarginTop(1).Render(savedBottomText)
+
+	merged = lipgloss.JoinVertical(lipgloss.Left, merged, savedBottomText)
 
 	return merged
 }
 
 func tickCmd() tea.Cmd {
-	return tea.Tick(time.Millisecond*250, func(t time.Time) tea.Msg {
+	return tea.Tick(threadPhase.DurationBetweenRefresh, func(t time.Time) tea.Msg {
 		return tickMsg(t)
 	})
+}
+
+func writeToFile(format string) {
+	if common.DoBanCheck() {
+		helper.Write(helper.ProxyMapFiltered, format, true, false)
+	}
+	helper.Write(helper.ProxyMap, format, false, false)
+}
+
+func setOutputBuilder() {
+	option := &options[index]
+
+	if outputContains(option.format) && len(option.seperators) == 0 {
+		outputBuilder = removeElementByValue(outputBuilder, options[index].format)
+		option.seperatorIndex = 0
+	} else {
+		shouldAppend := true
+		if len(outputBuilder) > 0 {
+			if option.seperatorIndicator != "" {
+				removedItem := false
+				if outputContains(option.format) {
+					if option.seperatorIndex >= len(option.seperators) || len(outputBuilder) < 2 {
+						outputBuilder = removeElementByValue(outputBuilder, option.format)
+						options[index].seperatorIndex = 0
+						removedItem = true
+					} else {
+						if getIndexOf(outputBuilder, option.format) > 0 {
+							outputBuilder[getIndexOf(outputBuilder, option.format)-1] = option.seperators[option.seperatorIndex]
+						}
+					}
+					shouldAppend = false
+
+				} else if getIndexOf(outputBuilder, option.seperatorIndicator)+1 == getIndexOf(outputBuilder, option.format) ||
+					outputBuilder[len(outputBuilder)-1] == option.seperatorIndicator {
+					outputBuilder = append(outputBuilder, option.seperators[option.seperatorIndex])
+				} else {
+					outputBuilder = append(outputBuilder, ";")
+					option.seperatorIndex = len(option.seperators) - 1
+				}
+
+				if !removedItem {
+					option.seperatorIndex++
+				}
+			} else {
+				outputBuilder = append(outputBuilder, ";")
+			}
+		}
+
+		if shouldAppend {
+			outputBuilder = append(outputBuilder, option.format)
+		}
+	}
 }
 
 func getTopRightInfo() string {
@@ -292,12 +403,6 @@ func getFastestProxies() string {
 }
 
 func getSelection() string {
-	style := borderBottomStyle.
-		Width(threadPhase.GetWidth() / 4).
-		Align(lipgloss.Center).
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderBottom(true).Render
-
 	title := lipgloss.NewStyle().
 		Width(threadPhase.GetWidth()).
 		Align(lipgloss.Center).
@@ -305,22 +410,15 @@ func getSelection() string {
 		MarginTop(1).
 		Render(titleStyle.Render("How do you want to save the proxies?"))
 
-	options := []string{}
-	if customEnabled {
-
-	} else {
-		options = []string{style("ip:port"), style("protocol://ip:port"), style("ip:port;ms"), style("CUSTOM")}
-	}
-
 	optionBar := ""
 
 	for i := 0; i < len(options); i++ {
 		str := ""
 
 		if index%len(options) == i {
-			str = currentIndexStyle.Render(options[i])
+			str = currentIndexStyle.Render(options[i].title)
 		} else {
-			str = notSelectedStyle.Render(options[i])
+			str = notSelectedStyle.Render(options[i].title)
 		}
 
 		optionBar = lipgloss.JoinHorizontal(lipgloss.Right, optionBar, str)
@@ -331,6 +429,31 @@ func getSelection() string {
 	title = lipgloss.JoinVertical(lipgloss.Center, title, optionBar)
 
 	return title
+}
+
+func setOptions() {
+	style := borderBottomStyle.
+		Width(threadPhase.GetWidth() / 4).
+		Align(lipgloss.Center).Render
+
+	customStyle := borderBottomStyle.
+		Width(threadPhase.GetWidth() / 6).
+		Align(lipgloss.Center)
+
+	if customEnabled {
+		options = []item{
+			{title: customStyle.Render("Protocol"), format: "protocol"},
+			{title: customStyle.Render("IP"), format: "ip", seperatorIndicator: "protocol", seperators: []string{"://", ";"}},
+			{title: customStyle.Render("Port"), format: "port", seperatorIndicator: "ip", seperators: []string{":", ";"}},
+			{title: customStyle.Render("Time"), format: "time"},
+			{title: customStyle.Render("Country"), format: "country"},
+			{title: customStyle.BorderBottom(false).MarginBottom(1).Render("CANCEL")}}
+	} else {
+		options = []item{{title: style("ip:port"), format: "ip:port"},
+			{title: style("protocol://ip:port"), format: "protocol://ip:port"},
+			{title: style("ip:port;time"), format: "ip:port;time"},
+			{title: style("CUSTOM"), format: "protocol://ip:port"}}
+	}
 }
 
 func getLenOfProxies() int {
@@ -345,4 +468,38 @@ func getLenOfProxies() int {
 
 func getWidth() int {
 	return threadPhase.GetWidth() - 5
+}
+
+func outputContains(str string) bool {
+	for _, s := range outputBuilder {
+		if s == str {
+			return true
+		}
+	}
+
+	return false
+}
+
+func removeElementByValue(slice []string, value string) []string {
+	for i, v := range slice {
+		if v == value {
+			if i > 0 {
+				return append(slice[:i-1], slice[i+1:]...)
+			} else if len(slice) >= 2 {
+				return append(slice[:i], slice[i+2:]...)
+			}
+			return append(slice[:i], slice[i+1:]...)
+		}
+	}
+	return slice // return original slice if value not found
+}
+
+func getIndexOf(slice []string, str string) int {
+	for i, s := range slice {
+		if s == str {
+			return i
+		}
+	}
+
+	return -1
 }

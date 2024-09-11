@@ -94,18 +94,18 @@ func GetConfig() Config {
 
 func GetPrivacyMode() bool { return config.PrivacyMode }
 
-func GetAutoOutput() int {
+func GetAutoOutput() string {
 	auto := config.AutoOutput
 
 	if auto.IpPort {
-		return 0
+		return "ip:port"
 	} else if auto.ProtocolIpPort {
-		return 1
+		return "protocol://ip:port"
 	} else if auto.IpPortMs {
-		return 2
+		return "ip:port;ms"
 	}
 
-	return -1
+	return ""
 }
 
 func DoBanCheck() bool {

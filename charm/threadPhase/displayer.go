@@ -23,7 +23,7 @@ func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
 var (
-	durationBetween time.Duration
+	DurationBetweenRefresh time.Duration
 
 	titleStyle = func() lipgloss.Style {
 		b := lipgloss.RoundedBorder()
@@ -92,7 +92,7 @@ func RunBars() {
 }
 
 func (m model) Init() tea.Cmd {
-	durationBetween = time.Duration(common.GetConfig().TimeBetweenRefresh) * time.Millisecond
+	DurationBetweenRefresh = time.Duration(common.GetConfig().TimeBetweenRefresh) * time.Millisecond
 
 	return tickCmd()
 }
@@ -118,10 +118,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		} else {
 			switch msg.String() {
 			case tea.KeyEnter.String():
-				if common.DoBanCheck() {
-					helper.Write(helper.ProxyMapFiltered, m.list.Index(), true, false)
-				}
-				outputPath = "\n\n" + helper.Write(helper.ProxyMap, m.list.Index(), false, false)
+				//if common.DoBanCheck() {
+				//	helper.Write(helper.ProxyMapFiltered, m.list.Index(), true, false)
+				//}
+				//outputPath = "\n\n" + helper.Write(helper.ProxyMap, m.list.Index(), false, false)
 			case tea.KeyRight.String():
 				m.list.CursorDown()
 			case tea.KeyLeft.String():
@@ -225,7 +225,7 @@ func (m model) renderLine(str string) string {
 }
 
 func tickCmd() tea.Cmd {
-	return tea.Tick(durationBetween, func(t time.Time) tea.Msg {
+	return tea.Tick(DurationBetweenRefresh, func(t time.Time) tea.Msg {
 		return tickMsg(t)
 	})
 }
