@@ -96,7 +96,7 @@ func check(proxy *Proxy) {
 		timeEnd := time.Now()
 		IncrementCheckCount()
 
-		proxy.time = int(timeEnd.Sub(timeStart).Milliseconds())
+		proxy.Time = int(timeEnd.Sub(timeStart).Milliseconds())
 
 		if err != nil {
 			status = -1
@@ -156,7 +156,7 @@ func GetInvalid() int {
 	return int(atomic.LoadInt32(&Invalid))
 }
 
-func GetActive() int {
+func GetThreadsActive() int {
 	return int(atomic.LoadInt32(&threadsActive))
 }
 

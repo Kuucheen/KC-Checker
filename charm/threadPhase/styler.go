@@ -17,9 +17,9 @@ var (
 	stopTime         = time.Now()
 	stoppedTime      = false
 	typeStyle        = lipgloss.NewStyle().Italic(true)
-	eliteStyle       = typeStyle.Foreground(lipgloss.Color("#624CAB"))
-	anonymousStyle   = typeStyle.Foreground(lipgloss.Color("#57CC99"))
-	transparentStyle = typeStyle.Foreground(lipgloss.Color("#4F4F4F"))
+	EliteStyle       = typeStyle.Foreground(lipgloss.Color("#624CAB"))
+	AnonymousStyle   = typeStyle.Foreground(lipgloss.Color("#57CC99"))
+	TransparentStyle = typeStyle.Foreground(lipgloss.Color("#4F4F4F"))
 )
 
 func getStyledQueue() string {
@@ -33,17 +33,17 @@ func getStyledQueue() string {
 
 		switch value.Level {
 		case 3:
-			addString += eliteStyle.Render("E")
+			addString += EliteStyle.Render("E")
 		case 2:
-			addString += anonymousStyle.Render("A")
+			addString += AnonymousStyle.Render("A")
 		case 1:
-			addString += transparentStyle.Render("T")
+			addString += TransparentStyle.Render("T")
 		}
 
 		ip := value.Full
 
 		if common.GetPrivacyMode() {
-			ip = getPrivateFull(value)
+			ip = GetPrivateFull(value)
 		}
 
 		times := strings.Repeat(" ", int(math.Abs(float64(21-len(ip)))))
@@ -63,7 +63,7 @@ func getStyledQueue() string {
 		Render(retString)
 }
 
-func getPrivateFull(proxy *helper.Proxy) string {
+func GetPrivateFull(proxy *helper.Proxy) string {
 	splitted := strings.Split(proxy.Ip, ".")
 	return splitted[0] + "." +
 		strings.Repeat("*", len(splitted[1])) + "." +
@@ -73,15 +73,9 @@ func getPrivateFull(proxy *helper.Proxy) string {
 }
 
 func getStyledInfo(elite int, anon int, trans int) string {
-	activeThreads := helper.GetActive()
+	activeThreads := helper.GetThreadsActive()
 
-	timeCalc := time.Now()
-
-	if stoppedTime {
-		timeCalc = stopTime
-	}
-
-	timeSince := timeCalc.Sub(startTime)
+	timeSince := GetTimeSince()
 
 	ms := fmt.Sprintf("%02d", int(timeSince.Milliseconds()%1000/10))
 
@@ -100,6 +94,16 @@ func getStyledInfo(elite int, anon int, trans int) string {
 		PaddingRight(6).
 		Width(GetWidth() / 4).
 		Render(retString)
+}
+
+func GetTimeSince() time.Duration {
+	timeCalc := time.Now()
+
+	if stoppedTime {
+		timeCalc = stopTime
+	}
+
+	return timeCalc.Sub(startTime)
 }
 
 func GetWidth() int {

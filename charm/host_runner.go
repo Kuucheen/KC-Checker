@@ -1,6 +1,7 @@
 package charm
 
 import (
+	"KC-Checker/charm/endPhase"
 	"KC-Checker/charm/errorDisplays"
 	"KC-Checker/charm/hosts"
 	"KC-Checker/charm/threadPhase"
@@ -50,4 +51,6 @@ func RunHostsDisplay() {
 	//Sets the current time & start the checker
 	threadPhase.SetTime()
 	threadPhase.RunBars()
+
+	endPhase.RunEndScreen()
 }

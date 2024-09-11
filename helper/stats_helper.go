@@ -48,3 +48,7 @@ func GetCPM() int64 {
 
 	return int64(currentCPM)
 }
+
+func GetChecksCompleted() int64 {
+	return atomic.LoadInt64(&checksCompleted)
+}

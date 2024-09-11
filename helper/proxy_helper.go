@@ -18,7 +18,7 @@ type Proxy struct {
 	Level    int
 	Protocol string
 	checks   int
-	time     int //in ms
+	Time     int //in ms
 }
 
 var (

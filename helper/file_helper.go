@@ -43,7 +43,7 @@ func Write(proxies map[int][]*Proxy, style int, banCheck bool, appendToFile bool
 		for _, proxyLevel := range proxies {
 
 			sort.Slice(proxyLevel, func(i, j int) bool {
-				return proxyLevel[i].time < proxyLevel[j].time
+				return proxyLevel[i].Time < proxyLevel[j].Time
 			})
 
 			filtered := ""
@@ -79,7 +79,7 @@ func Write(proxies map[int][]*Proxy, style int, banCheck bool, appendToFile bool
 				case 1:
 					proxyString = fmt.Sprintf("%s://%s", pType, proxy.Full)
 				case 2:
-					proxyString = fmt.Sprintf("%s;%d", proxy.Full, proxy.time)
+					proxyString = fmt.Sprintf("%s;%d", proxy.Full, proxy.Time)
 				}
 
 				_, err := fmt.Fprintln(f, proxyString)

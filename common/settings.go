@@ -9,21 +9,22 @@ import (
 )
 
 type Config struct {
-	Threads         int        `json:"threads"`
-	Retries         int        `json:"retries"`
-	Timeout         int        `json:"timeout"`
-	IpLookup        string     `json:"iplookup"`
-	JudgesThreads   int        `json:"judges_threads"`
-	JudgesTimeOut   int        `json:"judges_timeout"`
-	Judges          []string   `json:"judges"`
-	Blacklisted     []string   `json:"blacklisted"`
-	Bancheck        string     `json:"bancheck"`
-	Keywords        []string   `json:"keywords"`
-	PrivacyMode     bool       `json:"privacy_mode"`
-	CopyToClipboard bool       `json:"copyToClipboard"`
-	AutoSelect      autoSelect `json:"autoSelect"`
-	AutoOutput      autoOutput `json:"autoOutput"`
-	Transport       transport  `json:"transport"`
+	Threads            int        `json:"threads"`
+	Retries            int        `json:"retries"`
+	Timeout            int        `json:"timeout"`
+	PrivacyMode        bool       `json:"privacy_mode"`
+	CopyToClipboard    bool       `json:"copyToClipboard"`
+	AutoSelect         autoSelect `json:"autoSelect"`
+	AutoOutput         autoOutput `json:"autoOutput"`
+	TimeBetweenRefresh int        `json:"timeBetweenRefresh"`
+	IpLookup           string     `json:"iplookup"`
+	JudgesThreads      int        `json:"judges_threads"`
+	JudgesTimeOut      int        `json:"judges_timeout"`
+	Judges             []string   `json:"judges"`
+	Blacklisted        []string   `json:"blacklisted"`
+	Bancheck           string     `json:"bancheck"`
+	Keywords           []string   `json:"keywords"`
+	Transport          transport  `json:"transport"`
 }
 
 type autoSelect struct {
@@ -97,11 +98,11 @@ func GetAutoOutput() int {
 	auto := config.AutoOutput
 
 	if auto.IpPort {
-		return 1
+		return 0
 	} else if auto.ProtocolIpPort {
-		return 2
+		return 1
 	} else if auto.IpPortMs {
-		return 3
+		return 2
 	}
 
 	return -1
