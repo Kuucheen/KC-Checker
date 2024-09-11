@@ -23,6 +23,8 @@ func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
 var (
+	durationBetween time.Duration
+
 	titleStyle = func() lipgloss.Style {
 		b := lipgloss.RoundedBorder()
 		b.Right = "├"
@@ -59,6 +61,8 @@ type model struct {
 var (
 	threadPhase = true
 
+	finished = false
+
 	outputPath = ""
 )
 
@@ -88,6 +92,8 @@ func RunBars() {
 }
 
 func (m model) Init() tea.Cmd {
+	durationBetween = time.Duration(common.GetConfig().TimeBetweenRefresh) * time.Millisecond
+
 	return tickCmd()
 }
 
@@ -105,6 +111,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if msg.String() == "q" {
 				threadPhase = false
 				helper.StopThreads()
+				finished = true
+				SetStopTime()
+				return m, tea.Quit
 			}
 		} else {
 			switch msg.String() {
@@ -170,6 +179,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+	if finished {
+		return ""
+	}
+
 	pad := "\n\n"
 
 	bars := lipgloss.NewStyle().
@@ -212,7 +225,7 @@ func (m model) renderLine(str string) string {
 }
 
 func tickCmd() tea.Cmd {
-	return tea.Tick(time.Millisecond*100, func(t time.Time) tea.Msg {
+	return tea.Tick(durationBetween, func(t time.Time) tea.Msg {
 		return tickMsg(t)
 	})
 }
