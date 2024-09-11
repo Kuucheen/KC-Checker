@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"os"
 	"strconv"
+	"time"
 )
 
 const (
@@ -45,7 +46,18 @@ type model struct {
 
 func initialModel() model {
 	s := spinner.New()
-	s.Spinner = spinner.Meter
+	s.Spinner = spinner.Spinner{
+		Frames: []string{
+			"▱▱▱",
+			"▰▱▱",
+			"▰▰▱",
+			"▰▰▰",
+			"▱▰▰",
+			"▱▱▰",
+		},
+		FPS: time.Second / 5, //nolint:gomnd
+	}
+
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("#624CAB")).MarginLeft(8)
 	return model{spinner: s}
 }
@@ -127,10 +139,10 @@ func (m model) View() string {
 
 	thirdBoxString := ""
 
-	if common.GetAutoOutput() > 0 {
-		thirdBoxString = lipgloss.NewStyle().MarginLeft(6).Foreground(lipgloss.Color("#57CC99")).Render("true")
+	if common.GetAutoOutput() >= 0 {
+		thirdBoxString = lipgloss.NewStyle().MarginLeft(6).Foreground(lipgloss.Color("#57CC99")).Render("enabled")
 	} else {
-		thirdBoxString = errorStyle.MarginLeft(2).Render("false")
+		thirdBoxString = errorStyle.MarginLeft(2).Render("disabled")
 	}
 
 	thirdBox := topStyle.Render("Autosafe", thirdBoxString)
