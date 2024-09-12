@@ -135,7 +135,11 @@ func SetType(typ []int) {
 
 func GetCleanedProxies() []*Proxy {
 	if AllProxiesSum > 0 {
-		return AddAllProtocols(AllProxies)
+		withAllProtocols := AddAllProtocols(AllProxies)
+
+		AllProxiesSum = float64(len(withAllProtocols))
+
+		return withAllProtocols
 	}
 
 	forbidden := GetProxiesFile("blacklisted.txt", false)
