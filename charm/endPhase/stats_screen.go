@@ -371,7 +371,9 @@ func getFastestProxies() string {
 
 	retString := title
 
-	for i := 0; i < min(4, len(allProxies)); i++ {
+	mimimumValue := min(4, len(allProxies))
+
+	for i := 0; i < mimimumValue; i++ {
 		addString := ""
 		switch allProxies[i].Level {
 		case 3:
@@ -390,7 +392,9 @@ func getFastestProxies() string {
 
 		times := strings.Repeat(" ", int(math.Abs(float64(21-len(ip)))))
 
-		ms := successStyle.Render(strconv.Itoa(allProxies[i].Time) + "ms")
+		strTime := strconv.Itoa(allProxies[i].Time)
+
+		ms := successStyle.Render(strings.Repeat(" ", len(strconv.Itoa(allProxies[mimimumValue-1].Time))-len(strTime)) + strTime + "ms")
 
 		retString += fmt.Sprintf("[%s]%s %s %s\n", addString, times, ip, ms)
 	}
