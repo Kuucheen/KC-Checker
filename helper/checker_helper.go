@@ -69,6 +69,9 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string, isBanCheck bool) (string
 		privateTransport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 			return dialer.Dial(network, addr)
 		}
+		privateTransport.TLSClientConfig = &tls.Config{
+			InsecureSkipVerify: true,
+		}
 	}
 
 	client := GetClientFromPool()
