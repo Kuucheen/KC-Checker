@@ -18,7 +18,8 @@
 
     "ip:port": false,
     "protocol://ip:port": false,
-    "ip:port;ms": false
+    "ip:port;ms": false,
+    "custom": ""
   },
   
   "timeBetweenRefresh": 100,

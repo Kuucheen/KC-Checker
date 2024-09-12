@@ -35,10 +35,11 @@ type autoSelect struct {
 }
 
 type autoOutput struct {
-	TimeBetweenSafes int  `json:"timeBetweenSafes"`
-	IpPort           bool `json:"ip:port"`
-	ProtocolIpPort   bool `json:"protocol://ip:port"`
-	IpPortMs         bool `json:"ip:port;ms"`
+	TimeBetweenSafes int    `json:"timeBetweenSafes"`
+	IpPort           bool   `json:"ip:port"`
+	ProtocolIpPort   bool   `json:"protocol://ip:port"`
+	IpPortMs         bool   `json:"ip:port;ms"`
+	Custom           string `json:"custom"`
 }
 
 type transport struct {
@@ -105,7 +106,7 @@ func GetAutoOutput() string {
 		return "ip:port;ms"
 	}
 
-	return ""
+	return auto.Custom
 }
 
 func DoBanCheck() bool {
