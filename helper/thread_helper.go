@@ -119,6 +119,8 @@ func check(proxy *Proxy) {
 
 		mutex.Unlock()
 
+		proxy.Country = GetCountryCode(proxy)
+
 		responded = true
 		break
 	}
