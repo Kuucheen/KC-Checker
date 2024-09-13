@@ -120,7 +120,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				savedText = successStyle.Width(getWidth() / 3).Align(lipgloss.Center).Render("")
 
 				if customEnabled {
-					maxIndex = 5
+					maxIndex = 6
 				} else {
 					outputBuilder = []string{}
 					maxIndex = 3
@@ -359,6 +359,9 @@ func getFastestProxies() string {
 
 	for _, proxyLevel := range helper.ProxyMap {
 		sort.Slice(proxyLevel, func(i, j int) bool {
+			if proxyLevel[i].Time == proxyLevel[j].Time {
+				return proxyLevel[i].Full < proxyLevel[j].Full
+			}
 			return proxyLevel[i].Time < proxyLevel[j].Time
 		})
 
@@ -366,6 +369,9 @@ func getFastestProxies() string {
 	}
 
 	sort.Slice(allProxies, func(i, j int) bool {
+		if allProxies[i].Time == allProxies[j].Time {
+			return allProxies[i].Full < allProxies[j].Full
+		}
 		return allProxies[i].Time < allProxies[j].Time
 	})
 
@@ -437,7 +443,7 @@ func setOptions() {
 		Align(lipgloss.Center).Render
 
 	customStyle := borderBottomStyle.
-		Width(threadPhase.GetWidth() / 6).
+		Width(threadPhase.GetWidth() / 7).
 		Align(lipgloss.Center)
 
 	if customEnabled {
@@ -447,6 +453,7 @@ func setOptions() {
 			{title: customStyle.Render("Port"), format: "port", seperatorIndicator: "ip", seperators: []string{":", ";"}},
 			{title: customStyle.Render("Time"), format: "time"},
 			{title: customStyle.Render("Country"), format: "country"},
+			{title: customStyle.Render("Type"), format: "type"},
 			{title: customStyle.BorderBottom(false).MarginBottom(1).Render("CANCEL")}}
 	} else {
 		options = []item{{title: style("ip:port"), format: "ip:port"},
