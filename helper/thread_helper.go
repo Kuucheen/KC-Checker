@@ -116,10 +116,10 @@ func check(proxy *Proxy) {
 		ProxyProtocolCountMap[proxy.Protocol][level]++
 		proxyQueue.Enqueue(proxy)
 		AddToWriteQueue(proxy)
+		proxy.Country = GetCountryCode(proxy.Ip)
+		proxy.Type = DetermineProxyType(proxy.Ip)
 
 		mutex.Unlock()
-
-		proxy.Country = GetCountryCode(proxy)
 
 		responded = true
 		break

@@ -18,6 +18,7 @@ type Proxy struct {
 	Level    int
 	Protocol string
 	Country  string
+	Type     string
 	checks   int
 	Time     int //in ms
 }
