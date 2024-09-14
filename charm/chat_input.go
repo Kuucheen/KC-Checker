@@ -18,10 +18,7 @@ const (
 )
 
 var (
-	prevIndex         = 0
-	index             = 0
 	selectedItems     []int
-	finished          = false
 	currentIndexStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#B393EB"))
 	selectedStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#4F3793"))
 	borderStyle       = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true)
@@ -41,7 +38,10 @@ var (
 )
 
 type model struct {
-	spinner spinner.Model
+	spinner   spinner.Model
+	prevIndex int
+	index     int
+	finished  bool
 }
 
 func initialModel() model {
@@ -71,42 +71,42 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case tea.KeyEnter.String():
-			if index == -1 {
+			if m.index == -1 {
 				if len(selectedItems) > 0 && helper.AllProxiesSum > 0 {
-					finished = true
+					m.finished = true
 					return m, tea.Quit
 				} else {
 					break
 				}
 			}
 
-			if !inSelectedItems(index) {
-				selectedItems = append(selectedItems, index)
+			if !inSelectedItems(m.index) {
+				selectedItems = append(selectedItems, m.index)
 			} else {
 				var newSelectedItems []int
 				for _, v := range selectedItems {
-					if v != index {
+					if v != m.index {
 						newSelectedItems = append(newSelectedItems, v)
 					}
 				}
 				selectedItems = newSelectedItems
 			}
 		case tea.KeyRight.String():
-			if index < maxIndex && index != -1 {
-				index++
+			if m.index < maxIndex && m.index != -1 {
+				m.index++
 			}
 		case tea.KeyLeft.String():
-			if index > 0 {
-				index--
+			if m.index > 0 {
+				m.index--
 			}
 		case tea.KeyDown.String():
-			if index != -1 {
-				prevIndex = index
-				index = -1
+			if m.index != -1 {
+				m.prevIndex = m.index
+				m.index = -1
 			}
 		case tea.KeyUp.String():
-			if index == -1 {
-				index = prevIndex
+			if m.index == -1 {
+				m.index = m.prevIndex
 			}
 		case tea.KeyCtrlC.String():
 			os.Exit(1)
@@ -119,7 +119,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	if finished {
+	if m.finished {
 		return ""
 	}
 
@@ -171,7 +171,7 @@ func (m model) View() string {
 	var selectBar = ""
 
 	for i := 0; i < len(options); i++ {
-		if index%len(options) == i {
+		if m.index%len(options) == i {
 			options[i] = currentIndexStyle.Render(options[i])
 		} else if inSelectedItems(i) {
 			options[i] = selectedStyle.Render(options[i])
@@ -186,7 +186,7 @@ func (m model) View() string {
 
 	color := ""
 
-	if index == -1 {
+	if m.index == -1 {
 		color = "#57CC99"
 	} else {
 		color = "#3E8262"
@@ -211,9 +211,7 @@ func GetProxyType() []int {
 
 	go helper.GetCleanedProxies()
 
-	p := tea.NewProgram(initialModel())
-
-	if _, err := p.Run(); err != nil {
+	if _, err := tea.NewProgram(initialModel()).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
