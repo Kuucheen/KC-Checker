@@ -21,11 +21,13 @@ type JudgesTimes struct {
 type HostTimes []JudgesTimes
 
 var (
-	UserIP        string
-	FastestJudge  string
-	FastestJudges map[string]string
+	UserIP            string
+	FastestJudge      string
+	FastestJudgeName  *url.URL
+	FastestJudges     map[string]string
+	FastestJudgesName map[string]*url.URL
 
-	standardHeader = []string{"HTTP_HOST", "REQUEST_METHOD", "HTTP_USER", "REMOTE_ADDR", "REMOTE_PORT"}
+	standardHeader = []string{"HTTP_HOST", "REQUEST_METHOD", "REMOTE_ADDR", "REMOTE_PORT"}
 )
 
 func (ht HostTimes) Len() int {
@@ -49,6 +51,7 @@ var (
 
 func CheckDomains() HostTimes {
 	FastestJudges = make(map[string]string)
+	FastestJudgesName = make(map[string]*url.URL)
 
 	configHosts := GetConfig().Judges
 	maxThreads := GetConfig().JudgesThreads
@@ -73,7 +76,12 @@ func CheckDomains() HostTimes {
 	// Sort the original CurrentCheckedHosts based on response time
 	sort.Sort(CurrentCheckedHosts)
 
-	FastestJudge = strings.Split(CurrentCheckedHosts[0].Judge, "://")[0] + "://" + CurrentCheckedHosts[0].Ip
+	FastestJudge = CurrentCheckedHosts[0].Ip
+
+	u, err := url.Parse(CurrentCheckedHosts[0].Judge)
+	if err == nil {
+		FastestJudgeName = u
+	}
 
 	for _, host := range CurrentCheckedHosts {
 
@@ -82,7 +90,16 @@ func CheckDomains() HostTimes {
 		_, ok := FastestJudges[protocol]
 
 		if !ok {
-			FastestJudges[protocol] = protocol + "://" + host.Ip
+			FastestJudges[protocol] = host.Ip
+		}
+
+		_, ok = FastestJudgesName[protocol]
+
+		if !ok {
+			u, err = url.Parse(host.Judge)
+			if err == nil {
+				FastestJudgesName[protocol] = u
+			}
 		}
 	}
 
@@ -185,6 +202,14 @@ func GetFastestJudgeForProtocol(protocol string) string {
 	}
 
 	return FastestJudges[protocol]
+}
+
+func GetFastestJudgeNameForProtocol(protocol string) *url.URL {
+	if strings.HasPrefix(protocol, "socks") {
+		return FastestJudgeName
+	}
+
+	return FastestJudgesName[protocol]
 }
 
 func CheckForValidResponse(html string) bool {

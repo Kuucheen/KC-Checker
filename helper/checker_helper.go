@@ -4,13 +4,13 @@ import (
 	"KC-Checker/common"
 	"crypto/tls"
 	"golang.org/x/net/context"
-	"golang.org/x/net/proxy"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 var (
@@ -36,11 +36,11 @@ func GetProxyLevel(html string) int {
 }
 
 func Request(proxy *Proxy) (string, int, error) {
-	return RequestCustom(proxy, common.GetFastestJudgeForProtocol(proxy.Protocol), false)
+	return RequestCustom(proxy, common.GetFastestJudgeForProtocol(proxy.Protocol), common.GetFastestJudgeNameForProtocol(proxy.Protocol), false)
 }
 
 // RequestCustom makes a request to the provided siteUrl with the provided proxy
-func RequestCustom(proxyToCheck *Proxy, siteUrl string, isBanCheck bool) (string, int, error) {
+func RequestCustom(proxyToCheck *Proxy, targetIp string, siteName *url.URL, isBanCheck bool) (string, int, error) {
 	// Suppress logging for this operation
 	log.SetOutput(io.Discard)
 
@@ -51,33 +51,26 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string, isBanCheck bool) (string
 
 	privateTransport := GetSharedTransport()
 
-	switch proxyToCheck.Protocol {
-	case "http", "https":
-		privateTransport.Proxy = http.ProxyURL(proxyURL)
+	dialer := &net.Dialer{
+		Timeout: time.Millisecond * time.Duration(common.GetConfig().Timeout),
+	}
 
-		if proxyToCheck.Protocol == "https" {
-			privateTransport.TLSClientConfig = &tls.Config{
-				InsecureSkipVerify: true,
-			}
+	privateTransport.Proxy = http.ProxyURL(proxyURL)
+	privateTransport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+		if strings.Contains(addr, siteName.Hostname()) {
+			addr = net.JoinHostPort(targetIp, siteName.Port())
 		}
-
-	case "socks4", "socks5":
-		dialer, err := proxy.SOCKS5("tcp", proxyToCheck.Full, nil, proxy.Direct)
-		if err != nil {
-			return "Error creating SOCKS dialer", -1, err
-		}
-		privateTransport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
-			return dialer.Dial(network, addr)
-		}
-		privateTransport.TLSClientConfig = &tls.Config{
-			InsecureSkipVerify: true,
-		}
+		return dialer.DialContext(ctx, network, addr)
+	}
+	privateTransport.TLSClientConfig = &tls.Config{
+		ServerName:         siteName.Hostname(),
+		InsecureSkipVerify: false,
 	}
 
 	client := GetClientFromPool()
 	client.Transport = privateTransport
 
-	req, err := http.NewRequest("GET", siteUrl, nil)
+	req, err := http.NewRequest("GET", siteName.String(), nil)
 	if err != nil {
 		ReturnClientToPool(client)
 		return "Error creating HTTP request", -1, err
@@ -88,7 +81,6 @@ func RequestCustom(proxyToCheck *Proxy, siteUrl string, isBanCheck bool) (string
 	if err != nil {
 		return "Error making HTTP request", -1, err
 	}
-
 	defer resp.Body.Close()
 
 	status := resp.StatusCode

@@ -136,26 +136,27 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	merged := lipgloss.JoinHorizontal(lipgloss.Left, getTopLeftInfo(), getTopRightInfo())
-
-	merged = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true).Render(merged)
-
 	proxyTable := lipgloss.NewStyle().
-		Width(getWidth()/2 + 1).
-		Align(lipgloss.Center).
+		Width(getWidth() / 2).
 		BorderStyle(lipgloss.NormalBorder()).
-		BorderRight(true).
+		BorderTop(true).
+		Align(lipgloss.Center).
 		Render(getProxyTable())
 
+	leftMerged := lipgloss.JoinVertical(lipgloss.Left, getTopLeftInfo(), proxyTable)
+	leftMerged = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderRight(true).Render(leftMerged)
+
 	fastestProxies := lipgloss.NewStyle().
-		Width(getWidth()/2 - 1).
+		Width(getWidth()/2 + 1).
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderTop(true).
 		Align(lipgloss.Center).
 		Render(getFastestProxies())
 
-	midMerge := lipgloss.JoinHorizontal(lipgloss.Top, proxyTable, fastestProxies)
-	midMerge = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true).Render(midMerge)
+	rightMerged := lipgloss.JoinVertical(lipgloss.Left, getTopRightInfo(), fastestProxies)
 
-	merged = lipgloss.JoinVertical(lipgloss.Left, merged, midMerge)
+	merged := lipgloss.JoinHorizontal(lipgloss.Left, leftMerged, rightMerged)
+	merged = borderBottomStyle.Render(merged)
 
 	bottom := getSelection()
 
@@ -166,9 +167,9 @@ func (m model) View() string {
 
 	if customEnabled {
 		if index == -1 {
-			saveButton = currentIndexStyle.Align(lipgloss.Center).Width(getWidth() / 5).Render("SAVE")
+			saveButton = currentIndexStyle.Align(lipgloss.Center).Width(getWidth()/5 + getWidth()/30).Render("SAVE")
 		} else {
-			saveButton = notSelectedStyle.Align(lipgloss.Center).Width(getWidth() / 5).Render("SAVE")
+			saveButton = notSelectedStyle.Align(lipgloss.Center).Width(getWidth()/5 + getWidth()/30).Render("SAVE")
 		}
 	}
 
@@ -241,25 +242,22 @@ func setOutputBuilder() {
 func getTopRightInfo() string {
 	privacyMode := ""
 	if common.GetConfig().PrivacyMode {
-		privacyMode = successStyle.Render("  enabled")
-		//privacyMode = successStyle.Render("☑    .")
+		privacyMode = successStyle.Render("enabled")
 	} else {
-		privacyMode = errorStyle.Render(" disabled")
+		privacyMode = errorStyle.Render("disabled")
 	}
 
-	privacyMode = getTopItemInfoRatio("Privacy Mode", privacyMode, 8, true)
+	privacyMode = getTopItemInfoRatio("Privacy Mode", privacyMode, -1)
 
 	copyToClipboard := ""
 	if common.GetConfig().CopyToClipboard {
-		copyToClipboard = successStyle.Render(" enabled")
+		copyToClipboard = successStyle.Render("enabled")
 	} else {
 		copyToClipboard = errorStyle.Render("disabled")
-		//privacyMode = successStyle.Render("✖    .")
 	}
-	copyToClipboard = getTopItemInfoRatio("ClipboardCopy", copyToClipboard, 8, true)
+	copyToClipboard = getTopItemInfoRatio("Clipboard Copy", copyToClipboard, -1)
 
 	leftMerged := lipgloss.JoinVertical(lipgloss.Left, privacyMode, copyToClipboard)
-	//leftMerged = borderRightStyle.Render(leftMerged)
 
 	proxiesActiveText := ""
 	if helper.GetThreadsActive() > 0 {
@@ -270,6 +268,7 @@ func getTopRightInfo() string {
 	proxyCounter := getTopItemInfo("Threads", strconv.Itoa(helper.GetThreadsActive())+"/"+strconv.Itoa(common.GetConfig().Threads))
 
 	rightMerged := lipgloss.JoinVertical(lipgloss.Left, proxyCounter, proxiesActiveText)
+	rightMerged = lipgloss.NewStyle().MarginRight(1).Render(rightMerged)
 	rightMerged = borderRightStyle.Render(rightMerged)
 
 	return lipgloss.JoinHorizontal(lipgloss.Right, rightMerged, leftMerged)
@@ -283,26 +282,24 @@ func getTopLeftInfo() string {
 	averageCPM := getTopItemInfo("Average CPM", strconv.FormatInt(helper.GetCPM(), 10))
 
 	leftMerged := lipgloss.JoinVertical(lipgloss.Left, totalChecked, totalChecks)
+	leftMerged = lipgloss.NewStyle().MarginRight(1).Render(leftMerged)
 	rightMerged := lipgloss.JoinVertical(lipgloss.Left, totalTime, averageCPM)
 
 	leftMerged = borderRightStyle.Render(leftMerged)
-	rightMerged = borderRightStyle.Render(rightMerged)
 
 	bothMerged := lipgloss.JoinHorizontal(lipgloss.Right, leftMerged, rightMerged)
+
 	return bothMerged
 }
 
 func getTopItemInfo(leftStr string, rightStr string) string {
-	return getTopItemInfoRatio(leftStr, rightStr, 8, false)
+	return getTopItemInfoRatio(leftStr, rightStr, 0)
 }
 
-func getTopItemInfoRatio(leftStr string, rightStr string, ratio int, alignLeft bool) string {
-	halfStyle := lipgloss.NewStyle().Width(getWidth()/ratio + (getWidth()/ratio - len(leftStr)))
+func getTopItemInfoRatio(leftStr string, rightStr string, minus int) string {
+	halfStyle := lipgloss.NewStyle().Width(getWidth()/8 - minus + (getWidth()/8 - len(leftStr)))
 	leftStyle := leftStr
 	rightStyle := halfStyle.Align(lipgloss.Right).Render(rightStr)
-	if alignLeft {
-		rightStyle = halfStyle.Align(lipgloss.Left).MarginLeft(6).Render(rightStr)
-	}
 
 	merged := lipgloss.JoinHorizontal(lipgloss.Right, leftStyle, rightStyle)
 
@@ -350,7 +347,7 @@ func getTableItemString(str string) string {
 
 func getFastestProxies() string {
 	title := lipgloss.NewStyle().
-		Width(threadPhase.GetWidth()).
+		Width(getWidth() + 6).
 		Align(lipgloss.Center).
 		MarginBottom(1).
 		Render(titleStyle.Render("Fastest Proxies"))
@@ -410,7 +407,7 @@ func getFastestProxies() string {
 
 func getSelection() string {
 	title := lipgloss.NewStyle().
-		Width(threadPhase.GetWidth()).
+		Width(getWidth()).
 		Align(lipgloss.Center).
 		MarginBottom(1).
 		MarginTop(1).
@@ -430,7 +427,7 @@ func getSelection() string {
 		optionBar = lipgloss.JoinHorizontal(lipgloss.Right, optionBar, str)
 	}
 
-	optionBar = lipgloss.NewStyle().Align(lipgloss.Center).Width(threadPhase.GetWidth()).Render(optionBar)
+	optionBar = lipgloss.NewStyle().Align(lipgloss.Center).Width(getWidth()).Render(optionBar)
 
 	title = lipgloss.JoinVertical(lipgloss.Center, title, optionBar)
 
@@ -439,11 +436,11 @@ func getSelection() string {
 
 func setOptions() {
 	style := borderBottomStyle.
-		Width(threadPhase.GetWidth() / 4).
+		Width(getWidth() / 4).
 		Align(lipgloss.Center).Render
 
 	customStyle := borderBottomStyle.
-		Width(threadPhase.GetWidth() / 7).
+		Width(getWidth() / 7).
 		Align(lipgloss.Center)
 
 	if customEnabled {
@@ -474,7 +471,7 @@ func getLenOfProxies() int {
 }
 
 func getWidth() int {
-	return threadPhase.GetWidth() - 5
+	return threadPhase.GetWidth() - 6
 }
 
 func outputContains(str string) bool {

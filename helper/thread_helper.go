@@ -2,6 +2,7 @@ package helper
 
 import (
 	"KC-Checker/common"
+	"net/url"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -34,8 +35,6 @@ type ProxyListing struct {
 var proxyList = ProxyListing{}
 
 func Init() {
-	initClientPool()
-
 	InitializeCPM()
 
 	ProxyProtocolCountMap["http"] = make(map[int]int)
@@ -125,10 +124,12 @@ func check(proxy *Proxy) {
 		break
 	}
 
+	u, err := url.Parse(common.GetConfig().Bancheck)
 	//Ban check for websites
-	if responded && common.DoBanCheck() {
+	if responded && common.DoBanCheck() && err == nil {
+
 		for i := 0; i < retries; i++ {
-			body, status, err := RequestCustom(proxy, common.GetConfig().Bancheck, true)
+			body, status, err := RequestCustom(proxy, common.GetConfig().Bancheck, u, true)
 			IncrementCheckCount()
 
 			if err != nil {

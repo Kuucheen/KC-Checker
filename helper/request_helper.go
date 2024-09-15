@@ -13,7 +13,7 @@ var (
 	sharedTransport *http.Transport
 )
 
-func initClientPool() {
+func init() {
 	configTransport := common.GetConfig().Transport
 
 	sharedTransport = &http.Transport{
@@ -21,7 +21,7 @@ func initClientPool() {
 			Timeout:   time.Duration(common.GetConfig().Timeout) * time.Millisecond,
 			KeepAlive: time.Duration(configTransport.KeepAliveSeconds) * time.Second,
 		}).DialContext,
-		DisableKeepAlives:     !common.GetConfig().Transport.KeepAlive,
+		DisableKeepAlives:     !configTransport.KeepAlive,
 		MaxIdleConns:          configTransport.MaxIdleConns,
 		MaxIdleConnsPerHost:   configTransport.MaxIdleConnsPerHost,
 		IdleConnTimeout:       time.Duration(configTransport.IdleConnTimeout) * time.Second,
