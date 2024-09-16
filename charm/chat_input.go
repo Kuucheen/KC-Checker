@@ -206,6 +206,7 @@ func GetProxyType() []int {
 	checkForAutoUpdate()
 
 	if len(selectedItems) > 0 {
+		helper.GetCleanedProxies()
 		return selectedItems
 	}
 
