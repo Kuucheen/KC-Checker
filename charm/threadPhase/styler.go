@@ -6,6 +6,7 @@ import (
 	"KC-Checker/helper"
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/tree"
 	"math"
 	"strconv"
 	"strings"
@@ -20,6 +21,13 @@ var (
 	EliteStyle       = typeStyle.Foreground(lipgloss.Color("#624CAB"))
 	AnonymousStyle   = typeStyle.Foreground(lipgloss.Color("#57CC99"))
 	TransparentStyle = typeStyle.Foreground(lipgloss.Color("#4F4F4F"))
+
+	tempStyle        = lipgloss.NewStyle().Width(GetWidth() / 4).Render
+	borderRightStyle = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderRight(true).Width(GetWidth() / 2).Align(lipgloss.Center)
+
+	protocolMap     map[string]map[int]int
+	itemStyle       = lipgloss.NewStyle().MarginRight(1)
+	enumeratorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).MarginRight(1)
 )
 
 func getStyledQueue() string {
@@ -136,4 +144,38 @@ func SetStopTime() {
 		stopTime = time.Now()
 		stoppedTime = true
 	}
+}
+
+func getProxyTree() string {
+	protocolMap = helper.GetProxyProtocolCountMap()
+
+	t := tree.Root("Proxies").
+		Child(
+			tree.Root("HTTP").
+				Child(
+					GetFormattedInfoStr("Elite", strconv.Itoa(protocolMap["http"][3])),
+					GetFormattedInfoStr("Anonymous", strconv.Itoa(protocolMap["http"][2])),
+					GetFormattedInfoStr("Transparent", strconv.Itoa(protocolMap["http"][1])),
+				),
+			tree.Root("HTTPS").
+				Child(
+					GetFormattedInfoStr("Elite", strconv.Itoa(protocolMap["https"][3])),
+					GetFormattedInfoStr("Anonymous", strconv.Itoa(protocolMap["https"][2])),
+					GetFormattedInfoStr("Transparent", strconv.Itoa(protocolMap["https"][1])),
+				),
+			tree.Root("SOCKS4").
+				Child(
+					GetFormattedInfoStr("Elite", strconv.Itoa(protocolMap["socks4"][3])),
+					GetFormattedInfoStr("Anonymous", strconv.Itoa(protocolMap["socks4"][2])),
+					GetFormattedInfoStr("Transparent", strconv.Itoa(protocolMap["socks4"][1])),
+				),
+			tree.Root("SOCKS5").
+				Child(
+					GetFormattedInfoStr("Elite", strconv.Itoa(protocolMap["socks5"][3])),
+					GetFormattedInfoStr("Anonymous", strconv.Itoa(protocolMap["socks5"][2])),
+					GetFormattedInfoStr("Transparent", strconv.Itoa(protocolMap["socks5"][1])),
+				),
+		).ItemStyle(itemStyle).EnumeratorStyle(enumeratorStyle).Enumerator(tree.RoundedEnumerator)
+
+	return borderRightStyle.Render("\n" + tempStyle(t.String()+"\n"))
 }

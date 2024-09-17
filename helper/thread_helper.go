@@ -170,3 +170,11 @@ func GetQueue() ProxyQueue {
 func StopThreads() {
 	stop = true
 }
+
+func GetProxyProtocolCountMap() map[string]map[int]int {
+	var countMap map[string]map[int]int
+	mutex.Lock()
+	countMap = ProxyProtocolCountMap
+	mutex.Unlock()
+	return countMap
+}

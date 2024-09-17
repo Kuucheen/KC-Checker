@@ -7,15 +7,12 @@ import (
 	"KC-Checker/charm/threadPhase"
 	"KC-Checker/common"
 	"KC-Checker/helper"
-	"time"
 )
 
 // RunHostsDisplay This has the complete process of the program
 func RunHostsDisplay() {
 	//Draw logo on top
 	DrawLogo()
-
-	time.Sleep(time.Millisecond * 200)
 
 	//Sets the proxy type (http, socks4 or socks5) from user input (GetProxyType())
 	helper.SetType(GetProxyType())

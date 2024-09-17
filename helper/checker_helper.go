@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"golang.org/x/net/context"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -41,9 +40,6 @@ func Request(proxy *Proxy) (string, int, error) {
 
 // RequestCustom makes a request to the provided siteUrl with the provided proxy
 func RequestCustom(proxyToCheck *Proxy, targetIp string, siteName *url.URL, isBanCheck bool) (string, int, error) {
-	// Suppress logging for this operation
-	log.SetOutput(io.Discard)
-
 	proxyURL, err := url.Parse(strings.Replace(proxyToCheck.Protocol, "https", "http", 1) + "://" + proxyToCheck.Full)
 	if err != nil {
 		return "Error parsing proxyToCheck URL", -1, err
@@ -75,6 +71,8 @@ func RequestCustom(proxyToCheck *Proxy, targetIp string, siteName *url.URL, isBa
 		ReturnClientToPool(client)
 		return "Error creating HTTP request", -1, err
 	}
+
+	req.Header.Set("Connection", "close")
 
 	resp, err := client.Do(req)
 	ReturnClientToPool(client)

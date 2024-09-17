@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -38,24 +37,24 @@ var (
 
 	helpStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Width(GetWidth() / 2).Align(lipgloss.Center).Render
 	greenStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#01BE85")).Render
+	barStyle   = lipgloss.NewStyle().
+			BorderStyle(lipgloss.NormalBorder()).
+			Align(lipgloss.Center).
+			Width((GetWidth() - 10) / 2).
+			BorderBottom(true)
 
-	centerStyle = lipgloss.NewStyle().Width(GetWidth() / 2).Align(lipgloss.Center).Render
+	extraString = helpStyle("Press q to stop")
 )
 
 type tickMsg time.Time
 
 type model struct {
-	//Displays how many % of total good proxies are elite,anonymous or transparent
-	elite       progress.Model
-	anonymous   progress.Model
-	transparent progress.Model
 	//Displays % of good proxies that passed the bancheck
 	bancheck progress.Model
 	//Displays % of progress made while checking
 	percentage progress.Model
 
 	viewport viewport.Model
-	list     list.Model
 }
 
 var (
@@ -67,24 +66,10 @@ var (
 )
 
 func RunBars() {
-	items := []list.Item{
-		item{title: "ip:port"},
-		item{title: "protocol://ip:port"},
-		item{title: "ip:port;ms"},
-	}
-
 	m := model{
-		elite:       progress.New(progress.WithDefaultGradient()),
-		anonymous:   progress.New(progress.WithDefaultGradient()),
-		transparent: progress.New(progress.WithDefaultGradient()),
-		bancheck:    progress.New(progress.WithDefaultGradient()),
-		percentage:  progress.New(progress.WithDefaultGradient()),
-		list:        list.New(items, list.NewDefaultDelegate(), 75, 0),
+		bancheck:   progress.New(progress.WithDefaultGradient()),
+		percentage: progress.New(progress.WithDefaultGradient()),
 	}
-	m.list.Title = "How do you want to save the proxies?"
-	m.list.SetShowStatusBar(false)
-	m.list.SetFilteringEnabled(false)
-	m.list.SetShowHelp(false)
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		os.Exit(1)
@@ -118,29 +103,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				SetStopTime()
 				return m, tea.Quit
 			}
-		} else {
-			switch msg.String() {
-			case tea.KeyEnter.String():
-				//if common.DoBanCheck() {
-				//	helper.Write(helper.ProxyMapFiltered, m.list.Index(), true, false)
-				//}
-				//outputPath = "\n\n" + helper.Write(helper.ProxyMap, m.list.Index(), false, false)
-			case tea.KeyRight.String():
-				m.list.CursorDown()
-			case tea.KeyLeft.String():
-				m.list.CursorUp()
-			}
 		}
 		return m, nil
 
 	case tea.WindowSizeMsg:
 		width := GetWidth()/2 - 14
-		m.elite.Width = width
-		m.anonymous.Width = width
-		m.transparent.Width = width
-		m.bancheck.Width = width
+		m.bancheck.Width = width - 10
 		m.percentage.Width = width - 10
-		m.list.SetWidth(msg.Width)
 		return m, nil
 
 	case tickMsg:
@@ -150,32 +119,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		anonymousCount = helper.ProxyCountMap[2]
 		transparentCount = helper.ProxyCountMap[1]
 		banCheckCount = helper.ProxyCountMap[-1]
-
-		eliteCmd := m.elite.SetPercent(float64(eliteCount) / sum)
-		anonymousCmd := m.anonymous.SetPercent(float64(anonymousCount) / sum)
-		transparentCmd := m.transparent.SetPercent(float64(transparentCount) / sum)
 		banCheckCmd := m.bancheck.SetPercent(float64(banCheckCount) / sum)
 		percentageCmd := m.percentage.SetPercent(float64(getSumWithInvalid()) / helper.AllProxiesSum)
 
-		return m, tea.Batch(tickCmd(), eliteCmd, anonymousCmd, transparentCmd, banCheckCmd, percentageCmd)
+		return m, tea.Batch(tickCmd(), banCheckCmd, percentageCmd)
 
 	case progress.FrameMsg:
-		eliteModel, eliteCmd := m.elite.Update(msg)
-		m.elite = eliteModel.(progress.Model)
-
-		anonymousModel, anonymousCmd := m.anonymous.Update(msg)
-		m.anonymous = anonymousModel.(progress.Model)
-
-		transparentModel, transparentCmd := m.transparent.Update(msg)
-		m.transparent = transparentModel.(progress.Model)
-
 		bancheckModel, bancheckCmd := m.bancheck.Update(msg)
 		m.bancheck = bancheckModel.(progress.Model)
 
 		percentageModel, percentageCmd := m.percentage.Update(msg)
 		m.percentage = percentageModel.(progress.Model)
 
-		return m, tea.Batch(eliteCmd, anonymousCmd, transparentCmd, bancheckCmd, percentageCmd)
+		return m, tea.Batch(bancheckCmd, percentageCmd)
 	default:
 		return m, nil
 	}
@@ -186,38 +142,16 @@ func (m model) View() string {
 		return ""
 	}
 
-	pad := "\n\n"
+	percentageBar := barStyle.Render("Progress   " + m.percentage.View())
 
-	bars := lipgloss.NewStyle().
-		BorderStyle(lipgloss.ThickBorder()).
-		BorderRight(true).
-		SetString(lipgloss.JoinHorizontal(lipgloss.Center, titleStyle.Render("Elite"), "───────"+m.elite.View()) +
-			pad + lipgloss.JoinHorizontal(lipgloss.Center, titleStyle.Render("Anonymous"), "───"+m.anonymous.View()) +
-			pad + lipgloss.JoinHorizontal(lipgloss.Center, titleStyle.Render("Transparent"), "─"+m.transparent.View()) +
-			pad + strings.Repeat("━", GetWidth()/2+2) +
-			pad + lipgloss.JoinHorizontal(lipgloss.Center, titleStyle.Render("Banchecked"), "──"+m.bancheck.View()))
+	percentageBar = lipgloss.JoinVertical(lipgloss.Left, percentageBar, barStyle.Render("Banchecked  "+m.bancheck.View()))
 
-	percentageBar := lipgloss.NewStyle().
-		BorderStyle(lipgloss.NormalBorder()).
-		Align(lipgloss.Center).
-		Width((GetWidth() - 10) / 2).
-		BorderBottom(true).
-		SetString("Progress  " + m.percentage.View())
-
-	extraString := ""
-
-	if threadPhase {
-		extraString = helpStyle("Press q to stop")
-	} else {
-		extraString = centerStyle(m.list.View()) + "\n" + helpStyle("→ right • ← left • enter select")
-	}
-
-	return lipgloss.JoinHorizontal(lipgloss.Top, bars.String(),
+	return lipgloss.JoinHorizontal(lipgloss.Top, getProxyTree(),
 		lipgloss.JoinVertical(lipgloss.Center,
 			lipgloss.JoinVertical(lipgloss.Left, lipgloss.JoinVertical(lipgloss.Left,
 				lipgloss.JoinHorizontal(lipgloss.Top, getStyledQueue(),
 					getStyledInfo(eliteCount, anonymousCount, transparentCount)),
-				percentageBar.String()), extraString), greenStyle(outputPath)),
+				percentageBar), extraString), greenStyle(outputPath)),
 	)
 }
 

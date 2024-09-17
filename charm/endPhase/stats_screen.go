@@ -100,6 +100,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case tea.KeyEnter.String():
 			if index == -1 {
+				if len(outputBuilder) == 0 {
+					return m, nil
+				}
+
 				writeToFile(strings.Join(outputBuilder, ""))
 				savedText = successStyle.Width(getWidth() / 3).Align(lipgloss.Center).Render("Saved proxies in output folder!")
 				return m, nil
@@ -275,7 +279,7 @@ func getTopRightInfo() string {
 }
 
 func getTopLeftInfo() string {
-	totalChecked := getTopItemInfo("Proxies Checked", strconv.Itoa(getLenOfProxies()))
+	totalChecked := getTopItemInfo("Total Alive Proxies", strconv.Itoa(getLenOfProxies()))
 	totalChecks := getTopItemInfo("Total Checks", strconv.FormatInt(helper.GetChecksCompleted(), 10))
 
 	totalTime := getTopItemInfo("Total Time", threadPhase.GetTimeSince().String())
@@ -309,7 +313,7 @@ func getTopItemInfoRatio(leftStr string, rightStr string, minus int) string {
 func getProxyTable() string {
 	labelStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
 
-	p := helper.ProxyProtocolCountMap
+	p := helper.GetProxyProtocolCountMap()
 
 	protocols := []string{"http", "https", "socks4", "socks5"}
 
