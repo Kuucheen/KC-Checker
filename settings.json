@@ -4,7 +4,7 @@
   "timeout": 7500,
 
   "privacy_mode": false,
-  "copyToClipboard": true,
+  "copyToClipboard": false,
 
   "autoSelect": {
     "http": false,
@@ -15,24 +15,23 @@
 
   "autoOutput": {
     "timeBetweenSafes": 15,
-
     "ip:port": false,
     "protocol://ip:port": false,
     "ip:port;ms": false,
     "custom": ""
   },
-  
+
   "timeBetweenRefresh": 100,
-  
+
   "iplookup": "http://api.ipify.org/",
-  
+
   "judges_threads": 3,
   "judges_timeout": 5000,
   "judges": [
     "http://azenv.net",
     "https://pool.proxyspace.pro/judge.php"
   ],
-  
+
   "blacklisted": [
     "https://www.spamhaus.org/drop/drop.txt",
     "https://www.spamhaus.org/drop/edrop.txt",
@@ -43,14 +42,16 @@
   "keywords": [
     ""
   ],
-  
+
   "transport": {
-    "KeepAlive":             true,
-    "KeepAliveSeconds":      30,
-    "MaxIdleConns":          1000,
-    "MaxIdleConnsPerHost":   100,
-    "IdleConnTimeout":       90,
-    "TLSHandshakeTimeout":   10,
+    "KeepAlive": false,
+    "KeepAliveSeconds": 15,
+    "MaxIdleConns": 500,
+    "MaxIdleConnsPerHost": 100,
+    "IdleConnTimeout": 20,
+    "TLSHandshakeTimeout": 5,
     "ExpectContinueTimeout": 1
-  }
+  },
+
+  "DEBUG_MaxThreads": 0
 }

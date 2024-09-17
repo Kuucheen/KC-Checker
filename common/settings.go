@@ -25,6 +25,7 @@ type Config struct {
 	Bancheck           string     `json:"bancheck"`
 	Keywords           []string   `json:"keywords"`
 	Transport          transport  `json:"transport"`
+	DebugMaxThreads    int        `json:"DEBUG_MaxThreads"`
 }
 
 type autoSelect struct {
