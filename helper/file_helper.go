@@ -223,18 +223,22 @@ func StartAutoOutputManager() {
 	timeBetween := time.Duration(common.GetConfig().AutoOutput.TimeBetweenSafes) * time.Second
 
 	for {
+		muProxies.Lock()
 		if len(proxiesToWrite) > 0 {
-			muProxies.Lock()
 			Write(proxiesToWrite, common.GetAutoOutput(), false, true)
 			proxiesToWrite = make(map[int][]*Proxy)
-			muProxies.Unlock()
 		}
+		muProxies.Unlock()
 
+		muBancheck.Lock()
 		if len(bancheckProxiesToWrite) > 0 {
-			muBancheck.Lock()
 			Write(bancheckProxiesToWrite, common.GetAutoOutput(), true, true)
 			bancheckProxiesToWrite = make(map[int][]*Proxy)
-			muBancheck.Unlock()
+		}
+		muBancheck.Unlock()
+
+		if common.GetConfig().AutoOutput.SafeMemory {
+			ClearProxyMap()
 		}
 
 		time.Sleep(timeBetween)

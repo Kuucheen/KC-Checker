@@ -37,6 +37,7 @@ type autoSelect struct {
 
 type autoOutput struct {
 	TimeBetweenSafes int    `json:"timeBetweenSafes"`
+	SafeMemory       bool   `json:"safeMemory"`
 	IpPort           bool   `json:"ip:port"`
 	ProtocolIpPort   bool   `json:"protocol://ip:port"`
 	IpPortMs         bool   `json:"ip:port;ms"`

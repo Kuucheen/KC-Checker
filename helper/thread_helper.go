@@ -178,3 +178,9 @@ func GetProxyProtocolCountMap() map[string]map[int]int {
 	mutex.Unlock()
 	return countMap
 }
+
+func ClearProxyMap() {
+	mutex.Lock()
+	ProxyMap = make(map[int][]*Proxy)
+	mutex.Unlock()
+}

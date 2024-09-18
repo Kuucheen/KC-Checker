@@ -24,6 +24,7 @@ var (
 	warnStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("#F4A261"))
 	errorStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("#D14D4D"))
 	borderRightStyle = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderRight(true)
+	centerStyle      = lipgloss.NewStyle().Width(getWidth()).Align(lipgloss.Center).MarginTop(1)
 
 	notSelectedStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("#504A61"))
 	borderBottomStyle = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true)
@@ -72,6 +73,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
+		if common.GetConfig().AutoOutput.SafeMemory && common.GetAutoOutput() != "" {
+			return m, nil
+		}
+
 		switch msg.String() {
 		case tea.KeyRight.String():
 			if index < maxIndex {
@@ -161,6 +166,10 @@ func (m model) View() string {
 
 	merged := lipgloss.JoinHorizontal(lipgloss.Left, leftMerged, rightMerged)
 	merged = borderBottomStyle.Render(merged)
+
+	if common.GetConfig().AutoOutput.SafeMemory && common.GetAutoOutput() != "" {
+		return lipgloss.JoinVertical(lipgloss.Left, merged, centerStyle.Render(titleStyle.Render("Saving is not available when using SafeMemory option")))
+	}
 
 	bottom := getSelection()
 
@@ -410,11 +419,8 @@ func getFastestProxies() string {
 }
 
 func getSelection() string {
-	title := lipgloss.NewStyle().
-		Width(getWidth()).
-		Align(lipgloss.Center).
+	title := centerStyle.
 		MarginBottom(1).
-		MarginTop(1).
 		Render(titleStyle.Render("How do you want to save the proxies?"))
 
 	optionBar := ""
