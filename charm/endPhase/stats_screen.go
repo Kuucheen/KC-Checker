@@ -73,9 +73,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "ctrl+c" {
 			return m, tea.Quit
 		}
-		if common.GetConfig().AutoOutput.SafeMemory && common.GetAutoOutput() != "" {
-			return m, nil
-		}
 
 		switch msg.String() {
 		case tea.KeyRight.String():
@@ -166,10 +163,6 @@ func (m model) View() string {
 
 	merged := lipgloss.JoinHorizontal(lipgloss.Left, leftMerged, rightMerged)
 	merged = borderBottomStyle.Render(merged)
-
-	if common.GetConfig().AutoOutput.SafeMemory && common.GetAutoOutput() != "" {
-		return lipgloss.JoinVertical(lipgloss.Left, merged, centerStyle.Render(titleStyle.Render("Saving is not available when using SafeMemory option")))
-	}
 
 	bottom := getSelection()
 

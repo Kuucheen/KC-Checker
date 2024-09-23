@@ -15,11 +15,10 @@
 
   "autoOutput": {
     "timeBetweenSafes": 15,
-    "safeMemory": false,
     
     "ip:port": false,
     "protocol://ip:port": false,
-    "ip:port;ms": false,
+    "ip:port;time": false,
     "custom": ""
   },
 
@@ -53,7 +52,5 @@
     "IdleConnTimeout": 20,
     "TLSHandshakeTimeout": 5,
     "ExpectContinueTimeout": 1
-  },
-
-  "DEBUG_MaxThreads": 0
+  }
 }

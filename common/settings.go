@@ -25,7 +25,6 @@ type Config struct {
 	Bancheck           string     `json:"bancheck"`
 	Keywords           []string   `json:"keywords"`
 	Transport          transport  `json:"transport"`
-	DebugMaxThreads    int        `json:"DEBUG_MaxThreads"`
 }
 
 type autoSelect struct {
@@ -37,10 +36,9 @@ type autoSelect struct {
 
 type autoOutput struct {
 	TimeBetweenSafes int    `json:"timeBetweenSafes"`
-	SafeMemory       bool   `json:"safeMemory"`
 	IpPort           bool   `json:"ip:port"`
 	ProtocolIpPort   bool   `json:"protocol://ip:port"`
-	IpPortMs         bool   `json:"ip:port;ms"`
+	IpPortTime       bool   `json:"ip:port;time"`
 	Custom           string `json:"custom"`
 }
 
@@ -104,8 +102,8 @@ func GetAutoOutput() string {
 		return "ip:port"
 	} else if auto.ProtocolIpPort {
 		return "protocol://ip:port"
-	} else if auto.IpPortMs {
-		return "ip:port;ms"
+	} else if auto.IpPortTime {
+		return "ip:port;time"
 	}
 
 	return auto.Custom

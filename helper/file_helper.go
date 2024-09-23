@@ -237,10 +237,6 @@ func StartAutoOutputManager() {
 		}
 		muBancheck.Unlock()
 
-		if common.GetConfig().AutoOutput.SafeMemory {
-			ClearProxyMap()
-		}
-
 		time.Sleep(timeBetween)
 	}
 }

@@ -2,7 +2,6 @@ package helper
 
 import (
 	"KC-Checker/common"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -49,7 +48,6 @@ func ToProxies(arr []string) []*Proxy {
 			dat, err := strconv.Atoi(temp[1])
 
 			if err != nil {
-				fmt.Printf("Not a valid Port: %v\n", err)
 				return
 			}
 
