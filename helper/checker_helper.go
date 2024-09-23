@@ -4,6 +4,7 @@ import (
 	"KC-Checker/common"
 	"crypto/tls"
 	"golang.org/x/net/context"
+	"golang.org/x/net/proxy"
 	"io"
 	"net"
 	"net/http"
@@ -47,16 +48,30 @@ func RequestCustom(proxyToCheck *Proxy, targetIp string, siteName *url.URL, isBa
 
 	privateTransport := GetSharedTransport()
 
-	dialer := &net.Dialer{
-		Timeout: time.Millisecond * time.Duration(common.GetConfig().Timeout),
-	}
-
-	privateTransport.Proxy = http.ProxyURL(proxyURL)
-	privateTransport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
-		if strings.Contains(addr, siteName.Hostname()) {
-			addr = net.JoinHostPort(targetIp, siteName.Port())
+	if strings.HasPrefix(proxyToCheck.Protocol, "http") {
+		dialer := net.Dialer{
+			Timeout: time.Millisecond * time.Duration(common.GetConfig().Timeout),
 		}
-		return dialer.DialContext(ctx, network, addr)
+
+		privateTransport.Proxy = http.ProxyURL(proxyURL)
+		privateTransport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			if strings.Contains(addr, siteName.Hostname()) {
+				addr = net.JoinHostPort(targetIp, siteName.Port())
+			}
+			return dialer.DialContext(ctx, network, addr)
+		}
+	} else {
+		dialer, err := proxy.SOCKS5("tcp", proxyToCheck.Full, nil, &net.Dialer{
+			Timeout: time.Millisecond * time.Duration(common.GetConfig().Timeout),
+		})
+
+		if err != nil {
+			return "Error creating SOCKS dialer", -1, err
+		}
+
+		privateTransport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return dialer.Dial(network, addr)
+		}
 	}
 	privateTransport.TLSClientConfig = &tls.Config{
 		ServerName:         siteName.Hostname(),
