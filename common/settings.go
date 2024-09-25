@@ -15,7 +15,7 @@ type Config struct {
 	PrivacyMode        bool       `json:"privacy_mode"`
 	CopyToClipboard    bool       `json:"copyToClipboard"`
 	AutoSelect         autoSelect `json:"autoSelect"`
-	AutoOutput         autoOutput `json:"autoOutput"`
+	AutoOutput         autoSave   `json:"autoSave"`
 	TimeBetweenRefresh int        `json:"timeBetweenRefresh"`
 	IpLookup           string     `json:"iplookup"`
 	JudgesThreads      int        `json:"judges_threads"`
@@ -34,7 +34,7 @@ type autoSelect struct {
 	Socks5 bool
 }
 
-type autoOutput struct {
+type autoSave struct {
 	TimeBetweenSafes int    `json:"timeBetweenSafes"`
 	IpPort           bool   `json:"ip:port"`
 	ProtocolIpPort   bool   `json:"protocol://ip:port"`

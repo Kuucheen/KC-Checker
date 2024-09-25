@@ -13,7 +13,7 @@
     "socks5": false
   },
 
-  "autoOutput": {
+  "autoSave": {
     "timeBetweenSafes": 15,
 
     "ip:port": false,
