@@ -32,7 +32,6 @@ func GetProxyLevel(html string) int {
 
 	//Proxy is elite
 	return 3
-
 }
 
 func Request(proxy *Proxy) (string, int, error) {

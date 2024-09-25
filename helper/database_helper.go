@@ -7,13 +7,9 @@ import (
 	"strings"
 )
 
-// Embed the GeoLite2 ASN database
-//
 //go:embed GeoLite2-ASN.mmdb
 var geoLiteASNDB []byte
 
-// Existing GeoLite2 Country database
-//
 //go:embed GeoLite2-Country.mmdb
 var geoLiteCountryDB []byte
 

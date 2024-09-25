@@ -16,14 +16,10 @@ func (q *ProxyQueue) Enqueue(p *Proxy) {
 }
 
 // Dequeue removes and returns the front proxy value from the queue.
-func (q *ProxyQueue) Dequeue() *Proxy {
+func (q *ProxyQueue) Dequeue() {
 	if len(q.data) > 0 {
-		front := q.data[0]
 		q.data = append(q.data[:0], q.data[1:]...)
-		return front
 	}
-
-	return nil
 }
 func (q *ProxyQueue) Data() []*Proxy {
 	return q.data
