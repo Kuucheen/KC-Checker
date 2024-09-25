@@ -45,9 +45,9 @@ type item struct {
 	title  string
 	format string
 
-	seperatorIndicator string
-	seperators         []string
-	seperatorIndex     int
+	separatorIndicator string
+	separators         []string
+	separatorIndex     int
 }
 
 type model struct {
@@ -203,36 +203,36 @@ func writeToFile(format string) {
 func setOutputBuilder() {
 	option := &options[index]
 
-	if outputContains(option.format) && len(option.seperators) == 0 {
+	if outputContains(option.format) && len(option.separators) == 0 {
 		outputBuilder = removeElementByValue(outputBuilder, options[index].format)
-		option.seperatorIndex = 0
+		option.separatorIndex = 0
 	} else {
 		shouldAppend := true
 		if len(outputBuilder) > 0 {
-			if option.seperatorIndicator != "" {
+			if option.separatorIndicator != "" {
 				removedItem := false
 				if outputContains(option.format) {
-					if option.seperatorIndex >= len(option.seperators) || len(outputBuilder) < 2 {
+					if option.separatorIndex >= len(option.separators) || len(outputBuilder) < 2 {
 						outputBuilder = removeElementByValue(outputBuilder, option.format)
-						options[index].seperatorIndex = 0
+						options[index].separatorIndex = 0
 						removedItem = true
 					} else {
 						if getIndexOf(outputBuilder, option.format) > 0 {
-							outputBuilder[getIndexOf(outputBuilder, option.format)-1] = option.seperators[option.seperatorIndex]
+							outputBuilder[getIndexOf(outputBuilder, option.format)-1] = option.separators[option.separatorIndex]
 						}
 					}
 					shouldAppend = false
 
-				} else if getIndexOf(outputBuilder, option.seperatorIndicator)+1 == getIndexOf(outputBuilder, option.format) ||
-					outputBuilder[len(outputBuilder)-1] == option.seperatorIndicator {
-					outputBuilder = append(outputBuilder, option.seperators[option.seperatorIndex])
+				} else if getIndexOf(outputBuilder, option.separatorIndicator)+1 == getIndexOf(outputBuilder, option.format) ||
+					outputBuilder[len(outputBuilder)-1] == option.separatorIndicator {
+					outputBuilder = append(outputBuilder, option.separators[option.separatorIndex])
 				} else {
 					outputBuilder = append(outputBuilder, ";")
-					option.seperatorIndex = len(option.seperators) - 1
+					option.separatorIndex = len(option.separators) - 1
 				}
 
 				if !removedItem {
-					option.seperatorIndex++
+					option.separatorIndex++
 				}
 			} else {
 				outputBuilder = append(outputBuilder, ";")
@@ -449,8 +449,8 @@ func setOptions() {
 	if customEnabled {
 		options = []item{
 			{title: customStyle.Render("Protocol"), format: "protocol"},
-			{title: customStyle.Render("Ip"), format: "ip", seperatorIndicator: "protocol", seperators: []string{"://", ";"}},
-			{title: customStyle.Render("Port"), format: "port", seperatorIndicator: "ip", seperators: []string{":", ";"}},
+			{title: customStyle.Render("Ip"), format: "ip", separatorIndicator: "protocol", separators: []string{"://", ";", " "}},
+			{title: customStyle.Render("Port"), format: "port", separatorIndicator: "ip", separators: []string{":", ";", " "}},
 			{title: customStyle.Render("Time"), format: "time"},
 			{title: customStyle.Render("Country"), format: "country"},
 			{title: customStyle.Render("Type"), format: "type"},
