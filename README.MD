@@ -121,46 +121,56 @@ Now you have an executable. You can run it like described in **Getting Started**
     <summary>Details for settings.json</summary>
 
 1. **threads**: <br>
-   Maximum number of threads
+   Maximum number of threads<br>
 
 2. **retries**: <br>
-   Number of retries for a request
+   Number of retries for a request<br>
 
 3. **timeout**: <br>
-   Timeout duration for requests in ms
+   Timeout duration for requests in ms<br>
 
-4. **keep_alive**: <br>
-   If set to true, the request will have the keep-alive header
-
-5. **iplookup**: <br>
-   A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a>
-
-6. **judges_threads**: <br>
-   Maximum threads for selecting the judge
-
-7. **judges_timeout**: <br>
-   Timeout duration of judges in ms
-
-8. **judges**: <br>
-   Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request
-
-9. **blacklisted**:<br>
-   Websites that contain blacklisted ips. These ips won't be checked
-
-10. **bancheck**: <br>
-    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory
-
-11. **keywords**: <br>
-    It will check if the website the proxy has opened contains the text given
-
-12. **privacy_mode**: <br>
+4. **privacy_mode**: <br>
    If set to true, the proxies will be blured with "*" while checking
 
-13. **copyToClipboard**: <br>
+5. **copyToClipboard**: <br>
    If set to true, all proxies checked will be copied to clipboard when saving them to a file
 
-14. **autoSelect**: <br>
-   When setting http, https, socks4 or socks5 to true (or multiple at once) the check will automatically begin when the checker is started with the protocols you set to true
+6. **autoSelect**: <br>
+   When setting one or more protocols are set to true, it will automatically start checking with the selected protocols.
+
+7. **autoSave**: <br>
+   **timeBetweenSafes**: Seconds between the autoSave<br>
+   **ip:port**: If set to true it will automatically save the proxies with these format every timeBetweenSafes seconds<br>
+   **protocol://ip:port**: Same here<br>
+   **ip:port;time**: Same here<br>
+   **custom**: You can set a custom autoSave format here. If its not empty it will save it with this format. At the end of a checking process theres an option for "CUSTOM", where you can build your own output. You can put the output you built there in here.<br>
+
+8. **timeBetweenRefresh**: <br>
+   This is how often the screen updates in ms. If you experience high CPU usage, it is recommended to set it higher.
+
+9. **iplookup**: <br>
+   A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a>. This is needed to know if the proxies are Transparent. The website will only be used once when starting the checker.
+
+10. **judges_threads**: <br>
+   Maximum threads for selecting the judge
+
+11. **judges_timeout**: <br>
+   Timeout duration of judges in ms
+
+12. **judges**: <br>
+   These websites are the sites the proxies will connect to. These have to return the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request so the checker can determine what anonymity level the proxy is.
+
+13. **blacklisted**:<br>
+   Websites that contain blacklisted ips. These ips won't be checked
+
+14. **bancheck**: <br>
+    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory.
+
+15. **keywords**: <br>
+    It will check if the website the proxy has opened contains the text given
+
+16. **transport**: <br>
+    These are the settings used for making a request. Only touch this option if you know what you are doing.
 
 </details>
 
