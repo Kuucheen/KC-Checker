@@ -2,7 +2,9 @@ package common
 
 import (
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"sort"
 	"strings"
 	"sync"
@@ -12,17 +14,20 @@ import (
 
 type JudgesTimes struct {
 	Judge        string
+	Ip           string
 	ResponseTime time.Duration
 }
 
 type HostTimes []JudgesTimes
 
 var (
-	UserIP        string
-	FastestJudge  string
-	FastestJudges map[string]string
+	UserIP            string
+	FastestJudge      string
+	FastestJudgeName  *url.URL
+	FastestJudges     map[string]string
+	FastestJudgesName map[string]*url.URL
 
-	standardHeader = []string{"HTTP_HOST", "REQUEST_METHOD", "HTTP_USER", "REMOTE_ADDR", "REMOTE_PORT"}
+	standardHeader = []string{"HTTP_HOST", "REQUEST_METHOD", "REMOTE_ADDR", "REMOTE_PORT"}
 )
 
 func (ht HostTimes) Len() int {
@@ -46,6 +51,7 @@ var (
 
 func CheckDomains() HostTimes {
 	FastestJudges = make(map[string]string)
+	FastestJudgesName = make(map[string]*url.URL)
 
 	configHosts := GetConfig().Judges
 	maxThreads := GetConfig().JudgesThreads
@@ -70,7 +76,12 @@ func CheckDomains() HostTimes {
 	// Sort the original CurrentCheckedHosts based on response time
 	sort.Sort(CurrentCheckedHosts)
 
-	FastestJudge = CurrentCheckedHosts[0].Judge
+	FastestJudge = CurrentCheckedHosts[0].Ip
+
+	u, err := url.Parse(CurrentCheckedHosts[0].Judge)
+	if err == nil {
+		FastestJudgeName = u
+	}
 
 	for _, host := range CurrentCheckedHosts {
 
@@ -79,7 +90,16 @@ func CheckDomains() HostTimes {
 		_, ok := FastestJudges[protocol]
 
 		if !ok {
-			FastestJudges[protocol] = host.Judge
+			FastestJudges[protocol] = host.Ip
+		}
+
+		_, ok = FastestJudgesName[protocol]
+
+		if !ok {
+			u, err = url.Parse(host.Judge)
+			if err == nil {
+				FastestJudgesName[protocol] = u
+			}
 		}
 	}
 
@@ -91,9 +111,10 @@ func checkTimeAsync(host string) {
 	defer wg.Done()
 	defer atomic.AddInt32(&currentThreads, -1)
 
-	responseTime := checkTime(host)
+	ip, responseTime := checkTime(host)
 	hostTime := JudgesTimes{
 		Judge:        host,
+		Ip:           ip,
 		ResponseTime: responseTime,
 	}
 
@@ -102,39 +123,54 @@ func checkTimeAsync(host string) {
 	mutex.Unlock()
 }
 
-func checkTime(host string) time.Duration {
-	transport := &http.Transport{
-		DisableKeepAlives: !GetConfig().KeepAlive,
+// Main function to check the time
+func checkTime(host string) (string, time.Duration) {
+	// Parse the URL to extract the hostname
+	parsedURL, err := url.Parse(host)
+	if err != nil {
+		return "", time.Hour * 999
+	}
+
+	hostname := parsedURL.Hostname()
+
+	tempTransport := &http.Transport{
+		DisableKeepAlives: !GetConfig().Transport.KeepAlive,
 		MaxIdleConns:      3,
 		IdleConnTimeout:   time.Duration(GetConfig().JudgesTimeOut) * time.Millisecond,
 	}
 
 	client := &http.Client{
-		Transport: transport,
+		Transport: tempTransport,
 		Timeout:   time.Millisecond * time.Duration(config.JudgesTimeOut),
 	}
+
+	ips, err := net.LookupIP(hostname)
+	if err != nil || len(ips) == 0 {
+		return "", time.Hour * 999
+	}
+
+	ip := ips[0].String()
 
 	startTime := time.Now()
 
 	resp, err := client.Get(host)
 	if err != nil {
-		return time.Hour * 999
+		return ip, time.Hour * 999
 	}
 	defer resp.Body.Close()
 
 	// Read the response body
 	resBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return time.Hour * 999
+		return ip, time.Hour * 999
 	}
 
 	if !CheckForValidResponse(string(resBody)) {
-		return time.Hour * 99
+		return ip, time.Hour * 99
 	}
 
-	return time.Since(startTime)
+	return ip, time.Since(startTime)
 }
-
 func GetHosts() HostTimes {
 	return CurrentCheckedHosts
 }
@@ -166,6 +202,14 @@ func GetFastestJudgeForProtocol(protocol string) string {
 	}
 
 	return FastestJudges[protocol]
+}
+
+func GetFastestJudgeNameForProtocol(protocol string) *url.URL {
+	if strings.HasPrefix(protocol, "socks") {
+		return FastestJudgeName
+	}
+
+	return FastestJudgesName[protocol]
 }
 
 func CheckForValidResponse(html string) bool {

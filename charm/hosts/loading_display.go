@@ -59,6 +59,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if checked {
 		finished = true
 		go helper.Dispatcher(helper.GetCleanedProxies())
+
+		if common.GetAutoOutput() != "" {
+			go helper.StartAutoOutputManager()
+		}
+
 		time.Sleep(time.Second * 3)
 		m.View()
 		return m, tea.Quit
@@ -179,5 +184,4 @@ func Run() {
 	if _, err := p.Run(); err != nil {
 		os.Exit(1)
 	}
-
 }

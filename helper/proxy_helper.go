@@ -2,7 +2,6 @@ package helper
 
 import (
 	"KC-Checker/common"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -17,13 +16,16 @@ type Proxy struct {
 	Full     string
 	Level    int
 	Protocol string
+	Country  string
+	Type     string
 	checks   int
-	time     int //in ms
+	Time     int //in ms
 }
 
 var (
 	proxyType     []int
 	Blacklisted   []string
+	AllProxies    []*Proxy
 	AllProxiesSum float64
 )
 
@@ -46,7 +48,6 @@ func ToProxies(arr []string) []*Proxy {
 			dat, err := strconv.Atoi(temp[1])
 
 			if err != nil {
-				fmt.Printf("Not a valid Port: %v\n", err)
 				return
 			}
 
@@ -78,6 +79,10 @@ func ToProxies(arr []string) []*Proxy {
 // AddAllProtocols adds for every Protocol selected a proxy with the Protocol
 func AddAllProtocols(arr []*Proxy) []*Proxy {
 	typeNames := GetTypeNames()
+
+	if len(typeNames) == 0 {
+		return arr
+	}
 
 	var newArr []*Proxy
 
@@ -128,6 +133,14 @@ func SetType(typ []int) {
 }
 
 func GetCleanedProxies() []*Proxy {
+	if AllProxiesSum > 0 {
+		withAllProtocols := AddAllProtocols(AllProxies)
+
+		AllProxiesSum = float64(len(withAllProtocols))
+
+		return withAllProtocols
+	}
+
 	forbidden := GetProxiesFile("blacklisted.txt", false)
 	for _, val := range Blacklisted {
 		forbidden = append(forbidden, val)
@@ -148,11 +161,15 @@ func GetCleanedProxies() []*Proxy {
 		}
 	}
 
-	cleaned = AddAllProtocols(cleaned)
+	AllProxies = AddAllProtocols(cleaned)
 
 	AllProxiesSum = float64(len(cleaned))
 
-	return cleaned
+	if AllProxiesSum == 0 {
+		AllProxiesSum = -1
+	}
+
+	return AllProxies
 }
 
 func ContainsSlice(slice []string, str string) bool {
@@ -168,10 +185,17 @@ func GetBlacklisted() []string {
 	var blist []string
 
 	for _, site := range common.GetConfig().Blacklisted {
-		resp, _ := http.Get(site)
+		resp, err := http.Get(site)
+		if err != nil {
+			continue
+		}
 
 		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			continue
+		}
 		err = resp.Body.Close()
+
 		if err != nil {
 			continue
 		}

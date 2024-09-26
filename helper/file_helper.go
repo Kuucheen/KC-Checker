@@ -6,18 +6,31 @@ import (
 	"fmt"
 	"golang.design/x/clipboard"
 	"os"
+	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
 )
 
-var ProxySum int
+var (
+	ProxySum int
 
-func Write(proxies map[int][]*Proxy, style int, banCheck bool) string {
+	muProxies      sync.Mutex
+	proxiesToWrite = make(map[int][]*Proxy)
+
+	muBancheck             sync.Mutex
+	bancheckProxiesToWrite = make(map[int][]*Proxy)
+)
+
+func Write(proxies map[int][]*Proxy, outputFormat string, banCheck bool, appendToFile bool) string {
+	outputFormat = strings.ToLower(outputFormat)
 	pTypes := GetTypeNames()
 
 	if common.GetConfig().CopyToClipboard {
 		clipErr := clipboard.Init()
-
 		if clipErr != nil {
 			return "ClipBoard error"
 		}
@@ -33,19 +46,24 @@ func Write(proxies map[int][]*Proxy, style int, banCheck bool) string {
 		for _, proxyLevel := range proxies {
 
 			sort.Slice(proxyLevel, func(i, j int) bool {
-				return proxyLevel[i].time < proxyLevel[j].time
+				return proxyLevel[i].Time < proxyLevel[j].Time
 			})
 
 			filtered := ""
-
 			if banCheck {
 				filtered = "BanChecked/"
 			}
 
-			f, err := os.Create(GetFilePath(pType) + filtered + GetLevelNameOf(proxyLevel[0].Level-1) + ".txt")
+			fileMode := os.O_CREATE | os.O_WRONLY
+			if appendToFile {
+				fileMode |= os.O_APPEND
+			} else {
+				fileMode |= os.O_TRUNC
+			}
 
+			f, err := os.OpenFile(GetFilePath(pType)+filtered+GetLevelNameOf(proxyLevel[0].Level-1)+".txt", fileMode, 0644)
 			if allFile == nil {
-				allFile, allFileErr = os.Create(GetFilePath(pType) + filtered + "all.txt")
+				allFile, allFileErr = os.OpenFile(GetFilePath(pType)+filtered+"all.txt", fileMode, 0644)
 			}
 
 			if err != nil || allFileErr != nil {
@@ -57,16 +75,14 @@ func Write(proxies map[int][]*Proxy, style int, banCheck bool) string {
 					continue
 				}
 
-				var proxyString string
-				switch style {
-				case 0:
-					proxyString = proxy.Full
-				case 1:
-					proxyString = fmt.Sprintf("%s://%s", pType, proxy.Full)
+				proxyString := outputFormat
 
-				case 2:
-					proxyString = fmt.Sprintf("%s;%d", proxy.Full, proxy.time)
-				}
+				proxyString = strings.Replace(proxyString, "ip", proxy.Ip, 1)
+				proxyString = strings.Replace(proxyString, "port", strconv.Itoa(proxy.Port), 1)
+				proxyString = strings.Replace(proxyString, "protocol", proxy.Protocol, 1)
+				proxyString = strings.Replace(proxyString, "time", strconv.Itoa(proxy.Time), 1)
+				proxyString = strings.Replace(proxyString, "country", proxy.Country, 1)
+				proxyString = strings.Replace(proxyString, "type", proxy.Type, 1)
 
 				_, err := fmt.Fprintln(f, proxyString)
 				_, allFileErr = fmt.Fprintln(allFile, proxyString)
@@ -79,13 +95,12 @@ func Write(proxies map[int][]*Proxy, style int, banCheck bool) string {
 			}
 
 			err = f.Close()
+			if err != nil {
+				return ""
+			}
 
 			if common.GetConfig().CopyToClipboard {
 				clipboard.Write(clipboard.FmtText, []byte(clipString))
-			}
-
-			if err != nil {
-				return ""
 			}
 		}
 	}
@@ -174,4 +189,68 @@ func GetProxies(str string, full bool) []string {
 	ProxySum = len(matches)
 
 	return matches
+}
+
+func clearOutputFolder(path string) error {
+	return filepath.Walk(path, func(filePath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return fmt.Errorf("error accessing %s: %v", filePath, err)
+		}
+
+		// Skip the root folder itself
+		if filePath == path {
+			return nil
+		}
+
+		// If it's a directory, just continue
+		if info.IsDir() {
+			return nil
+		}
+
+		// Remove the file
+		err = os.Remove(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to remove file %s: %v", filePath, err)
+		}
+
+		return nil
+	})
+}
+
+func StartAutoOutputManager() {
+	_ = clearOutputFolder("./output")
+
+	timeBetween := time.Duration(common.GetConfig().AutoOutput.TimeBetweenSafes) * time.Second
+
+	for {
+		muProxies.Lock()
+		if len(proxiesToWrite) > 0 {
+			Write(proxiesToWrite, common.GetAutoOutput(), false, true)
+			proxiesToWrite = make(map[int][]*Proxy)
+		}
+		muProxies.Unlock()
+
+		muBancheck.Lock()
+		if len(bancheckProxiesToWrite) > 0 {
+			Write(bancheckProxiesToWrite, common.GetAutoOutput(), true, true)
+			bancheckProxiesToWrite = make(map[int][]*Proxy)
+		}
+		muBancheck.Unlock()
+
+		time.Sleep(timeBetween)
+	}
+}
+
+func AddToWriteQueue(proxy *Proxy) {
+	muProxies.Lock()
+	defer muProxies.Unlock()
+
+	proxiesToWrite[proxy.Level] = append(proxiesToWrite[proxy.Level], proxy)
+}
+
+func AddToBancheckWriteQueue(proxy *Proxy) {
+	muBancheck.Lock()
+	defer muBancheck.Unlock()
+
+	bancheckProxiesToWrite[proxy.Level] = append(bancheckProxiesToWrite[proxy.Level], proxy)
 }

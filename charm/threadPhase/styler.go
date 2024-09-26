@@ -6,6 +6,7 @@ import (
 	"KC-Checker/helper"
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/tree"
 	"math"
 	"strconv"
 	"strings"
@@ -17,9 +18,16 @@ var (
 	stopTime         = time.Now()
 	stoppedTime      = false
 	typeStyle        = lipgloss.NewStyle().Italic(true)
-	eliteStyle       = typeStyle.Foreground(lipgloss.Color("#624CAB"))
-	anonymousStyle   = typeStyle.Foreground(lipgloss.Color("#57CC99"))
-	transparentStyle = typeStyle.Foreground(lipgloss.Color("#4F4F4F"))
+	EliteStyle       = typeStyle.Foreground(lipgloss.Color("#624CAB"))
+	AnonymousStyle   = typeStyle.Foreground(lipgloss.Color("#57CC99"))
+	TransparentStyle = typeStyle.Foreground(lipgloss.Color("#4F4F4F"))
+
+	tempStyle        = lipgloss.NewStyle().Width(GetWidth() / 4).Render
+	borderRightStyle = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderRight(true).Width(GetWidth() / 2).Align(lipgloss.Center)
+
+	protocolMap     map[string]map[int]int
+	itemStyle       = lipgloss.NewStyle().MarginRight(1)
+	enumeratorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8")).MarginRight(1)
 )
 
 func getStyledQueue() string {
@@ -33,17 +41,17 @@ func getStyledQueue() string {
 
 		switch value.Level {
 		case 3:
-			addString += eliteStyle.Render("E")
+			addString += EliteStyle.Render("E")
 		case 2:
-			addString += anonymousStyle.Render("A")
+			addString += AnonymousStyle.Render("A")
 		case 1:
-			addString += transparentStyle.Render("T")
+			addString += TransparentStyle.Render("T")
 		}
 
 		ip := value.Full
 
 		if common.GetPrivacyMode() {
-			ip = getPrivateFull(value)
+			ip = GetPrivateFull(value)
 		}
 
 		times := strings.Repeat(" ", int(math.Abs(float64(21-len(ip)))))
@@ -63,7 +71,7 @@ func getStyledQueue() string {
 		Render(retString)
 }
 
-func getPrivateFull(proxy *helper.Proxy) string {
+func GetPrivateFull(proxy *helper.Proxy) string {
 	splitted := strings.Split(proxy.Ip, ".")
 	return splitted[0] + "." +
 		strings.Repeat("*", len(splitted[1])) + "." +
@@ -73,15 +81,9 @@ func getPrivateFull(proxy *helper.Proxy) string {
 }
 
 func getStyledInfo(elite int, anon int, trans int) string {
-	activeThreads := helper.GetActive()
+	activeThreads := helper.GetThreadsActive()
 
-	timeCalc := time.Now()
-
-	if stoppedTime {
-		timeCalc = stopTime
-	}
-
-	timeSince := timeCalc.Sub(startTime)
+	timeSince := GetTimeSince()
 
 	ms := fmt.Sprintf("%02d", int(timeSince.Milliseconds()%1000/10))
 
@@ -91,7 +93,7 @@ func getStyledInfo(elite int, anon int, trans int) string {
 		getFormattedInfo("Transparent:", trans) + "\n" +
 		getFormattedInfo("Invalid:", helper.GetInvalid()) + "\n" +
 		strings.Repeat("─", GetWidth()/4-6) + "\n" +
-		getFormattedInfoStr("Time:", strconv.Itoa(int(timeSince.Seconds()))+"."+ms+"s")
+		GetFormattedInfoStr("Time:", strconv.Itoa(int(timeSince.Seconds()))+"."+ms+"s")
 
 	return lipgloss.NewStyle().
 		BorderStyle(lipgloss.NormalBorder()).
@@ -100,6 +102,16 @@ func getStyledInfo(elite int, anon int, trans int) string {
 		PaddingRight(6).
 		Width(GetWidth() / 4).
 		Render(retString)
+}
+
+func GetTimeSince() time.Duration {
+	timeCalc := time.Now()
+
+	if stoppedTime {
+		timeCalc = stopTime
+	}
+
+	return timeCalc.Sub(startTime)
 }
 
 func GetWidth() int {
@@ -119,7 +131,7 @@ func getFormattedInfo(str string, num int) string {
 	return str + strings.Repeat(" ", MAXLENGTH-length) + numStr
 }
 
-func getFormattedInfoStr(str string, value string) string {
+func GetFormattedInfoStr(str string, value string) string {
 	return str + strings.Repeat(" ", 18-len(str)-len(value)) + value
 }
 
@@ -132,4 +144,38 @@ func SetStopTime() {
 		stopTime = time.Now()
 		stoppedTime = true
 	}
+}
+
+func getProxyTree() string {
+	protocolMap = helper.GetProxyProtocolCountMap()
+
+	t := tree.Root("Proxies").
+		Child(
+			tree.Root("HTTP").
+				Child(
+					GetFormattedInfoStr("Elite", strconv.Itoa(protocolMap["http"][3])),
+					GetFormattedInfoStr("Anonymous", strconv.Itoa(protocolMap["http"][2])),
+					GetFormattedInfoStr("Transparent", strconv.Itoa(protocolMap["http"][1])),
+				),
+			tree.Root("HTTPS").
+				Child(
+					GetFormattedInfoStr("Elite", strconv.Itoa(protocolMap["https"][3])),
+					GetFormattedInfoStr("Anonymous", strconv.Itoa(protocolMap["https"][2])),
+					GetFormattedInfoStr("Transparent", strconv.Itoa(protocolMap["https"][1])),
+				),
+			tree.Root("SOCKS4").
+				Child(
+					GetFormattedInfoStr("Elite", strconv.Itoa(protocolMap["socks4"][3])),
+					GetFormattedInfoStr("Anonymous", strconv.Itoa(protocolMap["socks4"][2])),
+					GetFormattedInfoStr("Transparent", strconv.Itoa(protocolMap["socks4"][1])),
+				),
+			tree.Root("SOCKS5").
+				Child(
+					GetFormattedInfoStr("Elite", strconv.Itoa(protocolMap["socks5"][3])),
+					GetFormattedInfoStr("Anonymous", strconv.Itoa(protocolMap["socks5"][2])),
+					GetFormattedInfoStr("Transparent", strconv.Itoa(protocolMap["socks5"][1])),
+				),
+		).ItemStyle(itemStyle).EnumeratorStyle(enumeratorStyle).Enumerator(tree.RoundedEnumerator)
+
+	return borderRightStyle.Render("\n" + tempStyle(t.String()+"\n"))
 }

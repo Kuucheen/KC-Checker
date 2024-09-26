@@ -3,10 +3,14 @@ package charm
 import (
 	"KC-Checker/charm/threadPhase"
 	"KC-Checker/common"
+	"KC-Checker/helper"
 	"fmt"
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"os"
+	"strconv"
+	"time"
 )
 
 const (
@@ -14,10 +18,7 @@ const (
 )
 
 var (
-	prevIndex         = 0
-	index             = 0
 	selectedItems     []int
-	finished          = false
 	currentIndexStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#B393EB"))
 	selectedStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("#4F3793"))
 	borderStyle       = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true)
@@ -27,13 +28,42 @@ var (
 				BorderStyle(lipgloss.NormalBorder()).
 				BorderForeground(lipgloss.Color("#55B08C")).
 				MarginTop(2)
+
+	topStyle          = lipgloss.NewStyle().Align(lipgloss.Center).Width(threadPhase.GetWidth() / 3).Foreground(lipgloss.Color("#e3dcf7"))
+	middleStyle       = topStyle.BorderStyle(lipgloss.NormalBorder()).BorderLeft(true).BorderRight(true).BorderForeground(lipgloss.Color("#6C44BB"))
+	bottomBorderStyle = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderBottom(true).
+				MarginBottom(2).BorderForeground(lipgloss.Color("#6C44BB"))
+
+	errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#D14D4D"))
 )
 
 type model struct {
+	spinner   spinner.Model
+	prevIndex int
+	index     int
+	finished  bool
+}
+
+func initialModel() model {
+	s := spinner.New()
+	s.Spinner = spinner.Spinner{
+		Frames: []string{
+			"▱▱▱",
+			"▰▱▱",
+			"▰▰▱",
+			"▰▰▰",
+			"▱▰▰",
+			"▱▱▰",
+		},
+		FPS: time.Second / 5, //nolint:gomnd
+	}
+
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("#624CAB")).MarginLeft(8)
+	return model{spinner: s}
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.SetWindowTitle("KC-Checker - github.com/Kuucheen")
+	return m.spinner.Tick
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -41,42 +71,42 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case tea.KeyEnter.String():
-			if index == -1 {
-				if len(selectedItems) > 0 {
-					finished = true
+			if m.index == -1 {
+				if len(selectedItems) > 0 && helper.AllProxiesSum > 0 {
+					m.finished = true
 					return m, tea.Quit
 				} else {
 					break
 				}
 			}
 
-			if !inSelectedItems(index) {
-				selectedItems = append(selectedItems, index)
+			if !inSelectedItems(m.index) {
+				selectedItems = append(selectedItems, m.index)
 			} else {
 				var newSelectedItems []int
 				for _, v := range selectedItems {
-					if v != index {
+					if v != m.index {
 						newSelectedItems = append(newSelectedItems, v)
 					}
 				}
 				selectedItems = newSelectedItems
 			}
 		case tea.KeyRight.String():
-			if index < maxIndex && index != -1 {
-				index++
+			if m.index < maxIndex && m.index != -1 {
+				m.index++
 			}
 		case tea.KeyLeft.String():
-			if index > 0 {
-				index--
+			if m.index > 0 {
+				m.index--
 			}
 		case tea.KeyDown.String():
-			if index != -1 {
-				prevIndex = index
-				index = -1
+			if m.index != -1 {
+				m.prevIndex = m.index
+				m.index = -1
 			}
 		case tea.KeyUp.String():
-			if index == -1 {
-				index = prevIndex
+			if m.index == -1 {
+				m.index = m.prevIndex
 			}
 		case tea.KeyCtrlC.String():
 			os.Exit(1)
@@ -84,13 +114,40 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	var cmd tea.Cmd
+	m.spinner, cmd = m.spinner.Update(msg)
 	return m, cmd
 }
 
 func (m model) View() string {
-	if finished {
+	if m.finished {
 		return ""
 	}
+
+	firstbox := topStyle.Render(threadPhase.GetFormattedInfoStr("Threads", strconv.Itoa(common.GetConfig().Threads)))
+
+	secBoxString := ""
+
+	if helper.AllProxiesSum == 0 {
+		secBoxString = "Proxies" + m.spinner.View()
+	} else if helper.AllProxiesSum == -1 {
+		secBoxString = errorStyle.Render("No proxies detected")
+	} else {
+		secBoxString = threadPhase.GetFormattedInfoStr("Proxies", strconv.Itoa(int(helper.AllProxiesSum)))
+	}
+
+	secBox := middleStyle.Render(secBoxString)
+
+	thirdBoxString := ""
+
+	if common.GetAutoOutput() != "" {
+		thirdBoxString = lipgloss.NewStyle().MarginLeft(6).Foreground(lipgloss.Color("#57CC99")).Render("enabled")
+	} else {
+		thirdBoxString = errorStyle.MarginLeft(2).Render("disabled")
+	}
+
+	thirdBox := topStyle.Render("Autosafe", thirdBoxString)
+
+	combined := bottomBorderStyle.Render(lipgloss.JoinHorizontal(lipgloss.Right, firstbox, secBox, thirdBox))
 
 	style := borderStyle.
 		MarginRight(threadPhase.GetWidth() / 8).
@@ -114,7 +171,7 @@ func (m model) View() string {
 	var selectBar = ""
 
 	for i := 0; i < len(options); i++ {
-		if index%len(options) == i {
+		if m.index%len(options) == i {
 			options[i] = currentIndexStyle.Render(options[i])
 		} else if inSelectedItems(i) {
 			options[i] = selectedStyle.Render(options[i])
@@ -129,7 +186,7 @@ func (m model) View() string {
 
 	color := ""
 
-	if index == -1 {
+	if m.index == -1 {
 		color = "#57CC99"
 	} else {
 		color = "#3E8262"
@@ -140,20 +197,22 @@ func (m model) View() string {
 
 	selectBar = lipgloss.JoinVertical(lipgloss.Bottom, title, selectBar)
 
-	return lipgloss.JoinVertical(lipgloss.Center, selectBar, helpStyle("↑ up • ↓ down • → right • ← left • enter select"))
+	selectBar = lipgloss.JoinVertical(lipgloss.Center, selectBar, helpStyle("↑ up • ↓ down • → right • ← left • enter select"))
+
+	return lipgloss.JoinVertical(lipgloss.Center, combined, selectBar)
 }
 
 func GetProxyType() []int {
 	checkForAutoUpdate()
 
 	if len(selectedItems) > 0 {
+		helper.GetCleanedProxies()
 		return selectedItems
 	}
 
-	m := model{}
-	p := tea.NewProgram(m)
+	go helper.GetCleanedProxies()
 
-	if _, err := p.Run(); err != nil {
+	if _, err := tea.NewProgram(initialModel()).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
