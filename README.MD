@@ -190,7 +190,7 @@ Now you have an executable. You can run it like described in **Getting Started**
     If a website URL is provided, the program verifies whether the proxy can successfully access the site. Proxies that have been checked against the website will be organized and stored in the `banchecked` directory.
 
 15. **keywords**: <br>
-    The program inspects the content of the website (in the bancheck option) accessed through the proxy to determine if it contains the specified keywords or phrases. If the proxy successfully reaches the site and the desired keywords are found it will safe them in the `banchecked` directory. If the keywords are not found they will not be safed in the `banchecked` directory
+    The program inspects the content of the website (in the bancheck option) accessed through the proxy to determine if it contains the specified keywords or phrases. If the proxy successfully reaches the site and the desired keywords are found it will safe them in the `banchecked` directory. If the keywords are not found they will not be safed in the `banchecked` directory (even when the proxy was able to reach the site).
 
 16. **transport**: <br>
     These are the settings used for making a request. Only touch this option if you know what you are doing.
