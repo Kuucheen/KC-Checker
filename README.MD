@@ -78,11 +78,12 @@ Now run it with
    If you want to determine the country and type (ISP, Datacenter, or Residential), you'll need to download the [GeoLite2 Country and GeoLite2 ASN Database](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) from MaxMind.
 
    - After downloading, replace the existing databases in the `helper` directory.
-   - Ensure they have the same names: `GeoLite2-ASN.mmdb` and `GeoLite2-Country.mmdb`.
+   - Ensure they have the same names: `GeoLite2-ASN.mmdb` and `GeoLite2-Country.mmdb`.<br><br>
 
    > **Note**: These databases are not included in the repository due to their licensing restrictions. However, they are bundled in the [prebuilt version](https://github.com/Kuucheen/KC-Checker/releases/).
 
-**Build**
+
+<br>**Build**
 <details>
   <summary>Using provided scripts</summary>
 
@@ -130,7 +131,7 @@ Now you have an executable. You can run it like described in **Getting Started**
     → Right
     Press Enter (↵) to select/confirm
 
-**Saving Proxies**: When you save the proxies, they will always be stored in the `output` folder.
+**Saving Proxies**: When you save the proxies at the end of a checking progress, they will always be stored in the `output` folder.
 
 # Customize Settings
 
@@ -187,7 +188,7 @@ Now you have an executable. You can run it like described in **Getting Started**
     It will check if the website the proxy has opened contains the text given
 
 12. **transport**: <br>
-   These are the settings used for making a request. Only touch this option if you know what you are doing.
+    These are the settings used for making a request. Only touch this option if you know what you are doing.
 
 </details>
 
