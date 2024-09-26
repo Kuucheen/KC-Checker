@@ -78,7 +78,7 @@ Now run it with
    If you want to determine the country and type (ISP, Datacenter, or Residential), you'll need to download the [GeoLite2 Country and GeoLite2 ASN Database](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) from MaxMind.
 
    - After downloading, replace the existing databases in the `helper` directory.
-   - Ensure they have the same names: `GeoLite2-ASN.mmdb` and `GeoLite2-Country.mmdb`.
+   - Ensure they have the same names: `GeoLite2-ASN.mmdb` and `GeoLite2-Country.mmdb`.<br>
 
    > **Note**: These databases are not included in the repository due to their licensing restrictions. However, they are bundled in the [prebuilt version](https://github.com/Kuucheen/KC-Checker/releases/).
 
