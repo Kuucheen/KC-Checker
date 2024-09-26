@@ -80,8 +80,7 @@ Now run it with
    - After downloading, replace the existing databases in the `helper` directory.
    - Ensure they have the same names: `GeoLite2-ASN.mmdb` and `GeoLite2-Country.mmdb`.
 
-   > [!NOTE]
-   > These databases are not included in the repository due to their licensing restrictions. However, they are bundled in the [prebuilt version](https://github.com/Kuucheen/KC-Checker/releases/).
+   > **Note**: These databases are not included in the repository due to their licensing restrictions. However, they are bundled in the [prebuilt version](https://github.com/Kuucheen/KC-Checker/releases/).
 
 **Build**
 <details>
