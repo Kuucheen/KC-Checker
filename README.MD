@@ -187,10 +187,10 @@ Now you have an executable. You can run it like described in **Getting Started**
    Websites that contain blacklisted ips. These ips won't be checked
 
 14. **bancheck**: <br>
-    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory.
+    If a website URL is provided, the program verifies whether the proxy can successfully access the site. Proxies that have been checked against the website will be organized and stored in the `banchecked` directory.
 
 15. **keywords**: <br>
-    It will check if the website the proxy has opened contains the text given
+    The program inspects the content of the website (in the bancheck option) accessed through the proxy to determine if it contains the specified keywords or phrases. If the proxy successfully reaches the site and the desired keywords are found it will safe them in the `banchecked` directory. If the keywords are not found they will not be safed in the `banchecked` directory
 
 16. **transport**: <br>
     These are the settings used for making a request. Only touch this option if you know what you are doing.
