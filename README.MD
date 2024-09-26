@@ -66,11 +66,22 @@ Now run it with
 
 ## Or build it yourself
 
-Install [go](https://go.dev/doc/install) and [git](https://git-scm.com/downloads)
+1. **Install Prerequisites:**
+   - [Go](https://go.dev/doc/install)
+   - [Git](https://git-scm.com/downloads)
 
-Now open your terminal & clone the project with
+2. **Clone the Project:**
+   Open your terminal and run:
+   `git clone https://github.com/Kuucheen/KC-Checker.git`
 
-`git clone https://github.com/Kuucheen/KC-Checker.git`
+3. **(OPTIONAL) Set Up GeoLite2 Database:**
+   If you want to determine the country and type (ISP, Datacenter, or Residential), you'll need to download the [GeoLite2 Country and GeoLite2 ASN Database](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) from MaxMind.
+
+- After downloading, replace the existing databases in the `helper` directory.
+- Ensure they have the same names: `GeoLite2-ASN.mmdb` and `GeoLite2-Country.mmdb`.
+
+> [!NOTE]
+> These databases are not included in the repository due to their licensing restrictions. However, they are bundled in the [prebuilt version](https://github.com/Kuucheen/KC-Checker/releases/).
 
 **Build**
 <details>
@@ -110,9 +121,22 @@ Build with
 Now you have an executable. You can run it like described in **Getting Started**
 </details>
 
+# How to Use
+
+**Navigation**: Use the arrow keys on your keyboard to navigate through the program:
+
+    ↑ Up
+    ↓ Down
+    ← Left
+    → Right
+    Press Enter (↵) to select/confirm
+
+**Saving Proxies**: When you save the proxies, they will always be stored in the `output` folder.
+
 # Customize Settings
 
-Note: Normally you don't have to change these settings
+> [!NOTE]
+> For most users, the default settings will probably be sufficient.
 
 <details>
     <summary>Details for settings.json</summary>
@@ -129,30 +153,52 @@ Note: Normally you don't have to change these settings
 4. **privacy_mode**: <br>
    If set to true, the proxies will be blured with "*" while checking
 
-5. **iplookup**: <br>
-   A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a><br>
+5. **autoSelect**: <br>
+   When setting one or more protocols are set to true, it will automatically start checking with the selected protocols.
 
-6. **judges_threads**: <br>
+6. **autoSave**: <br>
+   **timeBetweenSafes**: Seconds between the autoSave<br>
+   **ip:port**: If set to true it will automatically save the proxies with these format every timeBetweenSafes seconds<br>
+   **protocol://ip:port**: Same here<br>
+   **ip:port;time**: Same here<br>
+   **custom**: You can set a custom autoSave format here. If its not empty it will save it with this format. At the end of a checking process theres an option for "CUSTOM", where you can build your own output. You can put the output you built there in here.<br>
+
+7. **timeBetweenRefresh**: <br>
+   This is how often the screen updates in ms. If you experience high CPU usage, it is recommended to set it higher.
+
+8. **iplookup**: <br>
+   A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a>. This is needed to know if the proxies are Transparent. The website will only be used once when starting the checker.
+
+9. **judges_threads**: <br>
    Maximum threads for selecting the judge
 
 7. **judges_timeout**: <br>
    Timeout duration of judges in ms
 
 8. **judges**: <br>
-   Websites that returns the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request<br>
+   These websites are the sites the proxies will connect to. These have to return the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request so the checker can determine what anonymity level the proxy is.
 
 9. **blacklisted**:<br>
-   Websites that contain blacklisted ips. These ips won't be checked<br>
+   Websites that contain blacklisted ips. These ips won't be checked
 
 10. **bancheck**: <br>
-    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory<br>
+    If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory.
 
 11. **keywords**: <br>
-    It will check if the website the proxy has opened contains the text given<br>
+    It will check if the website the proxy has opened contains the text given
+
+12. **transport**: <br>
+   These are the settings used for making a request. Only touch this option if you know what you are doing.
 
 </details>
 
 You can blacklist custom proxies by adding them in `blacklisted.txt`
+
+## License
+
+The code for this project is licensed under the [MIT License](LICENSE).
+
+The GeoLite2 databases used by this project are provided by MaxMind and are licensed under the [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/).
 
 ## <p align="center">Other
 
