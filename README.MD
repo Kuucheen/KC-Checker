@@ -125,13 +125,15 @@ Now you have an executable. You can run it like described in **Getting Started**
 
 # How to Use
 
-**Navigation**: Use the arrow keys on your keyboard to navigate through the program:
+**Navigation**: Use the arrow keys on your keyboard to navigate through the program's interface. Here’s a quick guide to the controls:
 
-    ↑ Up
-    ↓ Down
-    ← Left
-    → Right
-    Press Enter (↵) to select/confirm
+| Key               | Description          |
+| :---------------- | :------------------- |
+| <kbd>↑ Up</kbd>   | Move up              |
+| <kbd>↓ Down</kbd> | Move down            |
+| <kbd>← Left</kbd> | Move left            |
+| <kbd>→ Right</kbd>| Move right           |
+| <kbd>↵ Enter</kbd>| Select/Confirm       |
 
 **Saving Proxies**: When you save the proxies at the end of a checking progress, they will always be stored in the `output` folder.
 
