@@ -38,7 +38,9 @@
 
 # Requirements
 
-Your terminal needs to support true color. <br><br>
+> [!IMPORTANT]
+> Your terminal needs to support true color, and using different fonts in your terminal may cause display errors.
+
 These are tested terminals on different operating systems:
 
 | System | Tested | Notes |
@@ -153,41 +155,44 @@ Now you have an executable. You can run it like described in **Getting Started**
 4. **privacy_mode**: <br>
    If set to true, the proxies will be blured with "*" while checking
 
-5. **autoSelect**: <br>
+5. **copyToClipboard**: <br>
+   If set to true, all proxies checked will be copied to clipboard when saving them to a file
+
+6. **autoSelect**: <br>
    When setting one or more protocols are set to true, it will automatically start checking with the selected protocols.
 
-6. **autoSave**: <br>
+7. **autoSave**: <br>
    **timeBetweenSafes**: Seconds between the autoSave<br>
    **ip:port**: If set to true it will automatically save the proxies with these format every timeBetweenSafes seconds<br>
    **protocol://ip:port**: Same here<br>
    **ip:port;time**: Same here<br>
    **custom**: You can set a custom autoSave format here. If its not empty it will save it with this format. At the end of a checking process theres an option for "CUSTOM", where you can build your own output. You can put the output you built there in here.<br>
 
-7. **timeBetweenRefresh**: <br>
+8. **timeBetweenRefresh**: <br>
    This is how often the screen updates in ms. If you experience high CPU usage, it is recommended to set it higher.
 
-8. **iplookup**: <br>
+9. **iplookup**: <br>
    A website that returns the <a href="https://de.wikipedia.org/wiki/Internet_Protocol">ip</a>. This is needed to know if the proxies are Transparent. The website will only be used once when starting the checker.
 
-9. **judges_threads**: <br>
+10. **judges_threads**: <br>
    Maximum threads for selecting the judge
 
-7. **judges_timeout**: <br>
+11. **judges_timeout**: <br>
    Timeout duration of judges in ms
 
-8. **judges**: <br>
+12. **judges**: <br>
    These websites are the sites the proxies will connect to. These have to return the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request so the checker can determine what anonymity level the proxy is.
 
-9. **blacklisted**:<br>
+13. **blacklisted**:<br>
    Websites that contain blacklisted ips. These ips won't be checked
 
-10. **bancheck**: <br>
+14. **bancheck**: <br>
     If here's a website the program will check if the proxy is able to reach the site. These will land in the `banchecked` directory.
 
-11. **keywords**: <br>
+15. **keywords**: <br>
     It will check if the website the proxy has opened contains the text given
 
-12. **transport**: <br>
+16. **transport**: <br>
     These are the settings used for making a request. Only touch this option if you know what you are doing.
 
 </details>
