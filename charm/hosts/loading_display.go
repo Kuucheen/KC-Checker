@@ -107,7 +107,7 @@ func (m model) View() string {
 
 	if len(data) == 0 {
 		for _, val := range common.GetConfig().Judges {
-			data[val] = "?"
+			data[val.Url] = "?"
 		}
 	}
 

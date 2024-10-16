@@ -129,7 +129,7 @@ func check(proxy *Proxy) {
 	if responded && common.DoBanCheck() && err == nil {
 
 		for i := 0; i < retries; i++ {
-			body, status, err := RequestCustom(proxy, common.GetConfig().Bancheck, u, true)
+			body, status, err := RequestCustom(proxy, common.GetConfig().Bancheck, u, "", true)
 			IncrementCheckCount()
 
 			if err != nil {

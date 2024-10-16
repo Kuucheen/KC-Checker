@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -15,17 +16,20 @@ import (
 type JudgesTimes struct {
 	Judge        string
 	Ip           string
+	Regex        string
 	ResponseTime time.Duration
 }
 
 type HostTimes []JudgesTimes
 
 var (
-	UserIP            string
-	FastestJudge      string
-	FastestJudgeName  *url.URL
-	FastestJudges     map[string]string
-	FastestJudgesName map[string]*url.URL
+	UserIP             string
+	FastestJudge       string
+	FastestJudgeName   *url.URL
+	FastestJudgeRegex  string
+	FastestJudges      map[string]string
+	FastestJudgesName  map[string]*url.URL
+	FastestJudgesRegex map[string]string
 
 	standardHeader = []string{"HTTP_HOST", "REQUEST_METHOD", "REMOTE_ADDR", "REMOTE_PORT"}
 )
@@ -52,6 +56,7 @@ var (
 func CheckDomains() HostTimes {
 	FastestJudges = make(map[string]string)
 	FastestJudgesName = make(map[string]*url.URL)
+	FastestJudgesRegex = make(map[string]string)
 
 	configHosts := GetConfig().Judges
 	maxThreads := GetConfig().JudgesThreads
@@ -77,6 +82,7 @@ func CheckDomains() HostTimes {
 	sort.Sort(CurrentCheckedHosts)
 
 	FastestJudge = CurrentCheckedHosts[0].Ip
+	FastestJudgeRegex = CurrentCheckedHosts[0].Regex
 
 	u, err := url.Parse(CurrentCheckedHosts[0].Judge)
 	if err == nil {
@@ -91,6 +97,7 @@ func CheckDomains() HostTimes {
 
 		if !ok {
 			FastestJudges[protocol] = host.Ip
+			FastestJudgesRegex[protocol] = host.Regex
 		}
 
 		_, ok = FastestJudgesName[protocol]
@@ -107,14 +114,15 @@ func CheckDomains() HostTimes {
 	return unsortedHosts
 }
 
-func checkTimeAsync(host string) {
+func checkTimeAsync(host configJudge) {
 	defer wg.Done()
 	defer atomic.AddInt32(&currentThreads, -1)
 
-	ip, responseTime := checkTime(host)
+	ip, responseTime := checkTime(host.Url, host.Regex)
 	hostTime := JudgesTimes{
-		Judge:        host,
+		Judge:        host.Url,
 		Ip:           ip,
+		Regex:        host.Regex,
 		ResponseTime: responseTime,
 	}
 
@@ -124,7 +132,7 @@ func checkTimeAsync(host string) {
 }
 
 // Main function to check the time
-func checkTime(host string) (string, time.Duration) {
+func checkTime(host string, regex string) (string, time.Duration) {
 	// Parse the URL to extract the hostname
 	parsedURL, err := url.Parse(host)
 	if err != nil {
@@ -165,7 +173,7 @@ func checkTime(host string) (string, time.Duration) {
 		return ip, time.Hour * 999
 	}
 
-	if !CheckForValidResponse(string(resBody)) {
+	if !CheckForValidResponse(string(resBody), regex) {
 		return ip, time.Hour * 99
 	}
 
@@ -212,12 +220,29 @@ func GetFastestJudgeNameForProtocol(protocol string) *url.URL {
 	return FastestJudgesName[protocol]
 }
 
-func CheckForValidResponse(html string) bool {
-	for _, header := range standardHeader {
-		if !strings.Contains(html, header) {
-			return false
-		}
+func GetFastestJudgeRegexForProtocol(protocol string) string {
+	if strings.HasPrefix(protocol, "socks") {
+		return FastestJudgeRegex
 	}
 
-	return true
+	return FastestJudgesRegex[protocol]
+}
+
+func CheckForValidResponse(html string, regex string) bool {
+	if strings.EqualFold(regex, "default") {
+		for _, header := range standardHeader {
+			if !strings.Contains(html, header) {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	re, err := regexp.Compile(regex)
+	if err != nil {
+		return false
+	}
+
+	return re.MatchString(html)
 }

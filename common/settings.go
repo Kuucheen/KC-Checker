@@ -9,22 +9,22 @@ import (
 )
 
 type Config struct {
-	Threads            int        `json:"threads"`
-	Retries            int        `json:"retries"`
-	Timeout            int        `json:"timeout"`
-	PrivacyMode        bool       `json:"privacy_mode"`
-	CopyToClipboard    bool       `json:"copyToClipboard"`
-	AutoSelect         autoSelect `json:"autoSelect"`
-	AutoOutput         autoSave   `json:"autoSave"`
-	TimeBetweenRefresh int        `json:"timeBetweenRefresh"`
-	IpLookup           string     `json:"iplookup"`
-	JudgesThreads      int        `json:"judges_threads"`
-	JudgesTimeOut      int        `json:"judges_timeout"`
-	Judges             []string   `json:"judges"`
-	Blacklisted        []string   `json:"blacklisted"`
-	Bancheck           string     `json:"bancheck"`
-	Keywords           []string   `json:"keywords"`
-	Transport          transport  `json:"transport"`
+	Threads            int           `json:"threads"`
+	Retries            int           `json:"retries"`
+	Timeout            int           `json:"timeout"`
+	PrivacyMode        bool          `json:"privacy_mode"`
+	CopyToClipboard    bool          `json:"copyToClipboard"`
+	AutoSelect         autoSelect    `json:"autoSelect"`
+	AutoOutput         autoSave      `json:"autoSave"`
+	TimeBetweenRefresh int           `json:"timeBetweenRefresh"`
+	IpLookup           string        `json:"iplookup"`
+	JudgesThreads      int           `json:"judges_threads"`
+	JudgesTimeOut      int           `json:"judges_timeout"`
+	Judges             []configJudge `json:"judges"`
+	Blacklisted        []string      `json:"blacklisted"`
+	Bancheck           string        `json:"bancheck"`
+	Keywords           []string      `json:"keywords"`
+	Transport          transport     `json:"transport"`
 }
 
 type autoSelect struct {
@@ -50,6 +50,11 @@ type transport struct {
 	IdleConnTimeout       int  `json:"IdleConnTimeout"`
 	TLSHandshakeTimeout   int  `json:"TLSHandshakeTimeout"`
 	ExpectContinueTimeout int  `json:"ExpectContinueTimeout"`
+}
+
+type configJudge struct {
+	Url   string `json:"url"`
+	Regex string `json:"regex"`
 }
 
 var config Config
@@ -78,11 +83,11 @@ func RemoveHttpsJudges() {
 }
 
 func removeJudge(str string) {
-	var httpsJudges []string
+	var httpsJudges []configJudge
 
 	for _, i2 := range config.Judges {
-		if strings.HasPrefix(i2, str) {
-			httpsJudges = append(httpsJudges, i2)
+		if strings.HasPrefix(i2.Url, str) {
+			httpsJudges = append(httpsJudges, configJudge{Url: i2.Url, Regex: i2.Regex})
 		}
 	}
 
@@ -114,12 +119,11 @@ func DoBanCheck() bool {
 }
 
 func IsAllowedToCheck(typeNames []string) bool {
-
 	for _, name := range typeNames {
 		hasBeenFound := false
 
 		for _, judge := range config.Judges {
-			if strings.HasPrefix(judge, name) {
+			if strings.HasPrefix(judge.Url, name) {
 				hasBeenFound = true
 				break
 			}
