@@ -31,7 +31,7 @@ var (
 	FastestJudgesName  map[string]*url.URL
 	FastestJudgesRegex map[string]string
 
-	standardHeader = []string{"HTTP_HOST", "REQUEST_METHOD", "REMOTE_ADDR", "REMOTE_PORT"}
+	standardHeader = []string{"USER-AGENT", "HOST", "ACCEPT", "ACCEPT-ENCODING", "ACCEPT-ENCODING"}
 )
 
 func (ht HostTimes) Len() int {
@@ -230,8 +230,12 @@ func GetFastestJudgeRegexForProtocol(protocol string) string {
 
 func CheckForValidResponse(html string, regex string) bool {
 	if strings.EqualFold(regex, "default") {
+		html = strings.ReplaceAll(html, "_", "-")
+		html = strings.ToUpper(html)
+
 		for _, header := range standardHeader {
 			if !strings.Contains(html, header) {
+
 				return false
 			}
 		}

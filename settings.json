@@ -1,5 +1,5 @@
 {
-  "threads": 2000,
+  "threads": 250,
   "retries": 2,
   "timeout": 7500,
 
@@ -30,9 +30,10 @@
   "judges_timeout": 5000,
   "judges": [
     {"url": "http://azenv.net", "regex": "default"},
+    {"url": "http://httpbin.org/headers", "regex": "default"},
     {"url": "https://pool.proxyspace.pro/judge.php", "regex": "default"},
-    {"url": "https://ident.me/", "regex": "\\b(?:(?:25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2})\\.){3}(?:25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2})\\b"},
-    {"url": "https://pool.proxyspace.pro/", "regex": "\\b(?:(?:25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2})\\.){3}(?:25[0-5]|2[0-4]\\d|1\\d{2}|\\d{1,2})\\b"}
+    {"url": "https://httpbingo.org/headers", "regex": "default"},
+    {"url": "https://postman-echo.com/headers", "regex": "default"}
   ],
 
   "blacklisted": [
