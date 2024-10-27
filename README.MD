@@ -181,7 +181,9 @@ Now you have an executable. You can run it like described in **Getting Started**
    Timeout duration of judges in ms
 
 12. **judges**: <br>
-   These websites are the sites the proxies will connect to. These have to return the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a> of the request so the checker can determine what anonymity level the proxy is.
+   **url**: This is the url the proxy will connect to while checking <br>
+   **regex**: The proxy will only be valid if the regex is found. When "default" is used it will check the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers">headers</a>. Headers are needed to determine the anonymity level of the proxies. <br>
+    If there are multiple judges the checker will use the fastest one
 
 13. **blacklisted**:<br>
    Websites that contain blacklisted ips. These ips won't be checked
