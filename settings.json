@@ -29,8 +29,11 @@
   "judges_threads": 3,
   "judges_timeout": 5000,
   "judges": [
-    "http://azenv.net",
-    "https://pool.proxyspace.pro/judge.php"
+    {"url": "http://azenv.net", "regex": "default"},
+    {"url": "http://httpbin.org/headers", "regex": "default"},
+    {"url": "https://pool.proxyspace.pro/judge.php", "regex": "default"},
+    {"url": "https://httpbingo.org/headers", "regex": "default"},
+    {"url": "https://postman-echo.com/headers", "regex": "default"}
   ],
 
   "blacklisted": [
