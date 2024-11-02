@@ -123,7 +123,7 @@ func (m model) View() string {
 		return ""
 	}
 
-	firstbox := topStyle.Render(threadPhase.GetFormattedInfoStr("Threads", strconv.Itoa(common.GetConfig().Threads)))
+	firstBox := topStyle.Render(threadPhase.GetFormattedInfoStr("Threads", strconv.Itoa(common.GetConfig().Threads)))
 
 	secBoxString := ""
 
@@ -147,7 +147,7 @@ func (m model) View() string {
 
 	thirdBox := topStyle.Render("Autosafe", thirdBoxString)
 
-	combined := bottomBorderStyle.Render(lipgloss.JoinHorizontal(lipgloss.Right, firstbox, secBox, thirdBox))
+	combined := bottomBorderStyle.Render(lipgloss.JoinHorizontal(lipgloss.Right, firstBox, secBox, thirdBox))
 
 	style := borderStyle.
 		MarginRight(threadPhase.GetWidth() / 8).
@@ -203,7 +203,7 @@ func (m model) View() string {
 }
 
 func GetProxyType() []int {
-	checkForAutoUpdate()
+	checkForAutoUpdateSetting()
 
 	if len(selectedItems) > 0 {
 		helper.GetCleanedProxies()
@@ -230,7 +230,7 @@ func inSelectedItems(index int) bool {
 	return false
 }
 
-func checkForAutoUpdate() {
+func checkForAutoUpdateSetting() {
 	autoSelect := common.GetConfig().AutoSelect
 
 	if autoSelect.Http {
