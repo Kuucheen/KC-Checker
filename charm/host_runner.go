@@ -38,13 +38,6 @@ func RunHostsDisplay() {
 	//Also starts the main checking process in the background if finished
 	hosts.Run()
 
-	//If there are no proxies in proxies.txt then wait for the user
-	//to put some in the file
-	if helper.ProxySum < 1 {
-		hosts.WaitForProxies()
-		go helper.Dispatcher(helper.GetCleanedProxies())
-	}
-
 	//Sets the current time & start the checker
 	threadPhase.SetTime()
 	threadPhase.RunBars()
