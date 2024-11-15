@@ -150,7 +150,8 @@ func check(proxy *Proxy) {
 				}
 			}
 		}
-	} else {
+	}
+	if !responded {
 		atomic.AddInt32(&Invalid, 1)
 	}
 }

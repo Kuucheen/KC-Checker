@@ -11,15 +11,21 @@ import (
 )
 
 type Proxy struct {
-	Ip       string
-	Port     int
-	Full     string
-	Level    int
-	Protocol string
+	Ip   string
+	Port int
+	Full string
+
+	Level    int    // anonymity
+	Protocol string // http, socks4...
 	Country  string
-	Type     string
-	checks   int
-	Time     int //in ms
+	Type     string // ISP, Residential or Datacenter
+
+	checks int
+	Time   int //in ms
+
+	// For authentication if existing
+	username string
+	password string
 }
 
 var (
@@ -39,23 +45,35 @@ func ToProxies(arr []string) []*Proxy {
 		wg.Add(1)
 		go func(value string) {
 			defer wg.Done()
-			temp := strings.Split(value, ":")
+			value = strings.Replace(value, "@", ":", 1)
+			splitProxyAuth := strings.Split(value, ":")
 
-			if len(temp) != 2 || !checkIp(temp[0]) {
+			tempLength := len(splitProxyAuth)
+
+			ip := splitProxyAuth[0]
+
+			if (tempLength != 4 && tempLength != 2) || !checkIp(ip) {
 				return
 			}
 
-			dat, err := strconv.Atoi(temp[1])
+			dat, err := strconv.Atoi(splitProxyAuth[1])
 
 			if err != nil {
 				return
 			}
 
-			proxyChan <- &Proxy{
-				Ip:   temp[0],
+			newProxy := &Proxy{
+				Ip:   ip,
 				Port: dat,
-				Full: value,
+				Full: splitProxyAuth[0] + ":" + splitProxyAuth[1],
 			}
+
+			if tempLength == 4 {
+				newProxy.username = splitProxyAuth[2]
+				newProxy.password = splitProxyAuth[3]
+			}
+
+			proxyChan <- newProxy
 		}(value)
 	}
 
