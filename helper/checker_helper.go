@@ -40,19 +40,29 @@ func Request(proxy *Proxy) (string, int, error) {
 
 // RequestCustom makes a request to the provided siteUrl with the provided proxy
 func RequestCustom(proxyToCheck *Proxy, targetIp string, siteName *url.URL, regex string, isBanCheck bool) (string, int, error) {
-	proxyURL, err := url.Parse(strings.Replace(proxyToCheck.Protocol, "https", "http", 1) + "://" + proxyToCheck.Full)
-	if err != nil {
-		return "Error parsing proxyToCheck URL", -1, err
-	}
-
 	privateTransport := GetSharedTransport()
+	isAuthProxy := false
+
+	if proxyToCheck.username != "" && proxyToCheck.password != "" {
+		isAuthProxy = true
+	}
 
 	if strings.HasPrefix(proxyToCheck.Protocol, "http") {
 		dialer := net.Dialer{
 			Timeout: time.Millisecond * time.Duration(common.GetConfig().Timeout),
 		}
 
-		privateTransport.Proxy = http.ProxyURL(proxyURL)
+		proxyUrl := &url.URL{
+			Scheme: strings.Replace(proxyToCheck.Protocol, "https", "http", 1),
+			Host:   proxyToCheck.Full,
+		}
+
+		if isAuthProxy {
+			proxyUrl.User = url.UserPassword(proxyToCheck.username, proxyToCheck.password)
+		}
+
+		privateTransport.Proxy = http.ProxyURL(proxyUrl)
+
 		privateTransport.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
 			if strings.Contains(addr, siteName.Hostname()) {
 				addr = net.JoinHostPort(targetIp, siteName.Port())
@@ -60,9 +70,19 @@ func RequestCustom(proxyToCheck *Proxy, targetIp string, siteName *url.URL, rege
 			return dialer.DialContext(ctx, network, addr)
 		}
 	} else {
-		dialer, err := proxy.SOCKS5("tcp", proxyToCheck.Full, nil, &net.Dialer{
-			Timeout: time.Millisecond * time.Duration(common.GetConfig().Timeout),
-		})
+		var proxyAuth *proxy.Auth
+
+		if isAuthProxy {
+			proxyAuth = &proxy.Auth{
+				User:     proxyToCheck.username,
+				Password: proxyToCheck.password,
+			}
+		}
+
+		dialer, err := proxy.SOCKS5("tcp", proxyToCheck.Full, proxyAuth,
+			&net.Dialer{
+				Timeout: time.Millisecond * time.Duration(common.GetConfig().Timeout),
+			})
 
 		if err != nil {
 			return "Error creating SOCKS dialer", -1, err
@@ -72,6 +92,7 @@ func RequestCustom(proxyToCheck *Proxy, targetIp string, siteName *url.URL, rege
 			return dialer.Dial(network, addr)
 		}
 	}
+
 	privateTransport.TLSClientConfig = &tls.Config{
 		ServerName:         siteName.Hostname(),
 		InsecureSkipVerify: false,
@@ -102,6 +123,7 @@ func RequestCustom(proxyToCheck *Proxy, targetIp string, siteName *url.URL, rege
 	}
 
 	html := string(resBody)
+
 	if !isBanCheck && !common.CheckForValidResponse(html, regex) {
 		return "Invalid response", -1, nil
 	}
