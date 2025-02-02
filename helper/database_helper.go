@@ -2,9 +2,12 @@ package helper
 
 import (
 	_ "embed"
-	"github.com/oschwald/geoip2-golang"
 	"net"
+	"regexp"
 	"strings"
+	"sync"
+
+	"github.com/oschwald/geoip2-golang"
 )
 
 //go:embed GeoLite2-ASN.mmdb
@@ -13,36 +16,47 @@ var geoLiteASNDB []byte
 //go:embed GeoLite2-Country.mmdb
 var geoLiteCountryDB []byte
 
-var geoIP2CountryDB *geoip2.Reader
-var geoIP2ASNDB *geoip2.Reader
+var (
+	countryDB   *geoip2.Reader
+	asnDB       *geoip2.Reader
+	initOnce    sync.Once
+	initSuccess bool
+
+	datacenterOrgs = map[string]bool{
+		"amazon": true, "google": true, "microsoft": true, "digitalocean": true,
+		"linode": true, "hetzner": true, "ovh": true, "vultr": true, "ibm": true,
+		"alibaba": true, "tencent": true, "cloudflare": true, "rackspace": true,
+		"hostinger": true, "upcloud": true, "azure": true, "gcp": true, "aws": true,
+	}
+
+	residentialKeywords = regexp.MustCompile(`(?i)(dyn|pool|dsl|cust|res|ip|adsl|ppp|user|mobile|static|dhcp)`)
+
+	ispKeywords = regexp.MustCompile(`(?i)(isp|broadband|telecom|communications|networks|carrier)`)
+)
 
 func init() {
-	// Load the Country database
-	if len(geoLiteCountryDB) > 0 {
+	initOnce.Do(func() {
 		var err error
-		geoIP2CountryDB, err = geoip2.FromBytes(geoLiteCountryDB)
-		if err != nil {
-			geoIP2CountryDB = nil
+		if len(geoLiteCountryDB) > 0 {
+			countryDB, err = geoip2.FromBytes(geoLiteCountryDB)
+			if err != nil {
+				countryDB = nil
+			}
 		}
-	} else {
-		geoIP2CountryDB = nil
-	}
 
-	// Load the ASN database
-	if len(geoLiteASNDB) > 0 {
-		var err error
-		geoIP2ASNDB, err = geoip2.FromBytes(geoLiteASNDB)
-		if err != nil {
-			geoIP2ASNDB = nil
+		if len(geoLiteASNDB) > 0 {
+			asnDB, err = geoip2.FromBytes(geoLiteASNDB)
+			if err != nil {
+				asnDB = nil
+			}
 		}
-	} else {
-		geoIP2ASNDB = nil
-	}
+
+		initSuccess = (countryDB != nil && asnDB != nil)
+	})
 }
 
-// GetCountryCode returns the ISO code of a country based on the IP address
 func GetCountryCode(ipAddress string) string {
-	if geoIP2CountryDB == nil {
+	if !initSuccess {
 		return "unknown"
 	}
 
@@ -51,7 +65,7 @@ func GetCountryCode(ipAddress string) string {
 		return "unknown"
 	}
 
-	record, err := geoIP2CountryDB.Country(ip)
+	record, err := countryDB.Country(ip)
 	if err != nil {
 		return "unknown"
 	}
@@ -59,9 +73,8 @@ func GetCountryCode(ipAddress string) string {
 	return record.Country.IsoCode
 }
 
-// DetermineProxyType classifies the IP as ISP, Datacenter, or Residential
 func DetermineProxyType(ipAddress string) string {
-	if geoIP2ASNDB == nil {
+	if !initSuccess {
 		return "unknown"
 	}
 
@@ -70,26 +83,39 @@ func DetermineProxyType(ipAddress string) string {
 		return "unknown"
 	}
 
-	record, err := geoIP2ASNDB.ASN(ip)
+	// First check reverse DNS for residential indicators
+	names, _ := net.LookupAddr(ipAddress)
+	for _, name := range names {
+		if residentialKeywords.MatchString(name) {
+			return "Residential"
+		}
+	}
+
+	// Check ASN information
+	asnRecord, err := asnDB.ASN(ip)
 	if err != nil {
 		return "unknown"
 	}
 
-	// Classify based on the ASN organization name
-	org := strings.ToLower(record.AutonomousSystemOrganization)
+	org := strings.ToLower(asnRecord.AutonomousSystemOrganization)
 
-	switch {
-	case strings.Contains(org, "amazon") || strings.Contains(org, "digitalocean") ||
-		strings.Contains(org, "google") || strings.Contains(org, "microsoft") ||
-		strings.Contains(org, "linode") || strings.Contains(org, "ovh") ||
-		strings.Contains(org, "choopa") || strings.Contains(org, "leaseweb"):
-		return "Datacenter"
-	case strings.Contains(org, "comcast") || strings.Contains(org, "verizon") ||
-		strings.Contains(org, "at&t") || strings.Contains(org, "charter") ||
-		strings.Contains(org, "spectrum") || strings.Contains(org, "centurylink") ||
-		strings.Contains(org, "bt group") || strings.Contains(org, "telecom"):
+	// Check for datacenter organizations
+	for keyword := range datacenterOrgs {
+		if strings.Contains(org, keyword) {
+			return "Datacenter"
+		}
+	}
+
+	// Check for ISP indicators in ASN organization
+	if ispKeywords.MatchString(org) {
 		return "ISP"
-	default:
+	}
+
+	// Final check for common residential ASN patterns
+	if strings.Contains(org, "customer") || strings.Contains(org, "residential") {
 		return "Residential"
 	}
+
+	// Default to ISP for unknown organizations
+	return "ISP"
 }
