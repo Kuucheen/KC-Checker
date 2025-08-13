@@ -29,13 +29,6 @@ func Write(proxies map[int][]*Proxy, outputFormat string, banCheck bool, appendT
 	outputFormat = strings.ToLower(outputFormat)
 	pTypes := GetTypeNames()
 
-	if common.GetConfig().CopyToClipboard {
-		clipErr := clipboard.Init()
-		if clipErr != nil {
-			return "ClipBoard error"
-		}
-	}
-
 	clipString := ""
 
 	for _, pType := range pTypes {
