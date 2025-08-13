@@ -33,6 +33,7 @@ var (
 	prevIndex         = 0
 	index             = 0
 	maxIndex          = 3
+	inExpanded        = false
 
 	customEnabled = false
 
@@ -81,6 +82,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				index = 0
 			}
+			setOptions()
 
 		case tea.KeyLeft.String():
 			if index > 0 {
@@ -88,6 +90,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				index = maxIndex
 			}
+			setOptions()
 
 		case tea.KeyDown.String():
 			if customEnabled && index >= 0 {
@@ -454,7 +457,25 @@ func setOptions() {
 			{title: customStyle.Render("Time"), format: "time"},
 			{title: customStyle.Render("Country"), format: "country"},
 			{title: customStyle.Render("Type"), format: "type"},
-			{title: customStyle.BorderBottom(false).MarginBottom(1).Render("CANCEL")}}
+			{title: customStyle.Render("HttpVersion"), format: "httpVersion"}}
+
+		if len(options)/2 <= index {
+			options = options[1:]
+			if !inExpanded && index != len(options) {
+				index--
+			}
+
+			inExpanded = true
+		} else {
+			options = options[:len(options)-1]
+			if inExpanded && index != 0 {
+				index++
+			}
+			inExpanded = false
+		}
+
+		options = append(options, item{title: customStyle.BorderBottom(false).MarginBottom(1).Render("CANCEL")})
+
 	} else {
 		options = []item{{title: style("ip:port"), format: "ip:port"},
 			{title: style("protocol://ip:port"), format: "protocol://ip:port"},

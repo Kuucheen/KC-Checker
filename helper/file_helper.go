@@ -76,6 +76,7 @@ func Write(proxies map[int][]*Proxy, outputFormat string, banCheck bool, appendT
 				proxyString = strings.Replace(proxyString, "time", strconv.Itoa(proxy.Time), 1)
 				proxyString = strings.Replace(proxyString, "country", proxy.Country, 1)
 				proxyString = strings.Replace(proxyString, "type", proxy.Type, 1)
+				proxyString = strings.Replace(proxyString, "httpversion", proxy.HTTPVersion, 1)
 
 				_, err := fmt.Fprintln(f, proxyString)
 				_, allFileErr = fmt.Fprintln(allFile, proxyString)

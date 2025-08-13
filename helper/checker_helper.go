@@ -124,6 +124,10 @@ func RequestCustom(proxyToCheck *Proxy, targetIp string, siteName *url.URL, rege
 
 	html := string(resBody)
 
+	if proxyToCheck.HTTPVersion != "HTTP/3" {
+		proxyToCheck.HTTPVersion = resp.Proto
+	}
+
 	if !isBanCheck && !common.CheckForValidResponse(html, regex) {
 		return "Invalid response", -1, nil
 	}
