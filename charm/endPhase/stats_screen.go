@@ -129,14 +129,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				setOptions()
 				savedText = successStyle.Width(getWidth() / 3).Align(lipgloss.Center).Render("")
 
-				maxIndex = len(options)
 				if !customEnabled {
 					outputBuilder = []string{}
 				}
-
-				index = maxIndex
+				index = 0
 			}
 		}
+
 		return m, nil
 
 	}
@@ -498,21 +497,12 @@ func setOptions() {
 			customWindowStart = index
 		}
 
-		//fmt.Println(index)
-
 		options = append(options, item{
 			title:  customStyle.BorderBottom(false).MarginBottom(1).Render("CANCEL"),
 			format: "cancel",
 		})
 
-		maxIndex = len(options)
-
-		if index < 0 {
-			index = 0
-		}
-		if index > maxIndex {
-			index = maxIndex
-		}
+		maxIndex = len(options) - 1
 
 	} else {
 		options = []item{
