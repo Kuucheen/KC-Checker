@@ -72,6 +72,8 @@ func Write(proxies map[int][]*Proxy, outputFormat string, banCheck bool, appendT
 
 				proxyString = strings.Replace(proxyString, "ip", proxy.Ip, 1)
 				proxyString = strings.Replace(proxyString, "port", strconv.Itoa(proxy.Port), 1)
+				proxyString = strings.Replace(proxyString, "email", proxy.username, 1)
+				proxyString = strings.Replace(proxyString, "password", proxy.password, 1)
 				proxyString = strings.Replace(proxyString, "protocol", proxy.Protocol, 1)
 				proxyString = strings.Replace(proxyString, "time", strconv.Itoa(proxy.Time), 1)
 				proxyString = strings.Replace(proxyString, "country", proxy.Country, 1)

@@ -33,7 +33,8 @@ var (
 	prevIndex         = 0
 	index             = 0
 	maxIndex          = 3
-	inExpanded        = false
+	maxItems          = 6
+	customWindowStart int
 
 	customEnabled = false
 
@@ -128,11 +129,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				setOptions()
 				savedText = successStyle.Width(getWidth() / 3).Align(lipgloss.Center).Render("")
 
-				if customEnabled {
-					maxIndex = 6
-				} else {
+				maxIndex = len(options)
+				if !customEnabled {
 					outputBuilder = []string{}
-					maxIndex = 3
 				}
 
 				index = maxIndex
@@ -450,37 +449,80 @@ func setOptions() {
 		Align(lipgloss.Center)
 
 	if customEnabled {
-		options = []item{
+		allOptions := []item{
 			{title: customStyle.Render("Protocol"), format: "protocol"},
 			{title: customStyle.Render("Ip"), format: "ip", separatorIndicator: "protocol", separators: []string{"://", ";", " "}},
 			{title: customStyle.Render("Port"), format: "port", separatorIndicator: "ip", separators: []string{":", ";", " "}},
+			{title: customStyle.Render("Email"), format: "email"},
+			{title: customStyle.Render("Password"), format: "password", separatorIndicator: "email", separators: []string{":", "@", ";", " "}},
 			{title: customStyle.Render("Time"), format: "time"},
 			{title: customStyle.Render("Country"), format: "country"},
 			{title: customStyle.Render("Type"), format: "type"},
-			{title: customStyle.Render("HttpVersion"), format: "httpVersion"}}
-
-		if len(options)/2 <= index {
-			options = options[1:]
-			if !inExpanded && index != len(options) {
-				index--
-			}
-
-			inExpanded = true
-		} else {
-			options = options[:len(options)-1]
-			if inExpanded && index != 0 {
-				index++
-			}
-			inExpanded = false
+			{title: customStyle.Render("HttpVersion"), format: "httpVersion"},
 		}
 
-		options = append(options, item{title: customStyle.BorderBottom(false).MarginBottom(1).Render("CANCEL")})
+		total := len(allOptions)
+		visible := maxItems
+		if total < visible {
+			visible = total
+		}
+
+		if customWindowStart < 0 {
+			customWindowStart = 0
+		}
+		if customWindowStart > total-visible {
+			customWindowStart = total - visible
+		}
+
+		lastReal := visible - 1
+
+		if index >= lastReal && index != visible && customWindowStart+visible < total {
+			customWindowStart++
+			if index > 0 {
+				index--
+			}
+		} else if index <= 0 && customWindowStart > 0 {
+			customWindowStart--
+			index++
+		}
+
+		start := customWindowStart
+		end := start + visible
+		options = append([]item{}, allOptions[start:end]...)
+		if len(options)+1 == index {
+			options = allOptions[:maxItems]
+			customWindowStart = 0
+			index = 0
+		} else if len(options) == index {
+			options = allOptions[len(allOptions)-maxItems:]
+			customWindowStart = index
+		}
+
+		//fmt.Println(index)
+
+		options = append(options, item{
+			title:  customStyle.BorderBottom(false).MarginBottom(1).Render("CANCEL"),
+			format: "cancel",
+		})
+
+		maxIndex = len(options)
+
+		if index < 0 {
+			index = 0
+		}
+		if index > maxIndex {
+			index = maxIndex
+		}
 
 	} else {
-		options = []item{{title: style("ip:port"), format: "ip:port"},
+		options = []item{
+			{title: style("ip:port"), format: "ip:port"},
 			{title: style("protocol://ip:port"), format: "protocol://ip:port"},
 			{title: style("ip:port;time"), format: "ip:port;time"},
-			{title: style("CUSTOM"), format: "protocol://ip:port"}}
+			{title: style("CUSTOM"), format: "protocol://ip:port"},
+		}
+		maxIndex = len(options) - 1
+		customWindowStart = 0
 	}
 }
 
