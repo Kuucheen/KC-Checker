@@ -15,10 +15,11 @@ type Proxy struct {
 	Port int
 	Full string
 
-	Level    int    // anonymity
-	Protocol string // http, socks4...
-	Country  string
-	Type     string // ISP, Residential or Datacenter
+	Level       int    // anonymity
+	Protocol    string // http, socks4...
+	HTTPVersion string // HTTP/1.1, HTTP/2, HTTP/3
+	Country     string
+	Type        string // ISP, Residential or Datacenter
 
 	checks int
 	Time   int //in ms

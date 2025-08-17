@@ -29,13 +29,6 @@ func Write(proxies map[int][]*Proxy, outputFormat string, banCheck bool, appendT
 	outputFormat = strings.ToLower(outputFormat)
 	pTypes := GetTypeNames()
 
-	if common.GetConfig().CopyToClipboard {
-		clipErr := clipboard.Init()
-		if clipErr != nil {
-			return "ClipBoard error"
-		}
-	}
-
 	clipString := ""
 
 	for _, pType := range pTypes {
@@ -79,10 +72,13 @@ func Write(proxies map[int][]*Proxy, outputFormat string, banCheck bool, appendT
 
 				proxyString = strings.Replace(proxyString, "ip", proxy.Ip, 1)
 				proxyString = strings.Replace(proxyString, "port", strconv.Itoa(proxy.Port), 1)
+				proxyString = strings.Replace(proxyString, "email", proxy.username, 1)
+				proxyString = strings.Replace(proxyString, "password", proxy.password, 1)
 				proxyString = strings.Replace(proxyString, "protocol", proxy.Protocol, 1)
 				proxyString = strings.Replace(proxyString, "time", strconv.Itoa(proxy.Time), 1)
 				proxyString = strings.Replace(proxyString, "country", proxy.Country, 1)
 				proxyString = strings.Replace(proxyString, "type", proxy.Type, 1)
+				proxyString = strings.Replace(proxyString, "httpversion", proxy.HTTPVersion, 1)
 
 				_, err := fmt.Fprintln(f, proxyString)
 				_, allFileErr = fmt.Fprintln(allFile, proxyString)
