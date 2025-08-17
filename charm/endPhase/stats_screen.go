@@ -82,6 +82,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				index++
 			} else {
 				index = 0
+				customWindowStart = 0
 			}
 			setOptions()
 
