@@ -34,6 +34,8 @@
 - Sleek and intuitive UI for a beautiful user experience
 - Highly customizable settings to tailor the tool to your needs
 
+## Companion project
+
 KC-Checker validates proxies. If you need a continuously maintained proxy pool (health checks, reputation, rotating endpoints), see [Magpie](https://github.com/Kuucheen/magpie?utm_source=kc-checker&utm_medium=readme&utm_campaign=cross_promo).
 
 <br>
