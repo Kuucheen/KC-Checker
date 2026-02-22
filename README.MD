@@ -36,7 +36,7 @@
 
 ## Companion project
 
-Tired of dead proxies? Magpie keeps a healthy proxy pool with checks, reputation, and rotating endpoints:  [Magpie](https://github.com/Kuucheen/magpie?utm_source=kc-checker&utm_medium=readme&utm_campaign=cross_promo)
+If you need proxies more frequently checkout [Magpie](https://github.com/Kuucheen/magpie?utm_source=kc-checker&utm_medium=readme&utm_campaign=cross_promo)
 
 <br>
 
